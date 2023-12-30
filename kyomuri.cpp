@@ -22,8 +22,9 @@ int main(int argc, char **argv) {
     // double rightDistance = rightToF->getValue();
     // cout << "Left Distance: " << leftDistance << ", Right Distance: " << rightDistance << endl;
     colorsensor.update();
-    ColorHSV hsv = colorsensor.getHSV();
-    cout << "Hue: " << hsv.hue << ", Saturation: " << hsv.saturation << ", Value: " << hsv.value << ", RED: " << colorsensor.RGB.red << ", GREEN: " << colorsensor.RGB.green << ", BLUE: " << colorsensor.RGB.blue << endl;
+    cout << colorsensor.getColor() << endl;
+    // ColorHSV hsv = colorsensor.getHSV();
+    // cout << "Hue: " << hsv.hue << ", Saturation: " << hsv.saturation << ", Value: " << hsv.value << ", RED: " << colorsensor.RGB.red << ", GREEN: " << colorsensor.RGB.green << ", BLUE: " << colorsensor.RGB.blue << endl;
   };
 
   delete robot;
