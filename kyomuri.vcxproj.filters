@@ -112,6 +112,9 @@
     <ClCompile Include="GlobalPositioningSystem.cpp">
       <Filter>lib\GPS</Filter>
     </ClCompile>
+    <ClCompile Include="ToF.cpp">
+      <Filter>lib\ToF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -132,6 +135,9 @@
     <Filter Include="lib\GPS">
       <UniqueIdentifier>{709be14d-210a-417e-a9c3-cabf94882c42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\ToF">
+      <UniqueIdentifier>{a2480ef0-33d2-43f3-a1f5-40ef14d04e71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorSensor.h">
@@ -145,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="GlobalPositioningSystem.h">
       <Filter>lib\GPS</Filter>
+    </ClInclude>
+    <ClInclude Include="ToF.h">
+      <Filter>lib\ToF</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

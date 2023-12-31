@@ -157,12 +157,14 @@
     <ClCompile Include="GlobalPositioningSystem.cpp" />
     <ClCompile Include="IMU.cpp" />
     <ClCompile Include="kyomuri.cpp" />
+    <ClCompile Include="ToF.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorSensor.h" />
     <ClInclude Include="devices.h" />
     <ClInclude Include="GlobalPositioningSystem.h" />
     <ClInclude Include="IMU.h" />
+    <ClInclude Include="ToF.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

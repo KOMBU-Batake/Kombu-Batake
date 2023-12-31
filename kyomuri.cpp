@@ -16,8 +16,9 @@ int main(int argc, char **argv) {
   enableDevices();
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
   while (robot->step(timeStep) != -1) {
-    GPSPosition gpsPosition = gps.getPosition();
-    cout << "x: " << gpsPosition.x << ", y: " << gpsPosition.y << ", z: " << gpsPosition.z << endl;
+    // GPSPosition gpsPosition = gps.getPosition();
+    // cout << "x: " << gpsPosition.x << ", y: " << gpsPosition.y << ", z: " << gpsPosition.z << endl;
+    cout << leftToF.getDistanceCM() << " , " << rightToF.getDistanceCM() << endl;
   };
 
   delete robot;
