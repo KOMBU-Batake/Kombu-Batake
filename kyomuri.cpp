@@ -5,7 +5,7 @@
 // Modifications:
 
 #include <iostream>
-#include "devices.h"
+#include "lib/devices.h"
 
 using namespace webots;
 using namespace std;
