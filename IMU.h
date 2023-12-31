@@ -20,7 +20,7 @@ public:
 	double getGyro() {
 		return IMU->getRollPitchYaw()[2] * 180 / 3.141592653589 + 180;
 	}
-	void setStartAngle() {
+	void setStartAngle() { // IMU‚ğenable‚µ‚½Œã‚ÉŒÄ‚Ño‚·‚±‚Æ
 		startAngle = getGyro();
 	}
 	double startAngle = 0;

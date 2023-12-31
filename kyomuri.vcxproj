@@ -154,12 +154,14 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp" />
     <ClCompile Include="ColorSensor.cpp" />
+    <ClCompile Include="GlobalPositioningSystem.cpp" />
     <ClCompile Include="IMU.cpp" />
     <ClCompile Include="kyomuri.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorSensor.h" />
     <ClInclude Include="devices.h" />
+    <ClInclude Include="GlobalPositioningSystem.h" />
     <ClInclude Include="IMU.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

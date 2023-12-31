@@ -16,13 +16,8 @@ int main(int argc, char **argv) {
   enableDevices();
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
   while (robot->step(timeStep) != -1) {
-    // double leftDistance = leftToF->getValue();
-    // double rightDistance = rightToF->getValue();
-    // cout << "Left Distance: " << leftDistance << ", Right Distance: " << rightDistance << endl;
-    colorsensor.update();
-    cout << colorsensor.getColor() << endl;
-    // ColorHSV hsv = colorsensor.getHSV();
-    // cout << "Hue: " << hsv.hue << ", Saturation: " << hsv.saturation << ", Value: " << hsv.value << ", RED: " << colorsensor.RGB.red << ", GREEN: " << colorsensor.RGB.green << ", BLUE: " << colorsensor.RGB.blue << endl;
+    GPSPosition gpsPosition = gps.getPosition();
+    cout << "x: " << gpsPosition.x << ", y: " << gpsPosition.y << ", z: " << gpsPosition.z << endl;
   };
 
   delete robot;

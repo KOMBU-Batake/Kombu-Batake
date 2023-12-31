@@ -12,6 +12,9 @@
 
 #include "ColorSensor.h"
 #include "IMU.h"
+#include "GlobalPositioningSystem.h"
+
+/* デバイスの設定、以下略をするよ */
 
 using namespace webots;
 using namespace std;
@@ -45,13 +48,14 @@ Camera* leftCam = robot->getCamera("leftCamera");
 Camera* rightCam = robot->getCamera("rightCamera");
 
 /* じーぴーえす */
-GPS* gps = robot->getGPS("gps");
+GPS* gpsXZ = robot->getGPS("gps");
 
 /* あいえむゆぅ */
 InertialUnit* IMU = robot->getInertialUnit("IMU");
 
 ColorSensor colorsensor(colorCam);
 GyroZ gyro;
+GlobalPositioningSystem gps;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);
@@ -62,6 +66,6 @@ void enableDevices() {
 	colorCam->enable(timeStep);
 	leftCam->enable(timeStep);
 	rightCam->enable(timeStep);
-	gps->enable(timeStep);
+	gpsXZ->enable(timeStep);
 	IMU->enable(timeStep);
 }
