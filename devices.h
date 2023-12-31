@@ -10,6 +10,13 @@
 #include <webots/GPS.hpp>
 #include <webots/InertialUnit.hpp>
 
+#include "ColorSensor.h"
+#include "IMU.h"
+#include "GlobalPositioningSystem.h"
+#include "ToF.h"
+
+/* デバイスの設定、以下略をするよ */
+
 using namespace webots;
 using namespace std;
 
@@ -31,8 +38,8 @@ PositionSensor* rightEncoder = rightMotor->getPositionSensor();
 Lidar* lidar = robot->getLidar("lidar");
 
 /* でぃすたんすせんさぁ */
-DistanceSensor* leftToF = robot->getDistanceSensor("leftToF");
-DistanceSensor* rightToF = robot->getDistanceSensor("rightToF");
+DistanceSensor* leftToFSensor = robot->getDistanceSensor("leftToF");
+DistanceSensor* rightToFSensor = robot->getDistanceSensor("rightToF");
 
 /* からぁせんさぁ */
 Camera* colorCam = robot->getCamera("ColorSensor");
@@ -42,22 +49,25 @@ Camera* leftCam = robot->getCamera("leftCamera");
 Camera* rightCam = robot->getCamera("rightCamera");
 
 /* じーぴーえす */
-GPS* gps = robot->getGPS("gps");
+GPS* gpsXZ = robot->getGPS("gps");
 
 /* あいえむゆぅ */
 InertialUnit* IMU = robot->getInertialUnit("IMU");
 
 ColorSensor colorsensor(colorCam);
+GyroZ gyro;
+GlobalPositioningSystem gps;
+ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);
 	rightEncoder->enable(timeStep);
 	lidar->enable(timeStep);
-	leftToF->enable(timeStep);
-	rightToF->enable(timeStep);
+	leftToFSensor->enable(timeStep);
+	rightToFSensor->enable(timeStep);
 	colorCam->enable(timeStep);
 	leftCam->enable(timeStep);
 	rightCam->enable(timeStep);
-	gps->enable(timeStep);
+	gpsXZ->enable(timeStep);
 	IMU->enable(timeStep);
 }

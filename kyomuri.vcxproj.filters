@@ -106,6 +106,15 @@
     <ClCompile Include="ColorSensor.cpp">
       <Filter>lib\ColorSensor</Filter>
     </ClCompile>
+    <ClCompile Include="IMU.cpp">
+      <Filter>lib\IMU</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalPositioningSystem.cpp">
+      <Filter>lib\GPS</Filter>
+    </ClCompile>
+    <ClCompile Include="ToF.cpp">
+      <Filter>lib\ToF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -120,6 +129,15 @@
     <Filter Include="lib\ColorSensor">
       <UniqueIdentifier>{fa9c3913-b95c-4f5c-80d5-459a6d7fce32}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\IMU">
+      <UniqueIdentifier>{97c57a33-9df9-4966-9f1b-d2f2c8208d90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\GPS">
+      <UniqueIdentifier>{709be14d-210a-417e-a9c3-cabf94882c42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\ToF">
+      <UniqueIdentifier>{a2480ef0-33d2-43f3-a1f5-40ef14d04e71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorSensor.h">
@@ -127,6 +145,15 @@
     </ClInclude>
     <ClInclude Include="devices.h">
       <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="IMU.h">
+      <Filter>lib\IMU</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalPositioningSystem.h">
+      <Filter>lib\GPS</Filter>
+    </ClInclude>
+    <ClInclude Include="ToF.h">
+      <Filter>lib\ToF</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
