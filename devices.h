@@ -10,6 +10,9 @@
 #include <webots/GPS.hpp>
 #include <webots/InertialUnit.hpp>
 
+#include "ColorSensor.h"
+#include "IMU.h"
+
 using namespace webots;
 using namespace std;
 
@@ -48,6 +51,7 @@ GPS* gps = robot->getGPS("gps");
 InertialUnit* IMU = robot->getInertialUnit("IMU");
 
 ColorSensor colorsensor(colorCam);
+GyroZ gyro;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);

@@ -116,7 +116,7 @@ private:
 	ColorRange swampRange= { 40, 5, 53, 5, 197, 5 };
 
 	bool isTheColor(const ColorRange& range, const ColorHSV& hsv) {
-		if (abs(hsv.hue - range.hue) <= range.hue_diff && (hsv.saturation - range.saturation) <= range.saturation_diff && (hsv.value - range.value) <= range.value_diff) {
+		if (abs(hsv.hue - range.hue) <= range.hue_diff && abs(hsv.saturation - range.saturation) <= range.saturation_diff && abs(hsv.value - range.value) <= range.value_diff) {
 			return true;
 		}
 		else {

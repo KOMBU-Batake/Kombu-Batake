@@ -5,8 +5,6 @@
 // Modifications:
 
 #include <iostream>
-
-#include "ColorSensor.h"
 #include "devices.h"
 
 using namespace webots;
