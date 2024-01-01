@@ -1,9 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="kyomuri.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <ClCompile Include="Kyomuri.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Accelerometer.cpp">
       <Filter>lib\default</Filter>
     </ClCompile>
@@ -103,57 +101,63 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp">
       <Filter>lib\default</Filter>
     </ClCompile>
-    <ClCompile Include="ColorSensor.cpp">
+    <ClCompile Include="lib\ColorSensor\ColorSensor.cpp">
       <Filter>lib\ColorSensor</Filter>
     </ClCompile>
-    <ClCompile Include="IMU.cpp">
+    <ClCompile Include="lib\IMU\IMU.cpp">
       <Filter>lib\IMU</Filter>
     </ClCompile>
-    <ClCompile Include="GlobalPositioningSystem.cpp">
+    <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
       <Filter>lib\GPS</Filter>
     </ClCompile>
-    <ClCompile Include="ToF.cpp">
+    <ClCompile Include="lib\ToF\ToF.cpp">
       <Filter>lib\ToF</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Tank\Tank.cpp">
+      <Filter>lib\Tank</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="src">
-      <UniqueIdentifier>{87e4ab68-155d-45e0-9a19-55e7bd75d270}</UniqueIdentifier>
-    </Filter>
     <Filter Include="lib">
-      <UniqueIdentifier>{b07431e6-340e-4f87-873c-10361f89ca69}</UniqueIdentifier>
+      <UniqueIdentifier>{f6f3a280-a204-4eaf-bd11-713dcb6d8c78}</UniqueIdentifier>
     </Filter>
     <Filter Include="lib\default">
-      <UniqueIdentifier>{955c983b-aa85-4c52-821c-65061f9ccac2}</UniqueIdentifier>
+      <UniqueIdentifier>{dfadc680-f1a2-48ec-8460-6307191ca2a9}</UniqueIdentifier>
     </Filter>
     <Filter Include="lib\ColorSensor">
-      <UniqueIdentifier>{fa9c3913-b95c-4f5c-80d5-459a6d7fce32}</UniqueIdentifier>
+      <UniqueIdentifier>{316d3a26-b4f6-4026-b8dc-5d3a07dd9d30}</UniqueIdentifier>
     </Filter>
     <Filter Include="lib\IMU">
-      <UniqueIdentifier>{97c57a33-9df9-4966-9f1b-d2f2c8208d90}</UniqueIdentifier>
+      <UniqueIdentifier>{c7429dd7-95e5-432f-b89b-bb02d82fdc17}</UniqueIdentifier>
     </Filter>
     <Filter Include="lib\GPS">
-      <UniqueIdentifier>{709be14d-210a-417e-a9c3-cabf94882c42}</UniqueIdentifier>
+      <UniqueIdentifier>{ae7ccf37-5dd4-40b8-90aa-bfcea3538379}</UniqueIdentifier>
     </Filter>
     <Filter Include="lib\ToF">
-      <UniqueIdentifier>{a2480ef0-33d2-43f3-a1f5-40ef14d04e71}</UniqueIdentifier>
+      <UniqueIdentifier>{3b8d7e79-fcb7-44e3-acd9-f8e78092bbcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\Tank">
+      <UniqueIdentifier>{75d83116-cd3d-411e-982a-aefb284ac225}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ColorSensor.h">
-      <Filter>lib\ColorSensor</Filter>
-    </ClInclude>
-    <ClInclude Include="devices.h">
+    <ClInclude Include="lib\devices.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="IMU.h">
+    <ClInclude Include="lib\ColorSensor\ColorSensor.h">
+      <Filter>lib\ColorSensor</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\IMU\IMU.h">
       <Filter>lib\IMU</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalPositioningSystem.h">
+    <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
       <Filter>lib\GPS</Filter>
     </ClInclude>
-    <ClInclude Include="ToF.h">
+    <ClInclude Include="lib\ToF\ToF.h">
       <Filter>lib\ToF</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Tank\Tank.h">
+      <Filter>lib\Tank</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

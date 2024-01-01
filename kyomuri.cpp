@@ -15,10 +15,14 @@ using namespace std;
 int main(int argc, char **argv) {
   enableDevices();
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
+  //robot->step(5000);
+  cout << "start" << endl;
+  tank.setPosition(360, 360, 2, 2, false);
+  tank.setPosition(180, -180, 2, 2, false);
+  cout << "fin" << endl;
+  cout << "left position: " << tank.getLeftEncoder() << ", right position: " << tank.getRightEncoder() << endl;
   while (robot->step(timeStep) != -1) {
-    // GPSPosition gpsPosition = gps.getPosition();
-    // cout << "x: " << gpsPosition.x << ", y: " << gpsPosition.y << ", z: " << gpsPosition.z << endl;
-    cout << leftToF.getDistanceCM() << " , " << rightToF.getDistanceCM() << endl;
+    
   };
 
   delete robot;

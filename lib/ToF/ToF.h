@@ -7,7 +7,7 @@
 using namespace webots;
 using namespace std;
 
-/* Œ‡ Š× •i */
+/* ˆ³ “| “I Œ‡ Š× •i */
 class ToFSensor
 {
 public:
