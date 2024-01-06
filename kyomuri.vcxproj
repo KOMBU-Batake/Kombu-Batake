@@ -153,12 +153,12 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp" />
-    <ClCompile Include="Kyomuri.cpp" />
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
     <ClCompile Include="lib\Tank\Tank.cpp" />
     <ClCompile Include="lib\ToF\ToF.cpp" />
+    <ClCompile Include="src\kyomuri.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />

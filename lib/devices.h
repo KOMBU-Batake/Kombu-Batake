@@ -10,11 +10,11 @@
 #include <webots/GPS.hpp>
 #include <webots/InertialUnit.hpp>
 
-#include "lib/ColorSensor/ColorSensor.h"
-#include "lib/IMU/IMU.h"
-#include "lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "lib/ToF/ToF.h"
-#include "lib/Tank/Tank.h"
+#include "../lib/ColorSensor/ColorSensor.h"
+#include "../lib/IMU/IMU.h"
+#include "../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
+#include "../lib/ToF/ToF.h"
+#include "../lib/Tank/Tank.h"
 
 /* デバイスの設定、以下略をするよ */
 

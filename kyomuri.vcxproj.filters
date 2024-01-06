@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Kyomuri.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Accelerometer.cpp">
       <Filter>lib\default</Filter>
     </ClCompile>
@@ -116,6 +115,9 @@
     <ClCompile Include="lib\Tank\Tank.cpp">
       <Filter>lib\Tank</Filter>
     </ClCompile>
+    <ClCompile Include="src\kyomuri.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lib">
@@ -138,6 +140,9 @@
     </Filter>
     <Filter Include="lib\Tank">
       <UniqueIdentifier>{75d83116-cd3d-411e-982a-aefb284ac225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{6be83a4b-09b7-4f1b-b1e5-7cb87177426a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

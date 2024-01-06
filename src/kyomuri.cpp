@@ -5,7 +5,9 @@
 // Modifications:
 
 #include <iostream>
-#include "lib/devices.h"
+#include <thread>
+#include <mutex>
+#include "../lib/devices.h"
 
 using namespace webots;
 using namespace std;
@@ -16,13 +18,12 @@ int main(int argc, char **argv) {
   enableDevices();
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
   //robot->step(5000);
+
   cout << "start" << endl;
-  tank.setPosition(360, 360, 2, 2, false);
-  tank.setPosition(180, -180, 2, 2, false);
-  cout << "fin" << endl;
-  cout << "left position: " << tank.getLeftEncoder() << ", right position: " << tank.getRightEncoder() << endl;
+  tank.setDireciton(270, 6);
+  //tank.setPosition(180, 180, -2, 2);
   while (robot->step(timeStep) != -1) {
-    
+    //cout << "gyro; " << gyro.getGyro() << endl;
   };
 
   delete robot;
