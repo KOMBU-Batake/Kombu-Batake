@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <math.h>
 #include <webots/Robot.hpp>
 #include <webots/Motor.hpp>
 #include <webots/PositionSensor.hpp>
@@ -90,29 +91,29 @@ public:
 	void setDireciton(double direction, double speed, const unit unit = unit::degrees);
 
 	/* 単にX軸方向、Y軸方向にGPSトレースする */
-	void gpsTraveSimple(const GPSPosition& goal, const double& speed /*rad/s固定*/ , const Direction_of_Travel& direction ); // ロボットはすでに進行方向を向いていることを前提とする
+	void gpsTraceSimple(const GPSPosition& goal, const double speed /*rad/s固定*/ , const Direction_of_Travel& direction ); // ロボットはすでに進行方向を向いていることを前提とする
+
+	static double pd_cm_to_rad(double cm) { // cmをラジアンに変換
+		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)
+	}
+
+	static double pd_degrees_to_rad(double degrees) {
+		return degrees * 3.1415926535 / 180;
+	}
+
+	static double pd_cm_to_degrees(double cm) { // cmを角度に変換
+		return pd_cm_to_rad(cm) * 180 / 3.141592; // θ*180/π
+	}
+
+	static double pd_rad_to_degrees(double rad) {
+		return rad * 180 / 3.1415926535;
+	}
 private:
 	enum class goalPosition :uint8_t{
 		plusINFINITY,
 		minusINFINITY,
 		OTHER,
 	};
-
-	double pd_cm_to_rad(double cm) { // cmをラジアンに変換
-		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)
-	}
-
-	double pd_degrees_to_rad(double degrees) {
-		return degrees * 3.1415926535 / 180;
-	}
-
-	double pd_cm_to_degrees(double cm) { // cmを角度に変換
-	  return pd_cm_to_rad(cm) * 180 / 3.141592; // θ*180/π
-	}
-
-	double pd_rad_to_degrees(double rad) {
-		return rad * 180 / 3.1415926535;
-	}
 
 	Motor* leftMotor;
 	Motor* rightMotor;

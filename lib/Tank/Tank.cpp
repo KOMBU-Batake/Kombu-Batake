@@ -1,6 +1,7 @@
 #include "Tank.h"
 
 static void setGoalPosition(const double& leftPos, const double& rightPos, double& leftSp, double& rightSp, const double& leftStartPos, const double& rightStartPos, double& leftGoalPos, double& rightGoalPos);
+static double pd_angle(double angle);
 
 Tank::Tank(Motor* _leftMotor, Motor* _rightMotor, PositionSensor* _leftEncoder, PositionSensor* _righhtEncoder) {
 	this->leftMotor = _leftMotor;
@@ -57,7 +58,7 @@ void Tank::setPosition(double left, double right, double leftSpeed, double right
 	stop(StopMode::BRAKE);
 }
 
-static void setGoalPosition(const double& leftPos, const double& rightPos,/* 単位はラジアンで渡す*/
+static void setGoalPosition(const double& leftPos, const double& rightPos,
 														double& leftSp, double& rightSp, 
 														const double& leftStartPos, const double& rightStartPos, 
 														double& leftGoalPos, double& rightGoalPos) {
@@ -107,12 +108,14 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 	if (speed > maxVelocity) speed = maxVelocity;
 	
 	// まずは回る方向を決める
+	uint8_t minus = 0;
 	if (direction > startAngle) {
-		if ((direction - startAngle) > 3.141592) {
+		if (abs(direction - startAngle) > 180) {
 			// 時計回り 
 			leftMotor->setPosition(INFINITY);
 			rightMotor->setPosition(-1 * INFINITY);
 			cout << "right1" << endl;
+			minus = 1;
 		}
 		else {
 			// 反時計回り
@@ -122,11 +125,12 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 		}
 	}
 	else {
-		if ((direction - startAngle) > 3.141592) {
+		if (abs(direction - startAngle) > 180) {
 			// 反時計回り 
 			rightMotor->setPosition(INFINITY);
 			leftMotor->setPosition(-1 * INFINITY);
 			cout << "left3" << endl;
+			minus = 2;
 		}
 		else {
 			// 時計回り
@@ -142,14 +146,51 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 	double Kd = 0;
 	double u, error = 100, last_error = 0;
 	while (1) {
-		if (robot->step(timeStep) == -1 || abs(error) < 0.05 || abs(error) > 359.5) break;
-		error = direction - gyro.getGyro();
+		if (robot->step(timeStep) == -1 || abs(error) < 0.5 || abs(error) > 359.5) break;
+		double angle = gyro.getGyro();
+		cout << "angle: " << angle << endl;
+		error = direction - angle;
+		if (minus == 1) { // もっと賢い方法があるんだろうなと思ったり思わなかったり
+			if (angle < direction) error -= 360;
+			else minus = 0;
+		}
+		else if (minus == 2) {
+			if (angle > direction) error += 360;
+			else minus = 0;
+		}
+		cout << "error: " << error << endl;
 		u = Kp * error + Ki * (error + last_error) + Kd * (error - last_error) ;
 		if (u > 1) u = 1;
 		else if (u < -1) u = -1;
-		leftMotor->setVelocity(-1*speed * u);
+		leftMotor->setVelocity(-1 * speed * u);
 		rightMotor->setVelocity(speed * u);
 	}
 	stop(StopMode::HOLD);
 	robot->step(160);
+}
+
+void Tank::gpsTraceSimple(const GPSPosition& goal, const double speed, const Direction_of_Travel& direction)
+{
+	// 現在地を取得
+	GPSPosition presentPos = gps.getPosition();
+	double angle_to_goal = pd_rad_to_degrees( atan2(goal.z - presentPos.z, goal.x - presentPos.x) ); // 目的地への偏角
+	cout << "angle_to_goal: " << angle_to_goal << endl;
+	// 現在の角度を取得
+	double presentAngle = gyro.getGyro();
+	double angle_to_O = pd_angle(angle_to_goal);
+	if (abs(angle_to_O - presentAngle) > 10) {
+		cout << "angle_to_0: " << angle_to_O << endl;
+		setDireciton(angle_to_O, speed);
+	}
+}
+
+static double pd_angle(double angle) {
+	if (angle > 360) angle = 360;
+	else if (angle < 0) angle = 0;
+
+	angle = 360 - angle; // 正負反転
+	if (angle < 270) {
+		return angle + 90;
+	}
+	else return angle - 270;
 }
