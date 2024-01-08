@@ -99,13 +99,13 @@ void Tank::stop(const StopMode mode) {
 	}
 }
 
-void Tank::setDireciton(double direction, double speed, const unit unit)
+void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 {
 	if (unit == unit::rad) direction = pd_rad_to_degrees(direction);
 	cout << "direction: " << direction << endl;
 	double startAngle = gyro.getGyro();
-	speed = abs(speed);
-	if (speed > maxVelocity) speed = maxVelocity;
+	maxspeed = abs(maxspeed);
+	if (maxspeed > maxVelocity) maxspeed = maxVelocity;
 	
 	// まずは回る方向を決める
 	uint8_t minus = 0;
@@ -114,14 +114,18 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 			// 時計回り 
 			leftMotor->setPosition(INFINITY);
 			rightMotor->setPosition(-1 * INFINITY);
-			cout << "right1" << endl;
+			setV_goal_right = goalPosition::minusINFINITY;
+			setV_goal_left = goalPosition::plusINFINITY;
+			//cout << "right1" << endl;
 			minus = 1;
 		}
 		else {
 			// 反時計回り
 			rightMotor->setPosition(INFINITY);
 			leftMotor->setPosition(-1 * INFINITY);
-			cout << "left2" << endl;
+			setV_goal_right = goalPosition::plusINFINITY;
+			setV_goal_left = goalPosition::minusINFINITY;
+			//cout << "left2" << endl;
 		}
 	}
 	else {
@@ -129,14 +133,18 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 			// 反時計回り 
 			rightMotor->setPosition(INFINITY);
 			leftMotor->setPosition(-1 * INFINITY);
-			cout << "left3" << endl;
+			setV_goal_right = goalPosition::plusINFINITY;
+			setV_goal_left = goalPosition::minusINFINITY;
+			//cout << "left3" << endl;
 			minus = 2;
 		}
 		else {
 			// 時計回り
 			leftMotor->setPosition(INFINITY);
 			rightMotor->setPosition(-1 * INFINITY);
-			cout << "right4" << endl;
+			setV_goal_right = goalPosition::minusINFINITY;
+			setV_goal_left = goalPosition::plusINFINITY;
+			//cout << "right4" << endl;
 		}
 	}
 
@@ -146,9 +154,9 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 	double Kd = 0;
 	double u, error = 100, last_error = 0;
 	while (1) {
-		if (robot->step(timeStep) == -1 || abs(error) < 0.5 || abs(error) > 359.5) break;
+		if (robot->step(timeStep) == -1 || abs(error) < 0.1 || abs(error) > 359.9) break;
 		double angle = gyro.getGyro();
-		cout << "angle: " << angle << endl;
+		//cout << "angle: " << angle << endl;
 		error = direction - angle;
 		if (minus == 1) { // もっと賢い方法があるんだろうなと思ったり思わなかったり
 			if (angle < direction) error -= 360;
@@ -158,35 +166,137 @@ void Tank::setDireciton(double direction, double speed, const unit unit)
 			if (angle > direction) error += 360;
 			else minus = 0;
 		}
-		cout << "error: " << error << endl;
+		//cout << "error: " << error << endl;
 		u = Kp * error + Ki * (error + last_error) + Kd * (error - last_error) ;
 		if (u > 1) u = 1;
 		else if (u < -1) u = -1;
-		leftMotor->setVelocity(-1 * speed * u);
-		rightMotor->setVelocity(speed * u);
+		leftMotor->setVelocity(-1 * maxspeed * u);
+		rightMotor->setVelocity(maxspeed * u);
+		last_error = error;
 	}
 	stop(StopMode::HOLD);
 	robot->step(160);
 }
 
-void Tank::gpsTraceSimple(const GPSPosition& goal, const double speed, const Direction_of_Travel& direction)
+void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Travel direction, const StopMode stopmode)
 {
+	speed = abs(speed);
+	if (speed > maxVelocity) speed = maxVelocity;
 	// 現在地を取得
-	GPSPosition presentPos = gps.getPosition();
-	double angle_to_goal = pd_rad_to_degrees( atan2(goal.z - presentPos.z, goal.x - presentPos.x) ); // 目的地への偏角
+	GPSPosition presentPos = gps.getPosition(), presentPosRAW;
+	double dz = goal.z - presentPos.z;
+	double dx = goal.x - presentPos.x;
+	double angle_to_goal = pd_rad_to_degrees( atan2(dz, dx) ); // 目的地への偏角
 	cout << "angle_to_goal: " << angle_to_goal << endl;
 	// 現在の角度を取得
 	double presentAngle = gyro.getGyro();
 	double angle_to_O = pd_angle(angle_to_goal);
-	if (abs(angle_to_O - presentAngle) > 10) {
+	if (abs(angle_to_O - presentAngle) > 10) { // 目的地への角度と現在の角度が10度以上ずれていたら 補正する
 		cout << "angle_to_0: " << angle_to_O << endl;
 		setDireciton(angle_to_O, speed);
+	}
+
+	// PIDしか勝たん!!
+	double error_x = 0, last_error_x = 0;
+	double error_z = 0, last_error_z = 0;
+	double u_x, u_z;
+	double leftSpeed = 0, rightSpeed = 0;
+	setV_goal_right = goalPosition::plusINFINITY;
+	setV_goal_left = goalPosition::plusINFINITY;
+	leftMotor->setPosition(INFINITY);
+	rightMotor->setPosition(INFINITY);
+	if (direction == Direction_of_Travel::z) {
+		double referenceX = goal.x;
+		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
+
+			// Ｚ軸正か負か
+			error_z = goal.z - presentPos.z;
+			if (error_z > 0) direction = Direction_of_Travel::z_plus; // Z軸正
+			else direction = Direction_of_Travel::z_minus; // Z軸負
+
+			// PID
+			double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
+			double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
+			while (1) {
+				presentPosRAW = gps.getPositionRAW();
+				presentPos = gps.filter(presentPosRAW);
+				// Ｘ軸方向のずれ
+				if (direction == Direction_of_Travel::z_plus) error_x = referenceX - presentPosRAW.x;
+				else error_x = presentPosRAW.x - referenceX; // z_plus
+				u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
+				// Z軸方向の目的地への距離
+				error_z = abs(goal.z - presentPos.z);
+				u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
+				if (u_z > 1) u_z = 1;
+
+				leftSpeed = speed * u_z + u_x;
+				rightSpeed = speed * u_z - u_x;
+				if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
+				if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
+				leftMotor->setVelocity(leftSpeed);
+				rightMotor->setVelocity(rightSpeed);
+				cout << "error_z: " << error_z << ", u_z: " << u_z << ", error_x: " << error_x << ", u_x: " << u_x << endl;
+
+				last_error_x = error_x;
+				last_error_z = error_z;
+				if (abs(error_z) < 0.1 || robot->step(timeStep) == -1) break;
+			}
+			stop(stopmode);
+		}
+		else { // coast
+			// かんがえるのだるい
+		}
+	}
+	else if (direction == Direction_of_Travel::x) {
+		double referenceZ = goal.z;
+		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
+			// Ｘ軸正か負か
+			error_x = goal.x - presentPos.x;
+			if (error_x > 0) direction = Direction_of_Travel::x_plus; // Ｘ軸正
+			else direction = Direction_of_Travel::x_minus; // Ｘ軸負
+
+			// PID
+			double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
+			double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
+			while (1) {
+				presentPosRAW = gps.getPositionRAW();
+				presentPos = gps.filter(presentPosRAW);
+				// Z軸方向のずれ
+				if (direction == Direction_of_Travel::x_plus) error_z = referenceZ - presentPosRAW.z;
+				else error_z = presentPosRAW.z - referenceZ; // x_plus
+				u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
+
+				// Ｘ軸方向の目的地への距離
+				error_x = abs(goal.x - presentPos.x);
+				u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
+				if (u_x > 1) u_x = 1;
+
+				leftSpeed = speed * u_x + u_z;
+				rightSpeed = speed * u_x - u_z;
+				if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
+				if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
+				leftMotor->setVelocity(leftSpeed);
+				rightMotor->setVelocity(rightSpeed);
+				cout << "error_x: " << error_x << ", u_x: " << u_x << ", error_z: " << error_z << ", u_z: " << u_z << endl;
+
+				last_error_x = error_x;
+				last_error_z = error_z;
+				if (abs(error_x) < 0.1 || robot->step(timeStep) == -1) break;
+			}
+			stop(stopmode);
+		}
+		else { // coast
+
+		}
+	}
+	else { // diagonal
+
 	}
 }
 
 static double pd_angle(double angle) {
 	if (angle > 360) angle = 360;
-	else if (angle < 0) angle = 0;
+	else if (angle < 0) angle += 360;
 
 	angle = 360 - angle; // 正負反転
 	if (angle < 270) {

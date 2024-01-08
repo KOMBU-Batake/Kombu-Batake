@@ -15,6 +15,7 @@ using namespace std;
 enum class StopMode {
 	BRAKE,
 	HOLD,
+	COAST,
 };
 
 enum class unit {
@@ -29,6 +30,12 @@ enum class Direction_of_Travel {
 	x,
 	z,
 	diagonal,
+
+	/* ここから下はTank.cppでしか使わない 他所で使うんじゃねぇ */
+	x_plus,
+	x_minus,
+	z_plus,
+	z_minus,
 };
 
 extern Robot* robot;
@@ -88,10 +95,10 @@ public:
 	void stop(const StopMode mode);
 
 	/* その場で回転して向きを合わせる */
-	void setDireciton(double direction, double speed, const unit unit = unit::degrees);
+	void setDireciton(double direction, double maxspeed /*最大速度*/, const unit unit = unit::degrees);
 
-	/* 単にX軸方向、Y軸方向にGPSトレースする */
-	void gpsTraceSimple(const GPSPosition& goal, const double speed /*rad/s固定*/ , const Direction_of_Travel& direction ); // ロボットはすでに進行方向を向いていることを前提とする
+	/* Ｘ軸方向、Y軸方向にGPSトレースする 位置はあらかたあっている前提で過度な修正はできない。 */
+	void gpsTraceSimple(const GPSPosition& goal, double speed /*rad/s固定*/ , Direction_of_Travel direction, const StopMode stopmode = StopMode::BRAKE); // ロボットはすでに進行方向を向いていることを前提とする
 
 	static double pd_cm_to_rad(double cm) { // cmをラジアンに変換
 		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)

@@ -70,8 +70,8 @@
 		"customName": "gps",
 		"type": "add",
 		"x": 0,
-		"y": 30,
-		"z": 0,
+		"y": -100,
+		"z": -370,
 		"rx": -0.5858,
 		"ry": 0.5858,
 		"rz": 0.5858,
@@ -103,19 +103,6 @@
 		"rz": 0,
 		"a": 1.57
 	},
-	"camera2": {
-		"dictName": "camera2",
-		"name": "Camera",
-		"customName": "rightCamera",
-		"type": "add",
-		"x": 300,
-		"y": 116,
-		"z": 0,
-		"rx": -1,
-		"ry": 0,
-		"rz": 0,
-		"a": 1.57
-	},
 	"iu": {
 		"dictName": "iu",
 		"name": "InertialUnit",
@@ -128,5 +115,18 @@
 		"ry": 0.5858,
 		"rz": 0.5858,
 		"a": 2.09
+	},
+	"camera2": {
+		"dictName": "camera2",
+		"name": "Camera",
+		"customName": "rightCamera",
+		"type": "add",
+		"x": 300,
+		"y": 116,
+		"z": 0,
+		"rx": -1,
+		"ry": 0,
+		"rz": 0,
+		"a": 1.57
 	}
 }
