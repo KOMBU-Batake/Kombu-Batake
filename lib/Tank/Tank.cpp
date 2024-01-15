@@ -195,6 +195,13 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 		cout << "angle_to_0: " << angle_to_O << endl;
 		setDireciton(angle_to_O, speed);
 	}
+	// •ûŒü‚ÌC³
+	if (angle_to_O < 3 || angle_to_O > 357 || (177 < angle_to_O < 183)) {
+		direction == Direction_of_Travel::z; // ‚yŽ²•ûŒü‚ÉŒÀ‚è‚È‚­‹ß‚¢
+	}
+	else if (87 < angle_to_O < 93 || 267 < angle_to_O < 273) {
+		direction == Direction_of_Travel::x; // ‚wŽ²•ûŒü‚ÉŒÀ‚è‚È‚­‹ß‚¢
+	}
 
 	// PID‚µ‚©Ÿ‚½‚ñ!!
 	double error_x = 0, last_error_x = 0;
@@ -205,92 +212,126 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 	setV_goal_left = goalPosition::plusINFINITY;
 	leftMotor->setPosition(INFINITY);
 	rightMotor->setPosition(INFINITY);
-	if (direction == Direction_of_Travel::z) {
+	// coast‚Ìê‡‚Íis•ûŒü‚Ö‚Ì‹——£‚ð—p‚¢‚½PID‚ðs‚í‚È‚¢
+
+	if (direction == Direction_of_Travel::z) { // ‚yŽ²•ûŒü
 		double referenceX = goal.x;
-		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
+		// ‚yŽ²³‚©•‰‚©
+		error_z = goal.z - presentPos.z;
+		if (error_z > 0) direction = Direction_of_Travel::z_plus; // ZŽ²³
+		else direction = Direction_of_Travel::z_minus; // ZŽ²•‰
 
-			// ‚yŽ²³‚©•‰‚©
-			error_z = goal.z - presentPos.z;
-			if (error_z > 0) direction = Direction_of_Travel::z_plus; // ZŽ²³
-			else direction = Direction_of_Travel::z_minus; // ZŽ²•‰
+		// PID
+		double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
+		double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
+		while (1) {
+			presentPosRAW = gps.getPositionRAW();
+			presentPos = gps.filter(presentPosRAW);
+			// ‚wŽ²•ûŒü‚Ì‚¸‚ê
+			if (direction == Direction_of_Travel::z_plus) error_x = referenceX - presentPosRAW.x;
+			else error_x = presentPosRAW.x - referenceX; // z_plus
+			u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
 
-			// PID
-			double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
-			double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
-			while (1) {
-				presentPosRAW = gps.getPositionRAW();
-				presentPos = gps.filter(presentPosRAW);
-				// ‚wŽ²•ûŒü‚Ì‚¸‚ê
-				if (direction == Direction_of_Travel::z_plus) error_x = referenceX - presentPosRAW.x;
-				else error_x = presentPosRAW.x - referenceX; // z_plus
-				u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
+			if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
 				// ZŽ²•ûŒü‚Ì–Ú“I’n‚Ö‚Ì‹——£
 				error_z = abs(goal.z - presentPos.z);
 				u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
 				if (u_z > 1) u_z = 1;
+			} else u_z = 1;
 
-				leftSpeed = speed * u_z + u_x;
-				rightSpeed = speed * u_z - u_x;
-				if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
-				if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
-				leftMotor->setVelocity(leftSpeed);
-				rightMotor->setVelocity(rightSpeed);
-				cout << "error_z: " << error_z << ", u_z: " << u_z << ", error_x: " << error_x << ", u_x: " << u_x << endl;
+			leftSpeed = (speed + u_x) * u_z;
+			rightSpeed = (speed - u_x) * u_z;
+			if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
+			if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
+			if (leftSpeed  < (-1* maxVelocity)) leftSpeed = -1 * maxVelocity;
+			if (rightSpeed < (-1* maxVelocity)) rightSpeed = -1 * maxVelocity;
+			leftMotor->setVelocity(leftSpeed);
+			rightMotor->setVelocity(rightSpeed);
+			cout << "error_z: " << error_z << ", u_z: " << u_z << ", error_x: " << error_x << ", u_x: " << u_x << endl;
 
-				last_error_x = error_x;
-				last_error_z = error_z;
-				if (abs(error_z) < 0.1 || robot->step(timeStep) == -1) break;
-			}
-			stop(stopmode);
+			last_error_x = error_x;
+			last_error_z = error_z;
+			if (abs(error_z) < 0.1 || robot->step(timeStep) == -1) break;
 		}
-		else { // coast
-			// ‚©‚ñ‚ª‚¦‚é‚Ì‚¾‚é‚¢
-		}
+		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
-	else if (direction == Direction_of_Travel::x) {
+	else if (direction == Direction_of_Travel::x) { // ‚wŽ²•ûŒü
 		double referenceZ = goal.z;
-		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
-			// ‚wŽ²³‚©•‰‚©
-			error_x = goal.x - presentPos.x;
-			if (error_x > 0) direction = Direction_of_Travel::x_plus; // ‚wŽ²³
-			else direction = Direction_of_Travel::x_minus; // ‚wŽ²•‰
+		// ‚wŽ²³‚©•‰‚©
+		error_x = goal.x - presentPos.x;
+		if (error_x > 0) direction = Direction_of_Travel::x_plus; // ‚wŽ²³
+		else direction = Direction_of_Travel::x_minus; // ‚wŽ²•‰
 
-			// PID
-			double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
-			double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
-			while (1) {
-				presentPosRAW = gps.getPositionRAW();
-				presentPos = gps.filter(presentPosRAW);
-				// ZŽ²•ûŒü‚Ì‚¸‚ê
-				if (direction == Direction_of_Travel::x_plus) error_z = referenceZ - presentPosRAW.z;
-				else error_z = presentPosRAW.z - referenceZ; // x_plus
-				u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
+		// PID
+		double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
+		double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
+		while (1) {
+			presentPosRAW = gps.getPositionRAW();
+			presentPos = gps.filter(presentPosRAW);
+			// ZŽ²•ûŒü‚Ì‚¸‚ê
+			if (direction == Direction_of_Travel::x_plus) error_z = referenceZ - presentPosRAW.z;
+			else error_z = presentPosRAW.z - referenceZ; // x_plus
+			u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
 
+			if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
 				// ‚wŽ²•ûŒü‚Ì–Ú“I’n‚Ö‚Ì‹——£
 				error_x = abs(goal.x - presentPos.x);
 				u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
 				if (u_x > 1) u_x = 1;
+			} else u_x = 1;
 
-				leftSpeed = speed * u_x + u_z;
-				rightSpeed = speed * u_x - u_z;
-				if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
-				if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
-				leftMotor->setVelocity(leftSpeed);
-				rightMotor->setVelocity(rightSpeed);
-				cout << "error_x: " << error_x << ", u_x: " << u_x << ", error_z: " << error_z << ", u_z: " << u_z << endl;
+			leftSpeed = (speed + u_z) * u_x;
+			rightSpeed = (speed - u_z) * u_x;
+			if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
+			if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
+			leftMotor->setVelocity(leftSpeed);
+			rightMotor->setVelocity(rightSpeed);
+			cout << "error_x: " << error_x << ", u_x: " << u_x << ", error_z: " << error_z << ", u_z: " << u_z << endl;
 
-				last_error_x = error_x;
-				last_error_z = error_z;
-				if (abs(error_x) < 0.1 || robot->step(timeStep) == -1) break;
-			}
-			stop(stopmode);
+			last_error_x = error_x;
+			last_error_z = error_z;
+			if (abs(error_x) < 0.1 || robot->step(timeStep) == -1) break;
 		}
-		else { // coast
-
-		}
+		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
-	else { // diagonal
+	else { // ŽÎ‚ß•ûŒü
+		// az-x+c=0 ‚ÌŽ®‚Ì’è”‚ð‹‚ß‚é
+		double a = (goal.x - presentPos.x) / (goal.z - presentPos.z);
+		double c = -1* a * presentPos.z + presentPos.x; 
+		double sqrt_ac = sqrt(a*a + 1); // sqrt(a^2 + 1) “_‚Æ’¼ü‚Ì‹——£ŒöŽ®‚ÅŽg‚¤
 
+		// PID‚Ì•Ï”
+		double Kp_d = 0.6, Ki_d = 0, Kd_d = 0;
+		double Kp_vertialdir = 0.5, Ki_vertialdir = 0.01, Kd_vertialdir = 15;
+		double error_d = 0, error_vertialdir = 0, last_error_d = 0, last_error_vertialdir = 0;
+		double u_d, u_vertialdir;
+		
+		// i‚Þ•ûŒü‚ÍZŽ²³‚©•‰‚©
+		Direction_of_Travel directionPorM = Direction_of_Travel::z_minus;
+		if (goal.z > presentPos.z) directionPorM = Direction_of_Travel::z_plus;
+		
+		while (1) {
+			presentPosRAW = gps.getPositionRAW();
+			presentPos = gps.filter(presentPosRAW);
+			error_d = sqrt(pow(presentPos.x - goal.x,2) + pow(presentPos.z - goal.z,2)); // presentPos‚Ægoal‚Ì‹——£
+			error_vertialdir = (a * presentPos.z - presentPos.x + c) / sqrt_ac; // presentPos‚Æ’¼ü‚Ì‹——£
+			
+			u_d = Kp_d * error_d + Ki_d * (error_d + last_error_d) + Kd_d * (error_d - last_error_d);
+			u_vertialdir = Kp_vertialdir * error_vertialdir + Ki_vertialdir * (error_vertialdir + last_error_vertialdir) + Kd_vertialdir * (error_vertialdir - last_error_vertialdir);
+			if (u_d > 1) u_d = 1;
+			if (directionPorM == Direction_of_Travel::z_plus) u_vertialdir = -1 * u_vertialdir;
+			leftSpeed = (speed + u_vertialdir) * u_d;
+			rightSpeed = (speed - u_vertialdir) * u_d;
+			if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
+			if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
+			leftMotor->setVelocity(leftSpeed);
+			rightMotor->setVelocity(rightSpeed);
+			cout << "error_d: " << error_d << ", u_d: " << u_d << ", error_vertialdir: " << error_vertialdir << ", u_vertialdir: " << u_vertialdir << endl;
+
+			last_error_d = error_d;
+			last_error_vertialdir = error_vertialdir;
+			if (abs(error_d) < 0.1 || robot->step(timeStep) == -1) break;
+		}
 	}
 }
 
