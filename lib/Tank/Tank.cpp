@@ -187,7 +187,7 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 	double dz = goal.z - presentPos.z;
 	double dx = goal.x - presentPos.x;
 	double angle_to_goal = pd_rad_to_degrees( atan2(dz, dx) ); // –Ú“I’n‚Ö‚Ì•ÎŠp
-	cout << "angle_to_goal: " << angle_to_goal << endl;
+	//cout << "angle_to_goal: " << angle_to_goal << endl;
 	// Œ»İ‚ÌŠp“x‚ğæ“¾
 	double presentAngle = gyro.getGyro();
 	double angle_to_O = pd_angle(angle_to_goal);
@@ -196,11 +196,13 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 		setDireciton(angle_to_O, speed);
 	}
 	// •ûŒü‚ÌC³
-	if (angle_to_O < 3 || angle_to_O > 357 || (177 < angle_to_O < 183)) {
-		direction == Direction_of_Travel::z; // ‚y²•ûŒü‚ÉŒÀ‚è‚È‚­‹ß‚¢
+  if (angle_to_O < 3 || angle_to_O > 357 || (angle_to_O > 177 && angle_to_O < 183)) {
+		direction = Direction_of_Travel::z; // ‚y²•ûŒü‚ÉŒÀ‚è‚È‚­‹ß‚¢
+		//cout << "z" << endl;
 	}
-	else if (87 < angle_to_O < 93 || 267 < angle_to_O < 273) {
-		direction == Direction_of_Travel::x; // ‚w²•ûŒü‚ÉŒÀ‚è‚È‚­‹ß‚¢
+    else if (((87 < angle_to_O) && (angle_to_O < 93)) || ((267 < angle_to_O) && (angle_to_O < 273))) {
+		direction = Direction_of_Travel::x; // ‚w²•ûŒü‚ÉŒÀ‚è‚È‚­‹ß‚¢
+		//cout << "x" << endl;
 	}
 
 	// PID‚µ‚©Ÿ‚½‚ñ!!
@@ -214,7 +216,7 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 	rightMotor->setPosition(INFINITY);
 	// coast‚Ìê‡‚Íis•ûŒü‚Ö‚Ì‹——£‚ğ—p‚¢‚½PID‚ğs‚í‚È‚¢
 
-	if (direction == Direction_of_Travel::z) { // ‚y²•ûŒü
+	if (direction == Direction_of_Travel::z) { // ‚y²•ûŒü ====================================================================================================
 		double referenceX = goal.x;
 		// ‚y²³‚©•‰‚©
 		error_z = goal.z - presentPos.z;
@@ -228,7 +230,7 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ‚w²•ûŒü‚Ì‚¸‚ê
-			if (direction == Direction_of_Travel::z_plus) error_x = referenceX - presentPosRAW.x;
+			if (direction == Direction_of_Travel::z_minus) error_x = referenceX - presentPosRAW.x;
 			else error_x = presentPosRAW.x - referenceX; // z_plus
 			u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
 
@@ -251,11 +253,11 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 
 			last_error_x = error_x;
 			last_error_z = error_z;
-			if (abs(error_z) < 0.1 || robot->step(timeStep) == -1) break;
+			if (abs(error_z) < 0.05 || robot->step(timeStep) == -1) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
-	else if (direction == Direction_of_Travel::x) { // ‚w²•ûŒü
+	else if (direction == Direction_of_Travel::x) { // ‚w²•ûŒü ====================================================================================================
 		double referenceZ = goal.z;
 		// ‚w²³‚©•‰‚©
 		error_x = goal.x - presentPos.x;
@@ -284,17 +286,19 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 			rightSpeed = (speed - u_z) * u_x;
 			if (leftSpeed > maxVelocity) leftSpeed = maxVelocity;
 			if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
+			if (leftSpeed < (-1 * maxVelocity)) leftSpeed = -1 * maxVelocity;
+			if (rightSpeed < (-1 * maxVelocity)) rightSpeed = -1 * maxVelocity;
 			leftMotor->setVelocity(leftSpeed);
 			rightMotor->setVelocity(rightSpeed);
 			cout << "error_x: " << error_x << ", u_x: " << u_x << ", error_z: " << error_z << ", u_z: " << u_z << endl;
 
 			last_error_x = error_x;
 			last_error_z = error_z;
-			if (abs(error_x) < 0.1 || robot->step(timeStep) == -1) break;
+			if (abs(error_x) < 0.05 || robot->step(timeStep) == -1) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
-	else { // Î‚ß•ûŒü
+	else { // Î‚ß•ûŒü ===================================================================================================================================================
 		// az-x+c=0 ‚Ì®‚Ì’è”‚ğ‹‚ß‚é
 		double a = (goal.x - presentPos.x) / (goal.z - presentPos.z);
 		double c = -1* a * presentPos.z + presentPos.x; 
@@ -302,18 +306,21 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 
 		// PID‚Ì•Ï”
 		double Kp_d = 0.6, Ki_d = 0, Kd_d = 0;
-		double Kp_vertialdir = 0.5, Ki_vertialdir = 0.01, Kd_vertialdir = 15;
+		double Kp_vertialdir = 0.8, Ki_vertialdir = 0.01, Kd_vertialdir = 15;
 		double error_d = 0, error_vertialdir = 0, last_error_d = 0, last_error_vertialdir = 0;
 		double u_d, u_vertialdir;
+		double dx_d, dz_d;
 		
 		// i‚Ş•ûŒü‚ÍZ²³‚©•‰‚©
 		Direction_of_Travel directionPorM = Direction_of_Travel::z_minus;
 		if (goal.z > presentPos.z) directionPorM = Direction_of_Travel::z_plus;
 		
-		while (1) {
+		do {
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
-			error_d = sqrt(pow(presentPos.x - goal.x,2) + pow(presentPos.z - goal.z,2)); // presentPos‚Ægoal‚Ì‹——£
+			dx_d = presentPos.x - goal.x;
+			dz_d = presentPos.z - goal.z;
+			error_d = sqrt(pow(dx_d,2) + pow(dz_d,2)); // presentPos‚Ægoal‚Ì‹——£
 			error_vertialdir = (a * presentPos.z - presentPos.x + c) / sqrt_ac; // presentPos‚Æ’¼ü‚Ì‹——£
 			
 			u_d = Kp_d * error_d + Ki_d * (error_d + last_error_d) + Kd_d * (error_d - last_error_d);
@@ -330,8 +337,8 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 
 			last_error_d = error_d;
 			last_error_vertialdir = error_vertialdir;
-			if (abs(error_d) < 0.1 || robot->step(timeStep) == -1) break;
-		}
+		} while (abs(dz_d) > 0.05 && abs(dx_d) > 0.05 && robot->step(timeStep) != -1);
+		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
 }
 

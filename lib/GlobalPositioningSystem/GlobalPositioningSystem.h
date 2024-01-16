@@ -44,4 +44,11 @@ public:
 		gpsPosition.z = gpsPosition.z - 3.7 * cos(angle);
 		return gpsPosition;
 	}
+
+	GPSPosition moveTiles(int x, int z) {
+		GPSPosition gpsPosition = getPosition();
+		gpsPosition.x += x * 12;
+		gpsPosition.z += z * 12;
+		return gpsPosition;
+	}
 };
