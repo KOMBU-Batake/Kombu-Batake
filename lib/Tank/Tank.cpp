@@ -178,7 +178,7 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 	robot->step(160);
 }
 
-void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Travel direction, const StopMode stopmode)
+void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmode, int timeout_ms, Direction_of_Travel direction)
 {
 	speed = abs(speed);
 	if (speed > maxVelocity) speed = maxVelocity;
@@ -234,9 +234,9 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 			else error_x = presentPosRAW.x - referenceX; // z_plus
 			u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
 
+			error_z = abs(goal.z - presentPos.z);
 			if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
 				// Z軸方向の目的地への距離
-				error_z = abs(goal.z - presentPos.z);
 				u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
 				if (u_z > 1) u_z = 1;
 			} else u_z = 1;
@@ -275,9 +275,9 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 			else error_z = presentPosRAW.z - referenceZ; // x_plus
 			u_z = Kp_z * error_z + Ki_z * (error_z + last_error_z) + Kd_z * (error_z - last_error_z);
 
+			error_x = abs(goal.x - presentPos.x);
 			if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
 				// Ｘ軸方向の目的地への距離
-				error_x = abs(goal.x - presentPos.x);
 				u_x = Kp_x * error_x + Ki_x * (error_x + last_error_x) + Kd_x * (error_x - last_error_x);
 				if (u_x > 1) u_x = 1;
 			} else u_x = 1;
@@ -323,9 +323,11 @@ void Tank::gpsTraceSimple(const GPSPosition& goal, double speed, Direction_of_Tr
 			error_d = sqrt(pow(dx_d,2) + pow(dz_d,2)); // presentPosとgoalの距離
 			error_vertialdir = (a * presentPos.z - presentPos.x + c) / sqrt_ac; // presentPosと直線の距離
 			
-			u_d = Kp_d * error_d + Ki_d * (error_d + last_error_d) + Kd_d * (error_d - last_error_d);
+			if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) {
+				u_d = Kp_d * error_d + Ki_d * (error_d + last_error_d) + Kd_d * (error_d - last_error_d);
+				if (u_d > 1) u_d = 1;
+			} else u_d = 1;
 			u_vertialdir = Kp_vertialdir * error_vertialdir + Ki_vertialdir * (error_vertialdir + last_error_vertialdir) + Kd_vertialdir * (error_vertialdir - last_error_vertialdir);
-			if (u_d > 1) u_d = 1;
 			if (directionPorM == Direction_of_Travel::z_plus) u_vertialdir = -1 * u_vertialdir;
 			leftSpeed = (speed + u_vertialdir) * u_d;
 			rightSpeed = (speed - u_vertialdir) * u_d;

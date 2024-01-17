@@ -61,8 +61,10 @@ public:
 		} else return rightEncoderValue;
 	}
 	
+	/* 今思ったけど、コレ色々都合が悪いからあんまり使わない方がいいね */
 	void setPosition(double left, double right, double leftSpeed, double rightSpeed, unit unit = unit::degrees, bool ifcout = false, bool ChangeSpeed = true);
 
+	/* #論外 */
 	void setVelocity(double leftSpeed, double rightSpeed) { // 引数はdouble
 		if (abs(leftSpeed) > maxVelocity) { cout << "exceed max velocity on left motor" << endl; return; }
 		if (abs(rightSpeed) > maxVelocity) { cout << "exceed max velocity on right motor" << endl; return; }
@@ -98,7 +100,7 @@ public:
 	void setDireciton(double direction, double maxspeed /*最大速度*/, const unit unit = unit::degrees);
 
 	/* Ｘ軸方向、Y軸方向にGPSトレースする 位置はあらかたあっている前提で過度な修正はできない。 */
-	void gpsTraceSimple(const GPSPosition& goal, double speed /*rad/s固定*/ , Direction_of_Travel direction, const StopMode stopmode = StopMode::BRAKE); // ロボットはすでに進行方向を向いていることを前提とする
+	void gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 1000, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
 
 	static double pd_cm_to_rad(double cm) { // cmをラジアンに変換
 		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)

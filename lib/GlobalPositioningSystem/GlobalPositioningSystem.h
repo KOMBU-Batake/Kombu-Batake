@@ -46,9 +46,25 @@ public:
 	}
 
 	GPSPosition moveTiles(int x, int z) {
-		GPSPosition gpsPosition = getPosition();
-		gpsPosition.x += x * 12;
-		gpsPosition.z += z * 12;
-		return gpsPosition;
+		last_expectedPos = expectedPos;
+		expectedPos.x += x * 12;
+		expectedPos.z += z * 12;
+		return expectedPos;
+	}
+
+	GPSPosition startPos , expectedPos , last_expectedPos;
+
+	bool comparePositions(bool ifchange = false) {
+		GPSPosition currentPos = getPosition();
+		double dis = sqrt(pow(currentPos.x - expectedPos.x, 2) + pow(currentPos.z - expectedPos.z, 2));
+		if (dis > 2) {
+			if (ifchange) expectedPos = currentPos;
+			return false;
+		}
+		return true;
+	}
+
+	void recoedStartPosition() {
+		startPos = last_expectedPos = expectedPos = getPosition();
 	}
 };

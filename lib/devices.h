@@ -70,6 +70,7 @@ void enableDevices() {
 	colorCam->enable(timeStep);
 	leftCam->enable(timeStep);
 	rightCam->enable(timeStep);
-	gpsXZ->enable(timeStep);
 	IMU->enable(timeStep);
+	gpsXZ->enable(timeStep);
+	gps.recoedStartPosition();
 }
