@@ -10,10 +10,11 @@
 #include <webots/GPS.hpp>
 #include <webots/InertialUnit.hpp>
 
-#include "lib/ColorSensor/ColorSensor.h"
-#include "lib/IMU/IMU.h"
-#include "lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "lib/ToF/ToF.h"
+#include "../lib/ColorSensor/ColorSensor.h"
+#include "../lib/IMU/IMU.h"
+#include "../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
+#include "../lib/ToF/ToF.h"
+#include "../lib/Tank/Tank.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -24,7 +25,7 @@ using namespace std;
 Robot* robot = new Robot();
 
 // タイムステップの取得
-int timeStep = (int)robot->getBasicTimeStep();
+int timeStep = (int)robot->getBasicTimeStep(); // =16
 
 /* もぉたぁ */
 Motor* leftMotor = robot->getMotor("leftWheel motor");
@@ -58,6 +59,7 @@ ColorSensor colorsensor(colorCam);
 GyroZ gyro;
 GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
+Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);
@@ -68,6 +70,7 @@ void enableDevices() {
 	colorCam->enable(timeStep);
 	leftCam->enable(timeStep);
 	rightCam->enable(timeStep);
-	gpsXZ->enable(timeStep);
 	IMU->enable(timeStep);
+	gpsXZ->enable(timeStep);
+	gps.recoedStartPosition();
 }
