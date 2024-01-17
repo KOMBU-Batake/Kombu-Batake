@@ -72,5 +72,4 @@ void enableDevices() {
 	rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
-	gps.recoedStartPosition();
 }

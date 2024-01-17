@@ -17,9 +17,13 @@ typedef struct {
 	double z;
 } GPSPosition;
 
+//extern GPSPosition startPos, expectedPos, last_expectedPos;
+
 class GlobalPositioningSystem
 {
 public:
+	GPSPosition startPos, expectedPos, last_expectedPos;
+
 	/* ’PˆÊ‚Ícm */ 
 	GPSPosition getPosition() {
 		const double* gpsValues = gpsXZ->getValues();
@@ -52,8 +56,6 @@ public:
 		return expectedPos;
 	}
 
-	GPSPosition startPos , expectedPos , last_expectedPos;
-
 	bool comparePositions(bool ifchange = false) {
 		GPSPosition currentPos = getPosition();
 		double dis = sqrt(pow(currentPos.x - expectedPos.x, 2) + pow(currentPos.z - expectedPos.z, 2));
@@ -65,6 +67,9 @@ public:
 	}
 
 	void recoedStartPosition() {
-		startPos = last_expectedPos = expectedPos = getPosition();
+		startPos = getPosition();
+		expectedPos = startPos;
+		last_expectedPos = startPos;
+		return;
 	}
 };

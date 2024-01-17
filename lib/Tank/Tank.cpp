@@ -180,19 +180,22 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 
 void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmode, int timeout_ms, Direction_of_Travel direction)
 {
+	cout << "goal: " << goal.x << ", " << goal.z << endl;
+	double endtime = robot->getTime() + timeout_ms / 1000.0;
 	speed = abs(speed);
 	if (speed > maxVelocity) speed = maxVelocity;
 	// 現在地を取得
 	GPSPosition presentPos = gps.getPosition(), presentPosRAW;
+	cout << "presentPos: " << presentPos.x << ", " << presentPos.z << endl;
 	double dz = goal.z - presentPos.z;
 	double dx = goal.x - presentPos.x;
 	double angle_to_goal = pd_rad_to_degrees( atan2(dz, dx) ); // 目的地への偏角
-	//cout << "angle_to_goal: " << angle_to_goal << endl;
+	cout << "angle_to_goal: " << angle_to_goal << endl;
 	// 現在の角度を取得
 	double presentAngle = gyro.getGyro();
 	double angle_to_O = pd_angle(angle_to_goal);
+	cout << "angle_to_0: " << angle_to_O << endl;
 	if (abs(angle_to_O - presentAngle) > 10) { // 目的地への角度と現在の角度が10度以上ずれていたら 補正する
-		cout << "angle_to_0: " << angle_to_O << endl;
 		setDireciton(angle_to_O, speed);
 	}
 	// 方向の修正
@@ -253,7 +256,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_x = error_x;
 			last_error_z = error_z;
-			if (abs(error_z) < 0.05 || robot->step(timeStep) == -1) break;
+			if (abs(error_z) < 0.05 || robot->step(timeStep) == -1/* || robot->getTime() >= endtime*/) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
@@ -294,7 +297,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_x = error_x;
 			last_error_z = error_z;
-			if (abs(error_x) < 0.05 || robot->step(timeStep) == -1) break;
+			if (abs(error_x) < 0.05 || robot->step(timeStep) == -1/* || robot->getTime() >= endtime*/) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
@@ -339,7 +342,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_d = error_d;
 			last_error_vertialdir = error_vertialdir;
-		} while (abs(dz_d) > 0.05 && abs(dx_d) > 0.05 && robot->step(timeStep) != -1);
+		} while (abs(dz_d) > 0.05 && abs(dx_d) > 0.05 && robot->step(timeStep) != -1/* && robot->getTime() <= endtime*/);
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
 }
