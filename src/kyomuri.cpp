@@ -30,8 +30,15 @@ int main(int argc, char **argv) {
     //tank.gpsTrace(pos1, 3, Direction_of_Travel::diagonal);
     //GPSPosition pos2 = gps.moveTiles(-1, -2);
     //tank.gpsTrace(pos2, 3, Direction_of_Travel::diagonal);
-    cout << robot->getTime() << endl;
-    //while (robot->step(timeStep) != -1);
+    const float* rangeImage = centralLidar->getRangeImage(); // Step 4: Retrieve the range image
+    for (int i = 0; i < 512; i++) {
+
+      // Print the first 10 values of the range image.
+      // The range image stores the distances from left to right, from first to last layer
+      //cout << i << "; " << rangeImage[i]*100 << ", " << rangeImage[i+512] * 100 << ", " << rangeImage[i + 512*2] * 100 << ", " << rangeImage[i + 512*3] * 100 << endl;/
+      cout << rangeImage[i + 512 * 2] * 100 << endl;
+    }
+    while (robot->step(timeStep) != -1);
   };
 
   delete robot;

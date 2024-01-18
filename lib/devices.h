@@ -15,6 +15,7 @@
 #include "../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
+#include "../lib/easyLiDAR/easyLiDAR.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -60,6 +61,7 @@ GyroZ gyro;
 GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
+LiDAR lidar;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);
