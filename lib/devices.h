@@ -36,7 +36,7 @@ PositionSensor* leftEncoder = leftMotor->getPositionSensor();
 PositionSensor* rightEncoder = rightMotor->getPositionSensor();
 
 /* ‚ç‚¢‚¾‚Ÿ */
-Lidar* lidar = robot->getLidar("lidar");
+Lidar* centralLidar = robot->getLidar("lidar");
 
 /* ‚Å‚¡‚·‚½‚ñ‚·‚¹‚ñ‚³‚Ÿ */
 DistanceSensor* leftToFSensor = robot->getDistanceSensor("leftToF");
@@ -64,7 +64,7 @@ Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 void enableDevices() {
 	leftEncoder->enable(timeStep);
 	rightEncoder->enable(timeStep);
-	lidar->enable(timeStep);
+	centralLidar->enable(timeStep);
 	leftToFSensor->enable(timeStep);
 	rightToFSensor->enable(timeStep);
 	colorCam->enable(timeStep);
@@ -72,5 +72,6 @@ void enableDevices() {
 	rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
+	robot->step(timeStep);
 	gps.recoedStartPosition();
 }
