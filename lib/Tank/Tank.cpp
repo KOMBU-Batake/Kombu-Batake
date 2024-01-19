@@ -178,6 +178,7 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 	robot->step(160);
 }
 
+// サイクロマティック複雑度53の力!!
 void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmode, int timeout_ms, Direction_of_Travel direction)
 {
 	speed = abs(speed);
@@ -249,7 +250,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 			if (rightSpeed < (-1* maxVelocity)) rightSpeed = -1 * maxVelocity;
 			leftMotor->setVelocity(leftSpeed);
 			rightMotor->setVelocity(rightSpeed);
-			cout << "error_z: " << error_z << ", u_z: " << u_z << ", error_x: " << error_x << ", u_x: " << u_x << endl;
+			//cout << "error_z: " << error_z << ", u_z: " << u_z << ", error_x: " << error_x << ", u_x: " << u_x << endl;
 
 			last_error_x = error_x;
 			last_error_z = error_z;
@@ -290,7 +291,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 			if (rightSpeed < (-1 * maxVelocity)) rightSpeed = -1 * maxVelocity;
 			leftMotor->setVelocity(leftSpeed);
 			rightMotor->setVelocity(rightSpeed);
-			cout << "error_x: " << error_x << ", u_x: " << u_x << ", error_z: " << error_z << ", u_z: " << u_z << endl;
+			//cout << "error_x: " << error_x << ", u_x: " << u_x << ", error_z: " << error_z << ", u_z: " << u_z << endl;
 
 			last_error_x = error_x;
 			last_error_z = error_z;
@@ -335,7 +336,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 			if (rightSpeed > maxVelocity) rightSpeed = maxVelocity;
 			leftMotor->setVelocity(leftSpeed);
 			rightMotor->setVelocity(rightSpeed);
-			cout << "error_d: " << error_d << ", u_d: " << u_d << ", error_vertialdir: " << error_vertialdir << ", u_vertialdir: " << u_vertialdir << endl;
+			//cout << "error_d: " << error_d << ", u_d: " << u_d << ", error_vertialdir: " << error_vertialdir << ", u_vertialdir: " << u_vertialdir << endl;
 
 			last_error_d = error_d;
 			last_error_vertialdir = error_vertialdir;

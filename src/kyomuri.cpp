@@ -20,25 +20,42 @@ int main(int argc, char **argv) {
 
   cout << "start" << endl;
 
-  while (robot->step(timeStep) != -1) {
-    //GPSPosition pos0 = gps.moveTiles(0, 2);
-    //tank.gpsTrace(pos0, 4, Direction_of_Travel::z,StopMode::COAST);
-    //cout << "a" << endl;
-    //GPSPosition pos = gps.moveTiles(0, 1);
-    //tank.gpsTrace(pos, 3, Direction_of_Travel::z);
-    //GPSPosition pos1 = gps.moveTiles(2, 0);
-    //tank.gpsTrace(pos1, 3, Direction_of_Travel::diagonal);
-    //GPSPosition pos2 = gps.moveTiles(-1, -2);
-    //tank.gpsTrace(pos2, 3, Direction_of_Travel::diagonal);
-    const float* rangeImage = centralLidar->getRangeImage(); // Step 4: Retrieve the range image
-    for (int i = 0; i < 512; i++) {
+  lidar.uodateLiDAR();
+  cout << "front-left; " << lidar.getDistance(LiDAR_degree::FRONT_LEFT) << endl;
+  cout << "front-right; " << lidar.getDistance(LiDAR_degree::FRONT_RIGHT) << endl;
+  cout << "--------" << endl;
+  cout << "front" << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
+  cout << "back" << (int)lidar.isWall(LiDAR_degree::BACK) << endl;
+  cout << "left" << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
+  cout << "right" << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
+  cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
+  cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
+  cout << "--------" << endl;
+  tank.setDireciton(270, 3);
+  lidar.uodateLiDAR();
+  cout << "front-left; " << lidar.getDistance(LiDAR_degree::FRONT_LEFT) << endl;
+  cout << "front-right; " << lidar.getDistance(LiDAR_degree::FRONT_RIGHT) << endl;
+  cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
+  cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
+  cout << "--------" << endl;
 
-      // Print the first 10 values of the range image.
-      // The range image stores the distances from left to right, from first to last layer
-      //cout << i << "; " << rangeImage[i]*100 << ", " << rangeImage[i+512] * 100 << ", " << rangeImage[i + 512*2] * 100 << ", " << rangeImage[i + 512*3] * 100 << endl;/
-      cout << rangeImage[i + 512 * 2] * 100 << endl;
-    }
-    while (robot->step(timeStep) != -1);
+  tank.gpsTrace(gps.moveTiles(0, -1), 3);
+  lidar.uodateLiDAR();
+  cout << "front; " << lidar.getDistance(LiDAR_degree::FRONT) << endl;
+  cout << "back; " << lidar.getDistance(LiDAR_degree::BACK) << endl;
+  cout << "left; " << lidar.getDistance(LiDAR_degree::LEFT) << endl;
+  cout << "right; " << lidar.getDistance(LiDAR_degree::RIGHT) << endl;
+  cout << "--------" << endl;
+
+  cout << "front; " << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
+  cout << "back; " << (int)lidar.isWall(LiDAR_degree::BACK) << endl;
+  cout << "left; " << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
+  cout << "right; " << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
+  cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
+  cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
+
+  while (robot->step(timeStep) != -1) {
+
   };
 
   delete robot;
