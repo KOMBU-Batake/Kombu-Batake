@@ -30,16 +30,16 @@ int main(int argc, char **argv) {
   cout << "right" << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
   cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
   cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
-  cout << "--------" << endl;
+  cout << "========" << endl;
   tank.setDireciton(270, 3);
   lidar.uodateLiDAR();
   cout << "front-left; " << lidar.getDistance(LiDAR_degree::FRONT_LEFT) << endl;
   cout << "front-right; " << lidar.getDistance(LiDAR_degree::FRONT_RIGHT) << endl;
   cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
   cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
-  cout << "--------" << endl;
+  cout << "========" << endl;
 
-  tank.gpsTrace(gps.moveTiles(0, -1), 3);
+  tank.gpsTrace(gps.moveTiles(-1, 0), 3);
   lidar.uodateLiDAR();
   cout << "front; " << lidar.getDistance(LiDAR_degree::FRONT) << endl;
   cout << "back; " << lidar.getDistance(LiDAR_degree::BACK) << endl;
