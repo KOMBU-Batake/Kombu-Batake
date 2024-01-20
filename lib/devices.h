@@ -15,6 +15,7 @@
 #include "../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
+#include "../lib/easyLiDAR/easyLiDAR.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -36,7 +37,7 @@ PositionSensor* leftEncoder = leftMotor->getPositionSensor();
 PositionSensor* rightEncoder = rightMotor->getPositionSensor();
 
 /* らいだぁ */
-Lidar* lidar = robot->getLidar("lidar");
+Lidar* centralLidar = robot->getLidar("lidar");
 
 /* でぃすたんすせんさぁ */
 DistanceSensor* leftToFSensor = robot->getDistanceSensor("leftToF");
@@ -60,11 +61,12 @@ GyroZ gyro;
 GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
+LiDAR lidar;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);
 	rightEncoder->enable(timeStep);
-	lidar->enable(timeStep);
+	centralLidar->enable(timeStep);
 	leftToFSensor->enable(timeStep);
 	rightToFSensor->enable(timeStep);
 	colorCam->enable(timeStep);
@@ -72,5 +74,6 @@ void enableDevices() {
 	rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
+	robot->step(timeStep);
 	gps.recoedStartPosition();
 }

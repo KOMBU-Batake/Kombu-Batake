@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{B2AA53B0-6416-4406-8FF5-6D43BBA8B305}</ProjectGuid>
-    <RootNamespace>Kyomuri</RootNamespace>
+    <RootNamespace>kyomuri</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -154,6 +154,7 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp" />
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp" />
+    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
     <ClCompile Include="lib\Tank\Tank.cpp" />
@@ -163,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />
     <ClInclude Include="lib\devices.h" />
+    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h" />
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h" />
     <ClInclude Include="lib\IMU\IMU.h" />
     <ClInclude Include="lib\Tank\Tank.h" />

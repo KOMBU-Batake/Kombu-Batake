@@ -2,103 +2,106 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Accelerometer.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Altimeter.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Brake.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Camera.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Compass.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Connector.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Device.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Display.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\DistanceSensor.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Emitter.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Field.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\GPS.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Gyro.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\InertialUnit.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Joystick.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Keyboard.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\LED.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Lidar.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\LightSensor.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Motion.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Motor.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Mouse.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Node.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Pen.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\PositionSensor.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Radar.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\RangeFinder.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Receiver.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Robot.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Skin.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Speaker.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp">
-      <Filter>lib\default</Filter>
+      <Filter>default</Filter>
+    </ClCompile>
+    <ClCompile Include="src\kyomuri.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp">
       <Filter>lib\ColorSensor</Filter>
@@ -106,63 +109,60 @@
     <ClCompile Include="lib\IMU\IMU.cpp">
       <Filter>lib\IMU</Filter>
     </ClCompile>
-    <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
-      <Filter>lib\GPS</Filter>
-    </ClCompile>
     <ClCompile Include="lib\ToF\ToF.cpp">
       <Filter>lib\ToF</Filter>
     </ClCompile>
     <ClCompile Include="lib\Tank\Tank.cpp">
       <Filter>lib\Tank</Filter>
     </ClCompile>
-    <ClCompile Include="src\kyomuri.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
+      <Filter>lib\GlobalPositioningSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="default">
+      <UniqueIdentifier>{6f503358-dc5b-4072-b107-24df5ba2b3b6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="lib">
-      <UniqueIdentifier>{f6f3a280-a204-4eaf-bd11-713dcb6d8c78}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\default">
-      <UniqueIdentifier>{dfadc680-f1a2-48ec-8460-6307191ca2a9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\ColorSensor">
-      <UniqueIdentifier>{316d3a26-b4f6-4026-b8dc-5d3a07dd9d30}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\IMU">
-      <UniqueIdentifier>{c7429dd7-95e5-432f-b89b-bb02d82fdc17}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\GPS">
-      <UniqueIdentifier>{ae7ccf37-5dd4-40b8-90aa-bfcea3538379}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\ToF">
-      <UniqueIdentifier>{3b8d7e79-fcb7-44e3-acd9-f8e78092bbcd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\Tank">
-      <UniqueIdentifier>{75d83116-cd3d-411e-982a-aefb284ac225}</UniqueIdentifier>
+      <UniqueIdentifier>{a0bb6c6b-4d52-424b-b283-c2e64a6eb3a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
-      <UniqueIdentifier>{6be83a4b-09b7-4f1b-b1e5-7cb87177426a}</UniqueIdentifier>
+      <UniqueIdentifier>{ec5623e7-3894-44ac-a352-71b21c842788}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\ColorSensor">
+      <UniqueIdentifier>{67031d20-4f43-48aa-9d0d-0a8ca3c55c88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\IMU">
+      <UniqueIdentifier>{612c68f7-7828-4e06-98f2-63767d2fdf22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\ToF">
+      <UniqueIdentifier>{16130f83-11a8-483c-8323-73a9821339db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\Tank">
+      <UniqueIdentifier>{5b59789f-60d5-4f9d-928b-53aeee8d5fc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\GlobalPositioningSystem">
+      <UniqueIdentifier>{42b8fd6b-4d29-40e8-817f-f794c364084e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\devices.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
       <Filter>lib\ColorSensor</Filter>
     </ClInclude>
+    <ClInclude Include="lib\devices.h">
+      <Filter>lib</Filter>
+    </ClInclude>
     <ClInclude Include="lib\IMU\IMU.h">
       <Filter>lib\IMU</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
-      <Filter>lib\GPS</Filter>
     </ClInclude>
     <ClInclude Include="lib\ToF\ToF.h">
       <Filter>lib\ToF</Filter>
     </ClInclude>
     <ClInclude Include="lib\Tank\Tank.h">
       <Filter>lib\Tank</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
+      <Filter>lib\GlobalPositioningSystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

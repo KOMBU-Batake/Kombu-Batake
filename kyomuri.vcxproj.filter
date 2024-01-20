@@ -18,7 +18,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Kyomuri.cpp">
+    <ClCompile Include="kyomuri.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Accelerometer.cpp">
