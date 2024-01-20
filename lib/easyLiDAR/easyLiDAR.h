@@ -94,6 +94,10 @@ public:
 		}
 	}
 
+	uint8_t convertCMtoTILE(float& distanceCM) {
+		return (uint8_t)round((distanceCM - 5)/12);
+	}
+
 private:
 	const float* rangeImage;
 
