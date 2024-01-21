@@ -1,9 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+#include <algorithm>
 #include <webots/Robot.hpp>
 #include <webots/Lidar.hpp>
 #include "../IMU/IMU.h"
+#include "../Tank/Tank.h"
 
 /* #easyなわけないだろ */
 
@@ -27,9 +30,9 @@ enum class LiDAR_degree {
 };
 
 typedef struct {
-	float degree;
-	float diff;
-	float direction;
+	float degree; // 目標の角度
+	float diff; // 前後の範囲
+	float distance; // これより大きければ壁ナシと判断
 }directionInfo;
 
 enum class DetailsofWall {
@@ -37,14 +40,15 @@ enum class DetailsofWall {
 	WALL,       // 1
 	leftWALL,   // 2
 	rightWALL,  // 3
-	maybeWALL,  // 4
-	maybeNOWALL,// 5
+	cneterWALL, // 4
+	maybeWALL,  // 5
+	maybeNOWALL,// 6
 };
 
 class LiDAR {
 public:
 	/* 値の更新 */
-	void uodateLiDAR() {
+	void updateLiDAR() {
 		rangeImage = centralLidar->getRangeImage();
 	}
 
@@ -69,27 +73,86 @@ public:
 		else {
 			directionInfo disinfo = deg_options(direction, degree); // 全部相対角に変換
 
-			float leftDistance, rightDistance;
+			bool over360 = false, less0 = false;
+			vector<float> distance_list;
+			vector<int> degree_list;
 			float leftDeg  = disinfo.degree - disinfo.diff; 
 			float rightDeg = disinfo.degree + disinfo.diff;
-			if (leftDeg < 0) leftDeg += 360;
-			if (rightDeg > 360) rightDeg -= 360;
-			rightDistance = getDistance(LiDAR_degree::RELATIVE, rightDeg);
-			leftDistance = getDistance(LiDAR_degree::RELATIVE, leftDeg);
-
-			if (direction == LiDAR_degree::FRONT_LEFT || direction == LiDAR_degree::FRONT_RIGHT) {
-				if (rightDistance < disinfo.direction || leftDistance < disinfo.direction) return DetailsofWall::maybeWALL;
-				else return DetailsofWall::maybeNOWALL;
+			if (leftDeg < 0) {
+				less0 = true;
+				leftDeg += 360;
 			}
-			else {
-				if (rightDistance < disinfo.direction) {
-					if (leftDistance < disinfo.direction) return DetailsofWall::WALL;
-					else return DetailsofWall::rightWALL;
+			if (rightDeg >= 360) { // この=には意味がある 360はconvert360to512にかけると0に変換されるからそのフラグを予め立てる
+				over360 = true;
+				rightDeg -= 360;
+			}
+			int leftDeg512 = convert360to512(leftDeg);
+			int rightDeg512 = convert360to512(rightDeg);
+			int centerDeg512 = convert360to512(disinfo.degree);
+			cout << "center; " << centerDeg512 << ", left: " << leftDeg512 << ", right: " << rightDeg512 << endl;
+
+			// 範囲のデータを取得
+			if (!less0 && !over360) { // どちらのフラグも立っていない
+				cout << "no flag" << endl;
+				distance_list.resize(rightDeg512 - leftDeg512 + 1); // left->rightの順に入っていく
+				degree_list.resize(rightDeg512 - leftDeg512 + 1);
+				for (int i = 0; i <= (rightDeg512 - leftDeg512); i++) {
+					distance_list[i] = rangeImage[i + leftDeg512 + 1024] * 100;
+					degree_list[i] = centerDeg512 - (i + leftDeg512);
+					cout << i + leftDeg512 << ", " << distance_list[i] << endl;
 				}
-				else if (leftDistance < disinfo.direction) {
+			}
+			else { // フラグが立った ToDo: 本当はdegree_listの値をdisindo.degreeに合わせなきゃいけないんだけどFRONT以外でここを踏むことはないはずだからほってる
+				cout << "flag" << endl;
+				int dn = 511 - leftDeg512;
+				distance_list.resize(dn + rightDeg512 + 2);
+				degree_list.resize(dn + rightDeg512 + 2);
+				for (int i = leftDeg512; i <= 511; i++) {
+					distance_list[i-leftDeg512] = rangeImage[i + 1024] * 100;
+					degree_list[i - leftDeg512] = i;
+					cout << i << ", " << distance_list[i-leftDeg512] << endl;
+				}
+				for (int i = 0; i <= rightDeg512; i++) {
+					distance_list[i + dn + 1] = rangeImage[i + 1024] * 100;
+					degree_list[i + dn + 1] = i;
+					cout << i << ", " << distance_list[i + dn + 1] << endl;
+				}
+			}
+			cout << "****************" << endl;
+			if (direction == LiDAR_degree::FRONT_LEFT || direction == LiDAR_degree::FRONT_RIGHT) {
+				for (int i = 0; i < distance_list.size(); i++) {
+					cout << abs(distance_list[i] * sin(pd_degrees_to_rad((centerDeg512 - degree_list[i]) * 45 / 64))) << ", " << disinfo.distance << ", " << ((centerDeg512 - degree_list[i]) * 45 / 64) << endl;
+					if (abs( distance_list[i] * sin(pd_degrees_to_rad((centerDeg512 - degree_list[i]) * 45 / 64)) ) < disinfo.distance) {
+						return DetailsofWall::maybeWALL; // 1つでも反応したら壁あり
+					}
+				}
+				return DetailsofWall::maybeNOWALL;
+			}
+			else 
+			{
+				vector<bool> wall_list(distance_list.size(),false); // falseで初期化
+				for (int i = 0; i < distance_list.size(); i++) {
+					if (abs(distance_list[i] * cos(pd_degrees_to_rad(degree_list[i] * 45 / 64))) < disinfo.distance) { // 各要素について壁かどうか判断
+						wall_list[i] = true;
+					}
+					//cout << abs(distance_list[i] * cos(pd_degrees_to_rad(degree_list[i] * 45 / 64))) << ", " << disinfo.distance << endl;
+				}
+
+				if (all_of(wall_list.begin(), wall_list.end(), [](bool i){ return i; })) { // 全て壁
+					return DetailsofWall::WALL;
+				}
+				else if (none_of(wall_list.begin(), wall_list.end(), [](bool i) { return i; })) { // 全て壁じゃない
+					return DetailsofWall::noWALL;
+				}
+				else if (wall_list[0]) { // 左側に壁
 					return DetailsofWall::leftWALL;
 				}
-				else return DetailsofWall::noWALL;
+				else if (wall_list[wall_list.size() - 1]) { // 右側に壁
+					return DetailsofWall::rightWALL;
+				}
+				else { // 中央に壁 というか、それ以外の意
+					return DetailsofWall::cneterWALL;
+				}
 			}
 		}
 	}
@@ -99,7 +162,14 @@ public:
 	}
 
 private:
-	const float* rangeImage;
+	const float* rangeImage = 0;
+
+	directionInfo LEFT = { 270, 22.5, (float)6.7 };
+	directionInfo RIGHT = { 90, 22.5, (float)6.7 };
+	directionInfo BACK = { 180, 22.5, (float)6.7 };
+	directionInfo FRONT = { 0, 22.5, (float)6.7 };
+	directionInfo FRONT_LEFT = { (float)(270 + 63.435), 3.5, 6.5 };
+	directionInfo FRONT_RIGHT = { (float)(90 - 63.435), 3.5, 6.5 };
 
 	void convertABSLOUTEtoRELATIVE(float& angle) { // 絶対角を相対角に変換
 		//double g_angle = 360 - gyro.getGyro();
@@ -135,10 +205,14 @@ private:
 		return { -1,-1,-1 }; // 知るか
 	}
 
-	directionInfo LEFT = { 270, 22.5, (float)6.7 };
-	directionInfo RIGHT = { 90, 22.5, (float)6.7 };
-	directionInfo BACK = { 180, 22.5, (float)6.7 };
-	directionInfo FRONT = { 0, 22.5, (float)6.7 };
-	directionInfo FRONT_LEFT = { (float)(270 + 63.435), 3.5, (float)13.416 };
-	directionInfo FRONT_RIGHT = { (float)(90 - 63.435), 3.5, (float)13.416 };
+	int convert360to512(float degree){
+		degree = degree * 512 / 360;
+		degree = round(degree);
+		if (degree == 512) degree = 0; // 512番の値は存在しない(0と等しい)
+		return (int)degree;
+	}
+
+	static double pd_degrees_to_rad(double degrees) {
+		return degrees * 3.1415926535 / 180;
+	}
 };

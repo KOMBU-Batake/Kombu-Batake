@@ -118,6 +118,12 @@
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
       <Filter>lib\GlobalPositioningSystem</Filter>
     </ClCompile>
+    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp">
+      <Filter>lib\LiADR</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DFS\DFS.cpp">
+      <Filter>src\DFS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -144,6 +150,12 @@
     <Filter Include="lib\GlobalPositioningSystem">
       <UniqueIdentifier>{42b8fd6b-4d29-40e8-817f-f794c364084e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\DFS">
+      <UniqueIdentifier>{343aeae6-7bb2-45be-bcc7-0b1ad55c2e4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\LiADR">
+      <UniqueIdentifier>{c2734b17-7193-4b78-9913-65678f444660}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
@@ -163,6 +175,12 @@
     </ClInclude>
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
       <Filter>lib\GlobalPositioningSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h">
+      <Filter>lib\LiADR</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DFS\DFS.h">
+      <Filter>src\DFS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
