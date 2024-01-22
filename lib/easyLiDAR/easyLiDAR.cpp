@@ -16,7 +16,7 @@ DetailsofWall LiDAR::isWall(LiDAR_degree direction, float degree) {
 		int leftDeg512 = disinfo.leftDeg512;
 		int rightDeg512 = disinfo.rightDeg512;
 		int centerDeg512 = disinfo.centerDeg512;
-		cout << "center; " << centerDeg512 << ", left: " << leftDeg512 << ", right: " << rightDeg512 << endl;
+		//cout << "center; " << centerDeg512 << ", left: " << leftDeg512 << ", right: " << rightDeg512 << endl;
 
 		// 範囲のデータを取得
 		if (!disinfo.flag0to360) { // どちらのフラグも立っていない

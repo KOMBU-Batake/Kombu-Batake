@@ -25,6 +25,11 @@ enum class LiDAR_degree {
 	FRONT,
 	BACK,
 
+	LEFT_HALF,
+	RIGHT_HALF,
+	FRONT_HALF,
+	BACK_HALF,
+
 	FRONT_RIGHT,
 	FRONT_LEFT,
 };
@@ -108,6 +113,12 @@ private:
 	directionInfo RIGHT = directionInfo(90, 22.5, (float)6.7);
 	directionInfo BACK = directionInfo(180, 22.5, (float)6.7);
 	directionInfo FRONT = directionInfo(0, 22.5, (float)6.7);
+
+	directionInfo LEFT_HALF = directionInfo(270, 14, (float)12.5);
+	directionInfo RIGHT_HALF = directionInfo(90, 14, (float)12.5);
+	directionInfo BACK_HALF = directionInfo(180, 14, (float)12.5);
+	directionInfo FRONT_HALF = directionInfo(0, 14, (float)12.5);
+
 	directionInfo FRONT_LEFT = directionInfo((float)(270 + 63.435), 3.5, 6.5);
 	directionInfo FRONT_RIGHT = directionInfo((float)(90 - 63.435), 3.5, 6.5 );
 
@@ -141,6 +152,18 @@ private:
 		}
 		else if (deg_option == LiDAR_degree::FRONT_RIGHT) {
 			return FRONT_RIGHT;
+		}
+		else if (deg_option == LiDAR_degree::LEFT_HALF) {
+			return LEFT_HALF;
+		}
+		else if (deg_option == LiDAR_degree::RIGHT_HALF) {
+			return RIGHT_HALF;
+		}
+		else if (deg_option == LiDAR_degree::BACK_HALF) {
+			return BACK_HALF;
+		}
+		else if (deg_option == LiDAR_degree::FRONT_HALF) {
+			return FRONT_HALF;
 		}
 		return { -1,-1,-1 }; // ’m‚é‚©
 	}
