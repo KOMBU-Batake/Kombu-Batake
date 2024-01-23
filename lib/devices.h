@@ -16,6 +16,7 @@
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
 #include "../lib/easyLiDAR/easyLiDAR.h"
+#include "../src/Map/Map.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -62,6 +63,7 @@ GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 LiDAR lidar;
+Map mapper;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);

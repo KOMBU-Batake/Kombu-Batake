@@ -124,6 +124,9 @@
     <ClCompile Include="src\DFS\DFS.cpp">
       <Filter>src\DFS</Filter>
     </ClCompile>
+    <ClCompile Include="src\Map\Map.cpp">
+      <Filter>src\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -156,6 +159,12 @@
     <Filter Include="lib\LiADR">
       <UniqueIdentifier>{c2734b17-7193-4b78-9913-65678f444660}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{467b1549-6725-46ab-8f01-51ee4f46eafd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Map">
+      <UniqueIdentifier>{ec66fd6a-7715-45b8-8bdd-b0ea5e23c5ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
@@ -182,5 +191,13 @@
     <ClInclude Include="src\DFS\DFS.h">
       <Filter>src\DFS</Filter>
     </ClInclude>
+    <ClInclude Include="src\Map\Map.h">
+      <Filter>src\Map</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Docs\map.md">
+      <Filter>Docs</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -73,7 +73,7 @@ public:
 		rightDeg512 = convert360to512(rightDeg);
 		centerDeg512 = convert360to512(deg);
 	}
-
+private:
 	int convert360to512(float degree) {
 		degree = degree * 512 / 360;
 		degree = round(degree);
