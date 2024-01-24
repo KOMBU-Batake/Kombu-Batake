@@ -19,14 +19,20 @@ int main(int argc, char **argv) {
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
 
   cout << "start" << endl;
-  cout << mapper.map_A.size() << endl;
-  cout << mapper.map_A[0].size() << endl;
-  mapper.addNorth();
-  cout << mapper.map_A.size() << endl;
-  cout << mapper.map_A[0].size() << endl;
-  mapper.addWest();
-  cout << mapper.map_A.size() << endl;
-  cout << mapper.map_A[0].size() << endl;
+  mapper.printMap();
+  cout << "----------------" << endl;
+  mapper.addEast(2);
+  mapper.printMap();
+  cout << "----------------" << endl;
+  mapper.addWest(2);
+  mapper.printMap();
+  cout << "----------------" << endl;
+  mapper.addSouth(2);
+  mapper.printMap();
+  cout << "----------------" << endl;
+  mapper.addNorth(2);
+  mapper.printMap();
+  cout << "----------------" << endl;
 
   //lidar.updateLiDAR();
   //cout << "front; " << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;

@@ -74,39 +74,47 @@ public:
 		map_A[add_L.z - 1][add_L.x + 1] = tile;
 		map_A[add_L.z + 1][add_L.x - 1] = tile;
 		map_A[add_L.z + 1][add_L.x + 1] = tile;
+
+		map_A[add_L.z - 1][add_L.x] = "1";
+		map_A[add_L.z + 1][add_L.x] = "1";
+		map_A[add_L.z][add_L.x - 1] = "1";
+		map_A[add_L.z][add_L.x + 1] = "1";
+		map_A[add_L.z][add_L.x] = "1";
 	}
 
-	void addNorth() { // 上に追加
-		// map_Aの下に1行追加
-		map_A.push_back(vector<string>(map_A.size(), "-"));
-		// map_Aの要素を下に1つずらす
-		rotate(map_A.begin(), map_A.begin() + 1, map_A.end());
+	void addNorth(int i = 1) { // 上に追加
+		// map_Aの下に4i行追加
+		cout << "map_A.size() = " << map_A.size() << endl;
+		map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
+		// map_Aの要素を下に4iずつずらす
+		rotate(map_A.rbegin(), map_A.rbegin() + 4 * i, map_A.rend());
 		startTile_A.z++;
 		currentTile_A.z++;
 	}
 
-	void addSouth() { // 下に追加
+	void addSouth(int i) { // 下に追加
 		// map_Aの下に1行追加
-		map_A.push_back(vector<string>(map_A.size(), "-"));
+		cout << "map_A.size() = " << map_A.size() << endl;
+		map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
 	}
 
-	void addWest() { // 左に追加
+	void addWest(int j = 1) { // 左に追加
 		// 既存の行に新しい列を追加
 		for (int i = 0; i < map_A.size(); ++i) {
-			map_A[i].push_back("-");
+			map_A[i].resize(map_A[i].size() + 4 * j, "-");
 		}
-		// 全体の要素を右に1つずらす
+		// 全体の要素を左に1つずらす
 		for (int i = 0; i < map_A.size(); ++i) {
-			rotate(map_A[i].begin(), map_A[i].begin() + 1, map_A[i].end());
+			rotate(map_A[i].rbegin(), map_A[i].rbegin() + 4 * j, map_A[i].rend());
 		}
 		startTile_A.x++;
 		currentTile_A.x++;
 	}
 
-	void addEast() { // 右に追加
+	void addEast(int j = 1) { // 右に追加
 		// 既存の行に新しい列を追加
 		for (int i = 0; i < map_A.size(); ++i) {
-			map_A[i].push_back("-");
+			map_A[i].resize(map_A[i].size() + 4 * j, "-");
 		}
 	}
 
@@ -116,6 +124,15 @@ public:
 
 	string getVictimName(VictimState state) {
 		return VictimStateMap[state];
+	}
+
+	void printMap() {
+		for (int i = 0; i < map_A.size(); ++i) {
+			for (int j = 0; j < map_A[i].size(); ++j) {
+				cout << map_A[i][j] << " ";
+			}
+			cout << endl;
+		}
 	}
 private: // ************************************************************************************
 	/* なんだコレ */
@@ -135,12 +152,12 @@ private: // ********************************************************************
 
 	/* タイル座標からリストのタイル中心の座標に変換 */
 	MapAddress convertAtoListPoint(const MapAddress& addr_A) {
-		return { addr_A.x * 4 + 3, addr_A.z * 4 + 3 };
+		return { addr_A.x * 4 + 2, addr_A.z * 4 + 2 };
 	}
 
 	/* リストのタイル中心の座標からタイル座標に変換 */
 	MapAddress convertListPointtoA(const MapAddress& addr_list) {
-		return { (addr_list.x - 3) / 4, (addr_list.z - 3) / 4 };
+		return { (addr_list.x - 2) / 4, (addr_list.z - 2) / 4 };
 	}
 
 	/* 相対座標からリストのタイル中心の座標に変換 */
