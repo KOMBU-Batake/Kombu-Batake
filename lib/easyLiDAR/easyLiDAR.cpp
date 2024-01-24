@@ -1,11 +1,11 @@
 #include "easyLiDAR.h"
 
-DetailsofWall LiDAR::isWall(LiDAR_degree direction, float degree) {
+WallState LiDAR::isWall(LiDAR_degree direction, float degree) {
 
 	if (direction == LiDAR_degree::RELATIVE || direction == LiDAR_degree::ABSOLUTE) { // そのまんま指定先の値で判断する。
 		float distance = getDistance(direction, degree);
-		if (distance > 6) return DetailsofWall::noWALL;
-		else return DetailsofWall::WALL;
+		if (distance > 6) return WallState::noWALL;
+		else return WallState::WALL;
 	}
 	else {
 		directionInfo disinfo = deg_options(direction, degree); // 全部相対角に変換
@@ -50,10 +50,10 @@ DetailsofWall LiDAR::isWall(LiDAR_degree direction, float degree) {
 			for (int i = 0; i < distance_list.size(); i++) {
 				//cout << abs(distance_list[i] * sin(pd_degrees_to_rad((centerDeg512 - degree_list[i]) * 45 / 64))) << ", " << disinfo.distance << ", " << ((centerDeg512 - degree_list[i]) * 45 / 64) << endl;
 				if (abs(distance_list[i] * sin(pd_degrees_to_rad((centerDeg512 - degree_list[i]) * 45 / 64))) < disinfo.distance) {
-					return DetailsofWall::maybeWALL; // 1つでも反応したら壁あり
+					return WallState::maybeWALL; // 1つでも反応したら壁あり
 				}
 			}
-			return DetailsofWall::maybeNOWALL;
+			return WallState::maybeNOWALL;
 		}
 		else
 		{
@@ -66,19 +66,19 @@ DetailsofWall LiDAR::isWall(LiDAR_degree direction, float degree) {
 			}
 
 			if (all_of(wall_list.begin(), wall_list.end(), [](bool i) { return i; })) { // 全て壁
-				return DetailsofWall::WALL;
+				return WallState::WALL;
 			}
 			else if (none_of(wall_list.begin(), wall_list.end(), [](bool i) { return i; })) { // 全て壁じゃない
-				return DetailsofWall::noWALL;
+				return WallState::noWALL;
 			}
 			else if (wall_list[0]) { // 左側に壁
-				return DetailsofWall::leftWALL;
+				return WallState::leftWALL;
 			}
 			else if (wall_list[wall_list.size() - 1]) { // 右側に壁
-				return DetailsofWall::rightWALL;
+				return WallState::rightWALL;
 			}
 			else { // 中央に壁 というか、それ以外の意
-				return DetailsofWall::cneterWALL;
+				return WallState::cneterWALL;
 			}
 		}
 	}

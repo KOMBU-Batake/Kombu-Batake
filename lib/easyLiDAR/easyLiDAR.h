@@ -34,7 +34,7 @@ enum class LiDAR_degree {
 	FRONT_LEFT,
 };
 
-enum class DetailsofWall {
+enum class WallState {
 	noWALL,     // 0
 	WALL,       // 1
 	leftWALL,   // 2
@@ -42,6 +42,14 @@ enum class DetailsofWall {
 	cneterWALL, // 4
 	maybeWALL,  // 5
 	maybeNOWALL,// 6
+	unknown,    // 7
+};
+
+enum class relativeDirection{
+	FRONT,
+	RIGHT,
+	BACK,
+	LEFT,
 };
 
 class directionInfo {
@@ -100,7 +108,7 @@ public:
 		return rangeImage[num + 1024] * 100;
 	}
 
-	DetailsofWall isWall(LiDAR_degree direction, float degree = 0);
+	WallState isWall(LiDAR_degree direction, float degree = 0);
 
 	uint8_t convertCMtoTILE(float& distanceCM) {
 		return (uint8_t)round((distanceCM - 5)/12);

@@ -5,10 +5,12 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-//#include <deque>
 #include <map>
+#include <unordered_set>
 
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
+#include "../../lib/easyLiDAR/easyLiDAR.h"
+#include "../../lib/IMU/IMU.h"
 
 /* 提出用のマップを作りつつ、DFSにも利用するよ
  * 
@@ -65,58 +67,90 @@ public:
 	// ↑↑命と同じくらい大事↑↑
 
 	Map() {
-		markTileAs({ 0, 0 }, getTileName(TileState::START));
+		markTileAs({ 0, 0 }, TileState::START);
 	}
 
-	void markTileAs(MapAddress add_R, string tile) {
+	TileState getTileState(MapAddress addr_R);
+
+	void markTileAs(MapAddress add_R, TileState tilestate) {
+		if (add_R.x < left_top_R.x) {
+			addWest(left_top_R.x - add_R.x);
+		} else if (add_R.x > right_bottom_R.x) {
+			addEast(add_R.x - right_bottom_R.x);
+		}
+		if (add_R.z < left_top_R.z) {
+			addNorth(left_top_R.z - add_R.z);
+		}else if (add_R.z > right_bottom_R.z) {
+			addSouth(add_R.z - right_bottom_R.z);
+		}
 		MapAddress add_L = convertRtoListPoint(add_R);
+		string tile = getTileName(tilestate);
 		map_A[add_L.z - 1][add_L.x - 1] = tile;
 		map_A[add_L.z - 1][add_L.x + 1] = tile;
 		map_A[add_L.z + 1][add_L.x - 1] = tile;
 		map_A[add_L.z + 1][add_L.x + 1] = tile;
 
-		map_A[add_L.z - 1][add_L.x] = "1";
-		map_A[add_L.z + 1][add_L.x] = "1";
-		map_A[add_L.z][add_L.x - 1] = "1";
-		map_A[add_L.z][add_L.x + 1] = "1";
-		map_A[add_L.z][add_L.x] = "1";
+		map_A[add_L.z - 1][add_L.x] = "0";
+		map_A[add_L.z + 1][add_L.x] = "0";
+		map_A[add_L.z][add_L.x - 1] = "0";
+		map_A[add_L.z][add_L.x + 1] = "0";
+		map_A[add_L.z][add_L.x] = "0";
 	}
 
-	void addNorth(int i = 1) { // 上に追加
-		// map_Aの下に4i行追加
-		cout << "map_A.size() = " << map_A.size() << endl;
-		map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
-		// map_Aの要素を下に4iずつずらす
-		rotate(map_A.rbegin(), map_A.rbegin() + 4 * i, map_A.rend());
-		startTile_A.z++;
-		currentTile_A.z++;
+	/* 何に使うねんこれ怒 */
+	void markAroundTile(TileState front, TileState back, TileState left, TileState right, float angle = -1);
+
+	void markAroundWall(WallState wall) {
 	}
 
-	void addSouth(int i) { // 下に追加
-		// map_Aの下に1行追加
-		cout << "map_A.size() = " << map_A.size() << endl;
-		map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
+	void markNorthWall(MapAddress add_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(add_R);
 	}
 
-	void addWest(int j = 1) { // 左に追加
-		// 既存の行に新しい列を追加
-		for (int i = 0; i < map_A.size(); ++i) {
-			map_A[i].resize(map_A[i].size() + 4 * j, "-");
+	void markSouthWall(MapAddress add_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(add_R);
+	}
+
+	void markWestWall(MapAddress add_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(add_R);
+	}
+
+	void markEastWall(MapAddress add_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(add_R);
+	}
+
+	// 角の処理
+	void edge(MapAddress add_R, MapAddress add_L = {-1,-1}) {
+		if (add_L.x == -1) add_L = convertRtoListPoint(add_R);
+		// 左上
+		if (WallAndVictim.find(map_A[add_L.z - 1][add_L.x - 2]) != WallAndVictim.end() ||
+			  WallAndVictim.find(map_A[add_L.z - 2][add_L.x - 1]) != WallAndVictim.end()) {
+			map_A[add_L.z - 2][add_L.x - 2] = "1";
 		}
-		// 全体の要素を左に1つずらす
-		for (int i = 0; i < map_A.size(); ++i) {
-			rotate(map_A[i].rbegin(), map_A[i].rbegin() + 4 * j, map_A[i].rend());
+		// 右上
+		if (WallAndVictim.find(map_A[add_L.z - 1][add_L.x + 2]) != WallAndVictim.end() ||
+			  WallAndVictim.find(map_A[add_L.z - 2][add_L.x + 1]) != WallAndVictim.end()) {
+			map_A[add_L.z - 2][add_L.x + 2] = "1";
 		}
-		startTile_A.x++;
-		currentTile_A.x++;
+		// 左下
+		if (WallAndVictim.find(map_A[add_L.z + 1][add_L.x - 2]) != WallAndVictim.end() ||
+			  WallAndVictim.find(map_A[add_L.z + 2][add_L.x - 1]) != WallAndVictim.end()) {
+			map_A[add_L.z + 2][add_L.x - 2] = "1";
+		}
+		// 右下
+		if (WallAndVictim.find(map_A[add_L.z + 1][add_L.x + 2]) != WallAndVictim.end() ||
+			  WallAndVictim.find(map_A[add_L.z + 2][add_L.x + 1]) != WallAndVictim.end()) {
+			map_A[add_L.z + 2][add_L.x + 2] = "1";
+		}
 	}
 
-	void addEast(int j = 1) { // 右に追加
-		// 既存の行に新しい列を追加
-		for (int i = 0; i < map_A.size(); ++i) {
-			map_A[i].resize(map_A[i].size() + 4 * j, "-");
-		}
-	}
+	void addNorth(const int i = 1);
+
+	void addSouth(const int i = 1);
+
+	void addWest(const int j = 1);
+
+	void addEast(const int j = 1);
 
 	string getTileName(TileState state) {
 		return TileStateMap[state];
@@ -126,14 +160,12 @@ public:
 		return VictimStateMap[state];
 	}
 
-	void printMap() {
-		for (int i = 0; i < map_A.size(); ++i) {
-			for (int j = 0; j < map_A[i].size(); ++j) {
-				cout << map_A[i][j] << " ";
-			}
-			cout << endl;
-		}
-	}
+	void printMap();
+
+	void replaceLineTo0();
+
+	MapAddress startTile_A = { 0, 0 }, startTile_R = { 0, 0 };
+	MapAddress currentTile_A = { 0, 0 }, currentTile_R = { 0, 0 };
 private: // ************************************************************************************
 	/* なんだコレ */
 	int convertTiletoList(int tile) {
@@ -170,8 +202,7 @@ private: // ********************************************************************
 		return convertAtoR(convertListPointtoA(addr_list));
 	}
 
-	MapAddress startTile_A = { 0, 0 }, startTile_R = { 0, 0 };
-	MapAddress currentTile_A = { 0, 0 }, currentTile_R = { 0, 0 };
+	MapAddress left_top_R = { 0, 0 }, right_bottom_R = { 0, 0 };
 
 	std::map<TileState, string> TileStateMap = {
 		{TileState::OTHER, "0"},
@@ -196,4 +227,6 @@ private: // ********************************************************************
 		{VictimState::Corrosive, "C"},
 		{VictimState::OrganicPeroxide, "O"},
 	};
+
+	std::unordered_set<std::string> WallAndVictim = { "1","H","S","U","F","P","C","O" };
 };
