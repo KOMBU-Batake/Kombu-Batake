@@ -72,6 +72,22 @@ public:
 
 	TileState getTileState(MapAddress addr_R);
 
+	void updatePostion(int dx_R, int dz_R) {
+		currentTile_R.x += dx_R;
+		currentTile_R.z += dz_R;
+		// マップ範囲外の場合は拡張
+		if (currentTile_R.x < left_top_R.x) {
+			addWest(left_top_R.x - currentTile_R.x);
+		} else if (currentTile_R.x > right_bottom_R.x) {
+			addEast(currentTile_R.x - right_bottom_R.x);
+		}
+		if (currentTile_R.z < left_top_R.z) {
+			addNorth(left_top_R.z - currentTile_R.z);
+		} else if (currentTile_R.z > right_bottom_R.z) {
+			addSouth(currentTile_R.z - right_bottom_R.z);
+		}
+	}
+
 	void markTileAs(MapAddress add_R, TileState tilestate) {
 		if (add_R.x < left_top_R.x) {
 			addWest(left_top_R.x - add_R.x);
@@ -100,49 +116,49 @@ public:
 	/* 何に使うねんこれ怒 */
 	void markAroundTile(TileState front, TileState back, TileState left, TileState right, float angle = -1);
 
-	void markAroundWall(WallState wall) {
+	// とりあえずタイルを跨ぐような曲線とかの変な壁はないものとして考える。 ToDo: LiDARでユークリッド距離の比較を実装する
+	void markAroundWall(WallState NorthWall, WallState SouthWall, WallState WestWall, WallState EastWall) {
+		markNorthWall(currentTile_R, NorthWall);
+		markSouthWall(currentTile_R, SouthWall);
+		markWestWall(currentTile_R, WestWall);
+		markEastWall(currentTile_R, EastWall);
+		edge(currentTile_R);
 	}
 
-	void markNorthWall(MapAddress add_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(add_R);
+	void markNorthWall(MapAddress addr_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(addr_R);
+		vector<string> tmp = WallStateMap[wall];
+		map_A[add_L.z - 2][add_L.x - 1] = tmp[0];
+		map_A[add_L.z - 2][add_L.x]     = tmp[1];
+		map_A[add_L.z - 2][add_L.x + 1] = tmp[2];
 	}
 
-	void markSouthWall(MapAddress add_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(add_R);
+	void markSouthWall(MapAddress addr_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(addr_R);
+		vector<string> tmp = WallStateMap[wall];
+		map_A[add_L.z + 2][add_L.x + 1] = tmp[0];
+		map_A[add_L.z + 2][add_L.x]     = tmp[1];
+		map_A[add_L.z + 2][add_L.x - 1] = tmp[2];
 	}
 
-	void markWestWall(MapAddress add_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(add_R);
+	void markWestWall(MapAddress addr_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(addr_R);
+		vector<string> tmp = WallStateMap[wall];
+		map_A[add_L.z + 1][add_L.x - 2] = tmp[0];
+		map_A[add_L.z    ][add_L.x - 2] = tmp[1];
+		map_A[add_L.z - 1][add_L.x - 2] = tmp[2];
 	}
 
-	void markEastWall(MapAddress add_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(add_R);
+	void markEastWall(MapAddress addr_R, WallState wall) {
+		MapAddress add_L = convertRtoListPoint(addr_R);
+		vector<string> tmp = WallStateMap[wall];
+		map_A[add_L.z - 1][add_L.x + 2] = tmp[0];
+		map_A[add_L.z    ][add_L.x + 2] = tmp[1];
+		map_A[add_L.z + 1][add_L.x + 2] = tmp[2];
 	}
 
 	// 角の処理
-	void edge(MapAddress add_R, MapAddress add_L = {-1,-1}) {
-		if (add_L.x == -1) add_L = convertRtoListPoint(add_R);
-		// 左上
-		if (WallAndVictim.find(map_A[add_L.z - 1][add_L.x - 2]) != WallAndVictim.end() ||
-			  WallAndVictim.find(map_A[add_L.z - 2][add_L.x - 1]) != WallAndVictim.end()) {
-			map_A[add_L.z - 2][add_L.x - 2] = "1";
-		}
-		// 右上
-		if (WallAndVictim.find(map_A[add_L.z - 1][add_L.x + 2]) != WallAndVictim.end() ||
-			  WallAndVictim.find(map_A[add_L.z - 2][add_L.x + 1]) != WallAndVictim.end()) {
-			map_A[add_L.z - 2][add_L.x + 2] = "1";
-		}
-		// 左下
-		if (WallAndVictim.find(map_A[add_L.z + 1][add_L.x - 2]) != WallAndVictim.end() ||
-			  WallAndVictim.find(map_A[add_L.z + 2][add_L.x - 1]) != WallAndVictim.end()) {
-			map_A[add_L.z + 2][add_L.x - 2] = "1";
-		}
-		// 右下
-		if (WallAndVictim.find(map_A[add_L.z + 1][add_L.x + 2]) != WallAndVictim.end() ||
-			  WallAndVictim.find(map_A[add_L.z + 2][add_L.x + 1]) != WallAndVictim.end()) {
-			map_A[add_L.z + 2][add_L.x + 2] = "1";
-		}
-	}
+	void edge(MapAddress add_R, MapAddress add_L = { -1,-1 });
 
 	void addNorth(const int i = 1);
 
@@ -202,8 +218,6 @@ private: // ********************************************************************
 		return convertAtoR(convertListPointtoA(addr_list));
 	}
 
-	MapAddress left_top_R = { 0, 0 }, right_bottom_R = { 0, 0 };
-
 	std::map<TileState, string> TileStateMap = {
 		{TileState::OTHER, "0"},
 		{TileState::WALL, "1"},
@@ -228,5 +242,15 @@ private: // ********************************************************************
 		{VictimState::OrganicPeroxide, "O"},
 	};
 
-	std::unordered_set<std::string> WallAndVictim = { "1","H","S","U","F","P","C","O" };
+	std::map<WallState, vector<string>> WallStateMap = {
+		{WallState::noWALL,{"0","0","0"}}, // left -> center -> right の順
+		{WallState::WALL,{"1","1","1"}},
+		{WallState::leftWALL,{"1","1","0"}},
+		{WallState::rightWALL,{"0","1","1"}},
+		{WallState::cneterWALL,{"0","1","0"}},
+		//{WallState::unknown,{"-","-","-"}},
+	};
+
+	std::unordered_set<string> WallAndVictim = { "1","H","S","U","F","P","C","O" };
+	MapAddress left_top_R = { 0, 0 }, right_bottom_R = { 0, 0 };
 };

@@ -34,7 +34,7 @@ enum class LiDAR_degree {
 	FRONT_LEFT,
 };
 
-enum class WallState {
+enum class WallState { // ‚±‚ê‚©‚çqí‚¶‚á‚È‚¢ƒŒƒxƒ‹‚Å‘‚¦‚é—\’è‚Í–¢’è
 	noWALL,     // 0
 	WALL,       // 1
 	leftWALL,   // 2

@@ -79,6 +79,30 @@ void Map::markAroundTile(TileState front, TileState back, TileState left, TileSt
 	else cout << "unreliable angle in makeAround4" << endl;
 }
 
+void Map::edge(MapAddress add_R, MapAddress add_L) {
+	if (add_L.x == -1) add_L = convertRtoListPoint(add_R);
+	// ¶ã
+	if (WallAndVictim.find(map_A[add_L.z - 1][add_L.x - 2]) != WallAndVictim.end() ||
+		WallAndVictim.find(map_A[add_L.z - 2][add_L.x - 1]) != WallAndVictim.end()) {
+		map_A[add_L.z - 2][add_L.x - 2] = "1";
+	} else if (map_A[add_L.z - 2][add_L.x - 2] == "-") map_A[add_L.z - 2][add_L.x - 2] = "0";
+	// ‰Eã
+	if (WallAndVictim.find(map_A[add_L.z - 1][add_L.x + 2]) != WallAndVictim.end() ||
+		WallAndVictim.find(map_A[add_L.z - 2][add_L.x + 1]) != WallAndVictim.end()) {
+		map_A[add_L.z - 2][add_L.x + 2] = "1";
+	} else if (map_A[add_L.z - 2][add_L.x + 2] == "-") map_A[add_L.z - 2][add_L.x + 2] = "0";
+	// ¶‰º
+	if (WallAndVictim.find(map_A[add_L.z + 1][add_L.x - 2]) != WallAndVictim.end() ||
+		WallAndVictim.find(map_A[add_L.z + 2][add_L.x - 1]) != WallAndVictim.end()) {
+		map_A[add_L.z + 2][add_L.x - 2] = "1";
+	} else if (map_A[add_L.z + 2][add_L.x - 2] == "-") map_A[add_L.z + 2][add_L.x - 2] = "0";
+	// ‰E‰º
+	if (WallAndVictim.find(map_A[add_L.z + 1][add_L.x + 2]) != WallAndVictim.end() ||
+		WallAndVictim.find(map_A[add_L.z + 2][add_L.x + 1]) != WallAndVictim.end()) {
+		map_A[add_L.z + 2][add_L.x + 2] = "1";
+	} else if (map_A[add_L.z + 2][add_L.x + 2] == "-") map_A[add_L.z + 2][add_L.x + 2] = "0";
+}
+
 void Map::replaceLineTo0() {
 	for (auto& row : map_A) {
 		std::replace(row.begin(), row.end(), "-", "0");

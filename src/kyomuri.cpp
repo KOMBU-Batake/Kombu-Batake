@@ -23,9 +23,13 @@ int main(int argc, char **argv) {
   mapper.map_A[4][3] = "S";
   mapper.printMap();
   cout << "----------------" << endl;
-  mapper.edge(mapper.currentTile_R);
+  mapper.markAroundWall(WallState::WALL, WallState::cneterWALL, WallState::rightWALL, WallState::leftWALL);
   mapper.printMap();
-
+  cout << "----------------" << endl;
+  mapper.updatePostion(0, -1);
+  mapper.markTileAs(mapper.currentTile_R, TileState::OTHER);
+  mapper.markAroundWall(WallState::noWALL, WallState::WALL, WallState::rightWALL, WallState::leftWALL);
+  mapper.printMap();
   //lidar.updateLiDAR();
   //cout << "front; " << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
   //cout << "left; " << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
