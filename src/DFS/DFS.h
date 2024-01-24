@@ -10,6 +10,7 @@
 #include "../../lib/ToF/ToF.h"
 #include "../../lib/Tank/Tank.h"
 #include "../../lib/easyLiDAR/easyLiDAR.h"
+#include "../Map/Map.h"
 
 using namespace webots;
 using namespace std;
@@ -21,6 +22,7 @@ extern GlobalPositioningSystem gps;
 extern ToFSensor leftToF, rightToF;
 extern Tank tank;
 extern LiDAR lidar;
+extern Map map;
 
 extern int timeStep;
 

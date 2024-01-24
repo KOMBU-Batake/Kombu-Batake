@@ -30,24 +30,19 @@ int main(int argc, char **argv) {
   mapper.markTileAs(mapper.currentTile_R, TileState::OTHER);
   mapper.markAroundWall(WallState::noWALL, WallState::WALL, WallState::rightWALL, WallState::leftWALL);
   mapper.printMap();
-  //lidar.updateLiDAR();
-  //cout << "front; " << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
-  //cout << "left; " << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
-  //cout << "left half; " << (int)lidar.isWall(LiDAR_degree::LEFT_HALF) << endl;
-  //cout << "right; " << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
-  //cout << "back; " << (int)lidar.isWall(LiDAR_degree::BACK) << endl;
-  //cout << "----------------" << endl;
-  //cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
-  //cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
-  //cout << "================" << endl;
-  //tank.setDireciton(90,3);
-  //lidar.updateLiDAR();
-  //cout << "front; " << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
-  //cout << "left; " << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
-  //cout << "right; " << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
-  //cout << "back; " << (int)lidar.isWall(LiDAR_degree::BACK) << endl;
-  //cout << "back half; " << (int)lidar.isWall(LiDAR_degree::BACK_HALF) << endl;
-  while (robot->step(timeStep) != -1);
+  cout << "----------------" << endl;
+  cout << mapper.startTile_A.x << "," << mapper.startTile_A.z << endl;
+  WallState front, back, right, left;
+  mapper.getAroundWallState(mapper.currentTile_R,front, back, right, left);
+  cout << "front:" << (int)front << endl;
+  cout << "back:" << (int)back << endl;
+  cout << "right:" << (int)right << endl;
+  cout << "left:" << (int)left << endl;
+
+  // 終了コマンド
+  char message = 'E';
+  emitter->send(&message, 1);
+  //while (robot->step(timeStep) != -1);
 
   delete robot;
   return 0; // ばいばい～

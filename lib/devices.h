@@ -9,6 +9,8 @@
 #include <webots/Lidar.hpp>
 #include <webots/GPS.hpp>
 #include <webots/InertialUnit.hpp>
+#include <webots/Receiver.hpp>
+#include <webots/Emitter.hpp>
 
 #include "../lib/ColorSensor/ColorSensor.h"
 #include "../lib/IMU/IMU.h"
@@ -57,6 +59,9 @@ GPS* gpsXZ = robot->getGPS("gps");
 /* ‚ ‚¢‚¦‚Þ‚ä‚£ */
 InertialUnit* IMU = robot->getInertialUnit("IMU");
 
+Emitter* emitter = robot->getEmitter("emitter");
+Receiver* receiver = robot->getReceiver("receiver");
+
 ColorSensor colorsensor(colorCam);
 GyroZ gyro;
 GlobalPositioningSystem gps;
@@ -76,6 +81,7 @@ void enableDevices() {
 	rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
-	robot->step(timeStep);
+	receiver->enable(timeStep);
+	robot->step(timeStep); // delay 16ms
 	gps.recoedStartPosition();
 }

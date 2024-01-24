@@ -47,7 +47,7 @@ enum class TileState {
 	AREA2to3 = 7,
 	AREA3to4 = 8,
 	AREA1to4 = 9,
-	UNKNOWN,
+	UNKNOWN, // = "-
 };
 
 enum class VictimState {
@@ -70,23 +70,8 @@ public:
 		markTileAs({ 0, 0 }, TileState::START);
 	}
 
-	TileState getTileState(MapAddress addr_R);
-
-	void updatePostion(int dx_R, int dz_R) {
-		currentTile_R.x += dx_R;
-		currentTile_R.z += dz_R;
-		// マップ範囲外の場合は拡張
-		if (currentTile_R.x < left_top_R.x) {
-			addWest(left_top_R.x - currentTile_R.x);
-		} else if (currentTile_R.x > right_bottom_R.x) {
-			addEast(currentTile_R.x - right_bottom_R.x);
-		}
-		if (currentTile_R.z < left_top_R.z) {
-			addNorth(left_top_R.z - currentTile_R.z);
-		} else if (currentTile_R.z > right_bottom_R.z) {
-			addSouth(currentTile_R.z - right_bottom_R.z);
-		}
-	}
+	// タイルの中心に到達したら初めに呼ぶ
+	void updatePostion(int dx_R, int dz_R);
 
 	void markTileAs(MapAddress add_R, TileState tilestate) {
 		if (add_R.x < left_top_R.x) {
@@ -100,7 +85,7 @@ public:
 			addSouth(add_R.z - right_bottom_R.z);
 		}
 		MapAddress add_L = convertRtoListPoint(add_R);
-		string tile = getTileName(tilestate);
+		string tile = TileStateMap[tilestate];
 		map_A[add_L.z - 1][add_L.x - 1] = tile;
 		map_A[add_L.z - 1][add_L.x + 1] = tile;
 		map_A[add_L.z + 1][add_L.x - 1] = tile;
@@ -116,68 +101,44 @@ public:
 	/* 何に使うねんこれ怒 */
 	void markAroundTile(TileState front, TileState back, TileState left, TileState right, float angle = -1);
 
+	TileState getTileState(MapAddress addr_R);
+
+	// 中の壁までは調べてない
+	void getAroundTileState(MapAddress addr_R, TileState& front, TileState& back, TileState& left, TileState& right, double angle = -1);
+
 	// とりあえずタイルを跨ぐような曲線とかの変な壁はないものとして考える。 ToDo: LiDARでユークリッド距離の比較を実装する
-	void markAroundWall(WallState NorthWall, WallState SouthWall, WallState WestWall, WallState EastWall) {
-		markNorthWall(currentTile_R, NorthWall);
-		markSouthWall(currentTile_R, SouthWall);
-		markWestWall(currentTile_R, WestWall);
-		markEastWall(currentTile_R, EastWall);
-		edge(currentTile_R);
-	}
+	void markAroundWall(WallState NorthWall, WallState SouthWall, WallState WestWall, WallState EastWall);
 
-	void markNorthWall(MapAddress addr_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(addr_R);
-		vector<string> tmp = WallStateMap[wall];
-		map_A[add_L.z - 2][add_L.x - 1] = tmp[0];
-		map_A[add_L.z - 2][add_L.x]     = tmp[1];
-		map_A[add_L.z - 2][add_L.x + 1] = tmp[2];
-	}
+	void markNorthWall(MapAddress addr_R, WallState wall);
 
-	void markSouthWall(MapAddress addr_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(addr_R);
-		vector<string> tmp = WallStateMap[wall];
-		map_A[add_L.z + 2][add_L.x + 1] = tmp[0];
-		map_A[add_L.z + 2][add_L.x]     = tmp[1];
-		map_A[add_L.z + 2][add_L.x - 1] = tmp[2];
-	}
+	void markSouthWall(MapAddress addr_R, WallState wall);
 
-	void markWestWall(MapAddress addr_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(addr_R);
-		vector<string> tmp = WallStateMap[wall];
-		map_A[add_L.z + 1][add_L.x - 2] = tmp[0];
-		map_A[add_L.z    ][add_L.x - 2] = tmp[1];
-		map_A[add_L.z - 1][add_L.x - 2] = tmp[2];
-	}
+	void markWestWall(MapAddress addr_R, WallState wall);
 
-	void markEastWall(MapAddress addr_R, WallState wall) {
-		MapAddress add_L = convertRtoListPoint(addr_R);
-		vector<string> tmp = WallStateMap[wall];
-		map_A[add_L.z - 1][add_L.x + 2] = tmp[0];
-		map_A[add_L.z    ][add_L.x + 2] = tmp[1];
-		map_A[add_L.z + 1][add_L.x + 2] = tmp[2];
-	}
+	void markEastWall(MapAddress addr_R, WallState wall);
+
+	// 壁の有無だけを調べる
+	void getAroundWallState(const MapAddress& addr_R, WallState& frontWall, WallState& backWall, WallState& leftWall, WallState& rightWall, double angle = -1);
 
 	// 角の処理
 	void edge(MapAddress add_R, MapAddress add_L = { -1,-1 });
 
+	// 北方向にタイルを追加
 	void addNorth(const int i = 1);
 
+	// 南方向にタイルを追加
 	void addSouth(const int i = 1);
 
+	// 西方向にタイルを追加
 	void addWest(const int j = 1);
 
+	// 東方向にタイルを追加
 	void addEast(const int j = 1);
 
-	string getTileName(TileState state) {
-		return TileStateMap[state];
-	}
-
-	string getVictimName(VictimState state) {
-		return VictimStateMap[state];
-	}
-
+	// マップ全体を表示する
 	void printMap();
 
+	// 最後に"-"を"0"に変更して少しでもポイントを稼ごうと足掻く
 	void replaceLineTo0();
 
 	MapAddress startTile_A = { 0, 0 }, startTile_R = { 0, 0 };
@@ -216,6 +177,22 @@ private: // ********************************************************************
 	/* リストのタイル中心の座標から相対座標に変換 */
 	MapAddress convertListPointtoR(const MapAddress& addr_list) {
 		return convertAtoR(convertListPointtoA(addr_list));
+	}
+
+	bool existTile_R(const MapAddress& addr_R) {
+		if (addr_R.x < left_top_R.x) {
+			return false;
+		}
+		else if (addr_R.x > right_bottom_R.x) {
+			return false;
+		}
+		if (addr_R.z < left_top_R.z) {
+			return false;
+		}
+		else if (addr_R.z > right_bottom_R.z) {
+			return false;
+		}
+		return true;
 	}
 
 	std::map<TileState, string> TileStateMap = {
