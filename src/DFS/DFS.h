@@ -26,4 +26,11 @@ extern Map map;
 
 extern int timeStep;
 
+typedef struct{
+	bool front;
+	bool back;
+	bool left;
+	bool right;
+} PotentialDirectionsOfTravel;
+
 void DepthFirstSearch();

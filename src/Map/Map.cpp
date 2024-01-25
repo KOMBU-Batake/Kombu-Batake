@@ -166,33 +166,34 @@ void Map::getAroundWallState(const MapAddress& addr_R, WallState& frontWall, Wal
 		angle = gyro.getGyro();
 	}
 	MapAddress add_L = convertRtoListPoint(addr_R);
-	frontWall = WallState::noWALL;
-	backWall = WallState::noWALL;
-	leftWall = WallState::noWALL;
-	rightWall = WallState::noWALL;
+	cout << add_L.x << " " << add_L.z << endl;
+ 	cout << map_A[add_L.z][add_L.x + 2] << endl;
+	cout << map_A[add_L.z][add_L.x - 2] << endl;
+	cout << map_A[add_L.z - 2][add_L.x] << endl;
+	cout << map_A[add_L.z + 2][add_L.x] << endl;
 	if (abs(angle - 90) < 5) {
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x + 2]) != WallAndVictim.end()) frontWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x - 2]) != WallAndVictim.end()) backWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z - 2][add_L.x]) != WallAndVictim.end()) leftWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z + 2][add_L.x]) != WallAndVictim.end()) rightWall = WallState::WALL;
+		frontWall = condition_getAroundWallState(add_L.x + 2, add_L.z);
+		backWall = condition_getAroundWallState( add_L.x - 2, add_L.z);
+		leftWall = condition_getAroundWallState( add_L.x, add_L.z - 2);
+		rightWall = condition_getAroundWallState(add_L.x, add_L.z + 2);
 	}
 	else if (abs(angle - 180) < 5) {
-		if (WallAndVictim.find(map_A[add_L.z - 2][add_L.x]) != WallAndVictim.end()) frontWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z + 2][add_L.x]) != WallAndVictim.end()) backWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x - 2]) != WallAndVictim.end()) leftWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x + 2]) != WallAndVictim.end()) rightWall = WallState::WALL;
+		frontWall = condition_getAroundWallState(add_L.x, add_L.z - 2);
+		backWall  = condition_getAroundWallState(add_L.x, add_L.z + 2);
+		leftWall  = condition_getAroundWallState(add_L.x - 2, add_L.z);
+		rightWall = condition_getAroundWallState(add_L.x + 2, add_L.z);
 	}
 	else if (abs(angle - 270) < 5) {
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x - 2]) != WallAndVictim.end()) frontWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x + 2]) != WallAndVictim.end()) backWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z + 2][add_L.x]) != WallAndVictim.end()) leftWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z - 2][add_L.x]) != WallAndVictim.end()) rightWall = WallState::WALL;
+		frontWall = condition_getAroundWallState(add_L.x - 2, add_L.z);
+		backWall  = condition_getAroundWallState(add_L.x + 2, add_L.z);
+		leftWall  = condition_getAroundWallState(add_L.x, add_L.z + 2);
+		rightWall = condition_getAroundWallState(add_L.x, add_L.z - 2);
 	}
 	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		if (WallAndVictim.find(map_A[add_L.z + 2][add_L.x]) != WallAndVictim.end()) frontWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z - 2][add_L.x]) != WallAndVictim.end()) backWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x + 2]) != WallAndVictim.end()) leftWall = WallState::WALL;
-		if (WallAndVictim.find(map_A[add_L.z][add_L.x - 2]) != WallAndVictim.end()) rightWall = WallState::WALL;
+		frontWall = condition_getAroundWallState(add_L.x, add_L.z + 2);
+		backWall  = condition_getAroundWallState(add_L.x, add_L.z - 2);
+		leftWall  = condition_getAroundWallState(add_L.x + 2, add_L.z);
+		rightWall = condition_getAroundWallState(add_L.x - 2, add_L.z);
 	}
 }
 

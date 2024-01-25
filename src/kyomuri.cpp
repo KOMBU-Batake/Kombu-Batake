@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   mapper.markAroundWall(WallState::noWALL, WallState::WALL, WallState::rightWALL, WallState::leftWALL);
   mapper.printMap();
   cout << "----------------" << endl;
-  cout << mapper.startTile_A.x << "," << mapper.startTile_A.z << endl;
+  cout << "currentTile_R:" << mapper.currentTile_R.x << "," << mapper.currentTile_R.z << endl;
   WallState front, back, right, left;
   mapper.getAroundWallState(mapper.currentTile_R,front, back, right, left);
   cout << "front:" << (int)front << endl;
@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
   cout << "right:" << (int)right << endl;
   cout << "left:" << (int)left << endl;
 
+  robot->step(timeStep * 1000);
   // 終了コマンド
   char message = 'E';
   emitter->send(&message, 1);

@@ -109,31 +109,23 @@ public:
 	// とりあえずタイルを跨ぐような曲線とかの変な壁はないものとして考える。 ToDo: LiDARでユークリッド距離の比較を実装する
 	void markAroundWall(WallState NorthWall, WallState SouthWall, WallState WestWall, WallState EastWall);
 
+	// 東西南北の壁をあてがう
 	void markNorthWall(MapAddress addr_R, WallState wall);
-
 	void markSouthWall(MapAddress addr_R, WallState wall);
-
 	void markWestWall(MapAddress addr_R, WallState wall);
-
 	void markEastWall(MapAddress addr_R, WallState wall);
 
-	// 壁の有無だけを調べる
+	// 壁の有無だけを調べる 具体的な種類は判別しない
 	void getAroundWallState(const MapAddress& addr_R, WallState& frontWall, WallState& backWall, WallState& leftWall, WallState& rightWall, double angle = -1);
 
 	// 角の処理
 	void edge(MapAddress add_R, MapAddress add_L = { -1,-1 });
 
-	// 北方向にタイルを追加
-	void addNorth(const int i = 1);
-
-	// 南方向にタイルを追加
-	void addSouth(const int i = 1);
-
-	// 西方向にタイルを追加
-	void addWest(const int j = 1);
-
-	// 東方向にタイルを追加
-	void addEast(const int j = 1);
+	
+	void addNorth(const int i = 1); // 北方向にタイルを追加
+	void addSouth(const int i = 1); // 南方向にタイルを追加
+	void addWest(const int j = 1); // 西方向にタイルを追加
+	void addEast(const int j = 1); // 東方向にタイルを追加
 
 	// マップ全体を表示する
 	void printMap();
@@ -193,6 +185,20 @@ private: // ********************************************************************
 			return false;
 		}
 		return true;
+	}
+
+	WallState condition_getAroundWallState(int x, int z) {
+		if (WallAndVictim.find(map_A[z][x]) != WallAndVictim.end()) 
+		{
+			return WallState::WALL;
+		} 
+		else if (map_A[z][x] == "-") 
+		{
+			return WallState::unknown;
+		}
+		else {
+			return WallState::noWALL;
+		}
 	}
 
 	std::map<TileState, string> TileStateMap = {
