@@ -127,6 +127,9 @@
     <ClCompile Include="src\Map\Map.cpp">
       <Filter>src\Map</Filter>
     </ClCompile>
+    <ClCompile Include="lib\myMath\myMath.cpp">
+      <Filter>lib\myMath</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -165,6 +168,9 @@
     <Filter Include="src\Map">
       <UniqueIdentifier>{ec66fd6a-7715-45b8-8bdd-b0ea5e23c5ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\myMath">
+      <UniqueIdentifier>{15177f5f-0901-4318-99d3-08b403578b38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
@@ -193,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="src\Map\Map.h">
       <Filter>src\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\myMath\myMath.h">
+      <Filter>lib\myMath</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

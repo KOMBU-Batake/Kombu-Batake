@@ -48,6 +48,7 @@ enum class TileState {
 	AREA3to4 = 8,
 	AREA1to4 = 9,
 	UNKNOWN, // = "-
+	visited, // LiDARのクラスでは使わない
 };
 
 enum class VictimState {
@@ -115,7 +116,7 @@ public:
 	void markWestWall(MapAddress addr_R, WallState wall);
 	void markEastWall(MapAddress addr_R, WallState wall);
 
-	// 壁の有無だけを調べる 具体的な種類は判別しない
+	// 壁の有無、未定義だけを調べる 具体的な種類は判別しない
 	void getAroundWallState(const MapAddress& addr_R, WallState& frontWall, WallState& backWall, WallState& leftWall, WallState& rightWall, double angle = -1);
 
 	// 角の処理

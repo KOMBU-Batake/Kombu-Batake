@@ -18,7 +18,9 @@
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
 #include "../lib/easyLiDAR/easyLiDAR.h"
+#include "../lib/myMath/myMath.h"
 #include "../src/Map/Map.h"
+#include "../src/DFS/DFS.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -69,6 +71,7 @@ ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 LiDAR lidar;
 Map mapper;
+MyMath myMath;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);

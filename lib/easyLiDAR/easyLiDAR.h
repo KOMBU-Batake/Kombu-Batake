@@ -42,7 +42,8 @@ enum class WallState { // これから尋常じゃないレベルで増える予定は未定
 	cneterWALL, // 4
 	maybeWALL,  // 5
 	maybeNOWALL,// 6
-	unknown,    // 7
+	unknown,    // 7 
+	visited, // LiDARのクラスでは使わない
 };
 
 enum class relativeDirection{

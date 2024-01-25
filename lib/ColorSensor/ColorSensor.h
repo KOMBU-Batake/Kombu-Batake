@@ -3,6 +3,9 @@
 #include <webots/Robot.hpp>
 #include <webots/Camera.hpp>
 #include <iostream>
+#include <algorithm>
+#include <map>
+#include "../../src/Map/Map.h"
 
 using namespace webots;
 using namespace std;
@@ -36,6 +39,8 @@ enum Colors {
 	CHECKPOINT,
 	BLUE,
 	PURPLE,
+	GREEN,
+	RED,
 	SWAMP,
 	OTHERS,
 };
@@ -102,9 +107,21 @@ public:
 		else if (isTheColor(swampRange, hsv)) {
 			return SWAMP;
 		}
-		else {
+		else if (isTheColor(greenRange, hsv)) {
+			return GREEN;
+		}
+		else if (isTheColor(redRange, hsv)) {
+			return RED;
+		}
+		else
+		{
 			return OTHERS;
 		}
+	}
+
+	TileState getTileColor() {
+		int col = getColor();
+		return tileColorMap[col];
 	}
 
 	ColorRGB RGB = { 0,0,0 };
@@ -114,6 +131,8 @@ private:
 	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // ãñóeåÎç∑ÇÕÇ∆ÇËÇ‹5 é¿å±Ç≈ÇÕ2ñ¢ñû
 	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };
 	ColorRange swampRange= { 40, 5, 53, 5, 197, 5 };
+	ColorRange greenRange = { 120, 5, 87, 5, 244, 5 };
+	ColorRange redRange = { 0, 5, 77, 5, 248, 5 };
 
 	bool isTheColor(const ColorRange& range, const ColorHSV& hsv) {
 		if (abs(hsv.hue - range.hue) <= range.hue_diff && abs(hsv.saturation - range.saturation) <= range.saturation_diff && abs(hsv.value - range.value) <= range.value_diff) {
@@ -123,5 +142,16 @@ private:
 			return false;
 		}
 	}
+
+	std::map<int, TileState> tileColorMap = {
+		{WHITE, TileState::OTHER},
+		{BLACK, TileState::HOLE},
+		{CHECKPOINT, TileState::CHECKPOINT},
+		{BLUE, TileState::AREA1to2},
+		{PURPLE, TileState::AREA2to3},
+		{GREEN,  TileState::AREA1to4},
+		{RED, TileState::AREA3to4},
+		{SWAMP, TileState::SWAMP},
+	};
 };
 

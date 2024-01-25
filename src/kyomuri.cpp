@@ -19,27 +19,31 @@ int main(int argc, char **argv) {
   // メインルウウウウゥゥゥゥゥゥプ
 
   cout << "start" << endl;
-  mapper.map_A[0][1] = "1";
-  mapper.map_A[4][3] = "S";
+  cout << myMath.sin.size() << endl;
+  cout << myMath.sin[512] << endl;
+  cout << myMath.cos.size() << endl;
+  cout << myMath.cos[512] << endl;
   mapper.printMap();
-  cout << "----------------" << endl;
-  mapper.markAroundWall(WallState::WALL, WallState::cneterWALL, WallState::rightWALL, WallState::leftWALL);
-  mapper.printMap();
-  cout << "----------------" << endl;
-  mapper.updatePostion(0, -1);
-  mapper.markTileAs(mapper.currentTile_R, TileState::OTHER);
-  mapper.markAroundWall(WallState::noWALL, WallState::WALL, WallState::rightWALL, WallState::leftWALL);
-  mapper.printMap();
-  cout << "----------------" << endl;
-  cout << "currentTile_R:" << mapper.currentTile_R.x << "," << mapper.currentTile_R.z << endl;
-  WallState front, back, right, left;
-  mapper.getAroundWallState(mapper.currentTile_R,front, back, right, left);
-  cout << "front:" << (int)front << endl;
-  cout << "back:" << (int)back << endl;
-  cout << "right:" << (int)right << endl;
-  cout << "left:" << (int)left << endl;
+  
+  tank.gpsTrace(gps.moveTiles(0,7),5);
+  tank.gpsTrace(gps.moveTiles(1, 0), 5);
+  tank.gpsTrace(gps.moveTiles(0, 1), 5);
+  tank.gpsTrace(gps.moveTiles(4, 0), 5);
+  tank.gpsTrace(gps.moveTiles(0, 1), 5);
+  tank.gpsTrace(gps.moveTiles(2, 0), 5);
+  tank.gpsTrace(gps.moveTiles(0, -2), 5);
+  tank.gpsTrace(gps.moveTiles(-1, 0), 5);
+  tank.gpsTrace(gps.moveTiles(0, -1), 5);
+  colorsensor.update();
+  ColorHSV hsv = colorsensor.getHSV();
+  cout << "H:" << hsv.hue << " S:" << hsv.saturation << " V:" << hsv.value << endl;
 
-  robot->step(timeStep * 1000);
+  // 深さ優先探索
+  //DFS();
+
+  // マップデータ提出
+
+  
   // 終了コマンド
   char message = 'E';
   emitter->send(&message, 1);

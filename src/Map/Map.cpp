@@ -166,11 +166,11 @@ void Map::getAroundWallState(const MapAddress& addr_R, WallState& frontWall, Wal
 		angle = gyro.getGyro();
 	}
 	MapAddress add_L = convertRtoListPoint(addr_R);
-	cout << add_L.x << " " << add_L.z << endl;
- 	cout << map_A[add_L.z][add_L.x + 2] << endl;
-	cout << map_A[add_L.z][add_L.x - 2] << endl;
-	cout << map_A[add_L.z - 2][add_L.x] << endl;
-	cout << map_A[add_L.z + 2][add_L.x] << endl;
+	//cout << add_L.x << " " << add_L.z << endl;
+ //	cout << map_A[add_L.z][add_L.x + 2] << endl;
+	//cout << map_A[add_L.z][add_L.x - 2] << endl;
+	//cout << map_A[add_L.z - 2][add_L.x] << endl;
+	//cout << map_A[add_L.z + 2][add_L.x] << endl;
 	if (abs(angle - 90) < 5) {
 		frontWall = condition_getAroundWallState(add_L.x + 2, add_L.z);
 		backWall = condition_getAroundWallState( add_L.x - 2, add_L.z);
