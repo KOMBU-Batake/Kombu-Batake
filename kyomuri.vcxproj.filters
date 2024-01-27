@@ -130,6 +130,9 @@
     <ClCompile Include="lib\myMath\myMath.cpp">
       <Filter>lib\myMath</Filter>
     </ClCompile>
+    <ClCompile Include="lib\PointCloudLiDAR\PointCloudLiDAR.cpp">
+      <Filter>lib\pcLiDAR</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -171,6 +174,9 @@
     <Filter Include="lib\myMath">
       <UniqueIdentifier>{15177f5f-0901-4318-99d3-08b403578b38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\pcLiDAR">
+      <UniqueIdentifier>{c9ed7cf7-03ce-42e9-a1cd-023b69664d82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
@@ -202,6 +208,9 @@
     </ClInclude>
     <ClInclude Include="lib\myMath\myMath.h">
       <Filter>lib\myMath</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h">
+      <Filter>lib\pcLiDAR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

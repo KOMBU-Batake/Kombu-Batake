@@ -19,30 +19,16 @@ int main(int argc, char **argv) {
   // メインルウウウウゥゥゥゥゥゥプ
 
   cout << "start" << endl;
-  cout << myMath.sin.size() << endl;
-  cout << myMath.sin[512] << endl;
-  cout << myMath.cos.size() << endl;
-  cout << myMath.cos[512] << endl;
-  mapper.printMap();
-  
-  tank.gpsTrace(gps.moveTiles(0,7),5);
-  tank.gpsTrace(gps.moveTiles(1, 0), 5);
-  tank.gpsTrace(gps.moveTiles(0, 1), 5);
-  tank.gpsTrace(gps.moveTiles(4, 0), 5);
-  tank.gpsTrace(gps.moveTiles(0, 1), 5);
-  tank.gpsTrace(gps.moveTiles(2, 0), 5);
-  tank.gpsTrace(gps.moveTiles(0, -2), 5);
-  tank.gpsTrace(gps.moveTiles(-1, 0), 5);
-  tank.gpsTrace(gps.moveTiles(0, -1), 5);
-  colorsensor.update();
-  ColorHSV hsv = colorsensor.getHSV();
-  cout << "H:" << hsv.hue << " S:" << hsv.saturation << " V:" << hsv.value << endl;
+  pcLiDAR.update();
+  for (int i = 0; i < 512; i++) {
+    cout << pcLiDAR.pointCloud[i].x << "," << pcLiDAR.pointCloud[i].z << endl;
+  }
 
   // 深さ優先探索
   //DFS();
 
   // マップデータ提出
-
+  robot->step(timeStep*1000);
   
   // 終了コマンド
   char message = 'E';
