@@ -13,9 +13,11 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/myMath/myMath.h"
 #include "../../lib/easyLiDAR/easyLiDAR.h"
+#include "../../lib/Tank/Tank.h"
 
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
+extern Tank tank;
 
 extern Robot* robot;
 extern Lidar* centralLidar;
@@ -127,6 +129,16 @@ public:
 	// LiDARの変換されたXZ平面上の点
 	vector<XZcoordinate> pointCloud = vector<XZcoordinate>(512, { 0,0 });
 
+	// 特別に作成したワールドの壁をモデリングする専用の関数
+	void modelSamplimg() {
+		tank.setDireciton(90,3);
+		for (int i = 2; i < 12; i++) {
+			move_update_display(i);
+		}
+		tank.gpsTrace(gps.moveTiles(-10, 0), 3);
+	}
+
+	void move_update_display(int j);
 private:
 	const float* rangeImage = 0;
 	MyMath myMath;
@@ -173,17 +185,17 @@ private:
 
 	// 角度補正
 	void fixPointCloudAngle(const float angle_G_A, const float& gyro_angle) {
-		cout << "angle goal absolute" << angle_G_A << ", gyro angle" << gyro_angle << endl;
+		//cout << "angle goal absolute" << angle_G_A << ", gyro angle" << gyro_angle << endl;
 		//int da = (int)round((angle_G_A - gyro_angle) * 512 / 360); // 偏角を求める 0~360 -> 0~512 四捨五入
 		float da = angle_G_A - gyro_angle;
 		da *= -1; // 時計回りに変換
-		cout << "da:" << da << endl;
+		//cout << "da:" << da << endl;
 		//if (da < 0) da += 512;
 		//if (da > 512) da -= 512;
 		// x=xcosθ−ysinθ
 		// y=ycosθ+xsinθ
 		da = da * (float)3.1415926535 / 180;
-		cout << "da:" << da << endl;
+		//cout << "da:" << da << endl;
 		if (da != 0 && da != 512) {
 			for (int i = 0; i < 512; i++) {
 				pointCloud[i].x = pointCloud[i].x * (float)cos(da) - pointCloud[i].z * (float)sin(da);
@@ -195,4 +207,8 @@ private:
 	double pd_degrees_to_rad(const double degrees) {
 		return degrees * 3.1415926535 / 180;
 	}
+
+	void displayAllfloatVector(vector<float>& vec);
+
+	void displayAllXZcoordinateVector(vector<XZcoordinate>& vec, int j);
 };

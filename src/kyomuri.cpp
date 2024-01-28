@@ -19,18 +19,17 @@ int main(int argc, char **argv) {
   // メインルウウウウゥゥゥゥゥゥプ
 
   cout << "start" << endl;
-  pcDetails model_1 = { LiDAR_degree::FRONT,TagDegree::leftLarge_rightLarge, TagMinDistance::one_point_five, {0,1,2} };
-  cout << model_1.model[0] << model_1.model[1] << model_1.model[2] << endl;
   /*pcLiDAR.update();
   for (int i = 0; i < 512; i++) {
     cout << pcLiDAR.pointCloud[i].x << "," << pcLiDAR.pointCloud[i].z << endl;
   }*/
+  pcLiDAR.modelSamplimg();
 
   // 深さ優先探索
   //DFS();
 
   // マップデータ提出
-  robot->step(timeStep*1000);
+  cout << "end" << endl;
   
   // 終了コマンド
   char message = 'E';
