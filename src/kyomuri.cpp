@@ -24,6 +24,12 @@ int main(int argc, char **argv) {
     cout << pcLiDAR.pointCloud[i].x << "," << pcLiDAR.pointCloud[i].z << endl;
   }*/
   pcLiDAR.modelSamplimg();
+  //tank.setDireciton(270,5);
+  //pcLiDAR.update(gps.expectedPos);
+  //pcLiDAR.identifyWall(LiDAR_degree::FRONT);
+  //pcLiDAR.identifyWall(LiDAR_degree::RIGHT);
+  //pcLiDAR.identifyWall(LiDAR_degree::LEFT);
+  //pcLiDAR.identifyWall(LiDAR_degree::BACK);
 
   // [‚³—Dæ’Tõ
   //DFS();
