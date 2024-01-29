@@ -1,8 +1,19 @@
 #include "PointCloudLiDAR.h"
 
-void PointCloudLiDAR::move_update_display(int j) {
+void PointCloudLiDAR::modelSamplimg() {
+	tank.setDireciton(90, 3);
+	move_update_display(gps.getPosition(), 1);
+	for (int i = 2; i < 12; i++) {
+		GPSPosition goalPos = gps.moveTiles(1, 0);
+		tank.gpsTrace(goalPos, 3);
+		move_update_display(goalPos,i);
+	}
+	tank.gpsTrace(gps.moveTiles(-10, 0), 3);
+	tank.setDireciton(90, 3);
+}
+
+void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j) {
 	cout << "==================================================" << endl;
-	tank.gpsTrace(gps.moveTiles(1, 0), 3);
 	//vector<float> model0(73);
 	//vector<float> model_LS(59);
 	//vector<float> model_SL(59);
@@ -11,7 +22,7 @@ void PointCloudLiDAR::move_update_display(int j) {
 	vector<XZcoordinate> model_LS_XZ(59);
 	vector<XZcoordinate> model_SL_XZ(59);
 	vector<XZcoordinate> model_SS_XZ(45);
-	update();
+	update(goalPos);
 	for (int i = 348; i <= 420; i++) {
 		//model0[i - 348] = rangeImage[i + 1024];
 		model0_XZ[i - 348].x = pointCloud[i].x;
@@ -36,15 +47,15 @@ void PointCloudLiDAR::move_update_display(int j) {
 void PointCloudLiDAR::displayAllfloatVector(vector<float>& vec) {
 	cout << "size;" << vec.size() << ", ";
 	for (int i = 0; i < vec.size(); i++) {
-		cout << vec[i] << ",";
+		cout << vec[i] << "F,";
 	}
 	cout << endl;
 }
 
 void PointCloudLiDAR::displayAllXZcoordinateVector(vector<XZcoordinate>& vec, int j) {
-	cout << j << "; size;" << vec.size() << ", ";
+	cout << j << ": size:" << vec.size() << "; ";
 	for (int i = 0; i < vec.size(); i++) {
-		cout << vec[i].x << ", ";
+		cout << vec[i].x << "F, ";
 	}
 	cout << endl;
 }
