@@ -8,6 +8,7 @@
 #include <thread>
 #include <mutex>
 #include "../lib/devices.h"
+//#include <opencv2/opencv.hpp>
 
 using namespace webots;
 using namespace std;
@@ -19,14 +20,14 @@ int main(int argc, char **argv) {
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
 
   cout << "start" << endl;
-  /*pcLiDAR.update();
-  for (int i = 0; i < 512; i++) {
-    cout << pcLiDAR.pointCloud[i].x << "," << pcLiDAR.pointCloud[i].z << endl;
-  }*/
+  //pcLiDAR.update();
+  //for (int i = 0; i < 512; i++) {
+  //  cout << pcLiDAR.pointCloud[i].x << "," << pcLiDAR.pointCloud[i].z << endl;
+  //}
   pcLiDAR.modelSamplimg();
-  //tank.setDireciton(270,5);
+  //tank.setDireciton(90,5);
   //pcLiDAR.update(gps.expectedPos);
-  //pcLiDAR.identifyWall(LiDAR_degree::FRONT);
+  //pcLiDAR.identifyWall(LiDAR_degree::LEFT);
   //pcLiDAR.identifyWall(LiDAR_degree::RIGHT);
   //pcLiDAR.identifyWall(LiDAR_degree::LEFT);
   //pcLiDAR.identifyWall(LiDAR_degree::BACK);

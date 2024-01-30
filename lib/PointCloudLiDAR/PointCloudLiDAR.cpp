@@ -13,7 +13,7 @@ void PointCloudLiDAR::modelSamplimg(recoedingMode mode) {
 }
 
 void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMode mode) {
-	cout << "==================================================" << endl;
+	//cout << "==================================================" << endl;
 	//vector<float> model0(73);
 	//vector<float> model_LS(59);
 	//vector<float> model_SL(59);
@@ -54,9 +54,6 @@ void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMo
 		}
 	}
 	model_left.insert(model_left.end(), model_right.begin(), model_right.end());
-	cout << "num: " << j << endl;
-	cout << "model size:" << model_left.size() << endl;
-	cout << "model_left.size():" << count_left << ", model_right.size():" << count_right << endl;
 	if (mode == recoedingMode::model) {
 		printVectorModel(model_left, j, {count_left,count_right});
 	}
@@ -84,6 +81,32 @@ void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMo
 	//displayAllXZcoordinateVector(model_SS_XZ, j);
 }
 
+void PointCloudLiDAR::getRangeImage(vector<float>& examinee, const LiDAR_degree& direction) {
+	if (direction == LiDAR_degree::FRONT) {
+		for (int i = 476; i < 512; i++) {
+			examinee[i - 476] = pointCloud[i].z;
+		}
+		for (int i = 0; i <= 36; i++) {
+			examinee[i + 36] = pointCloud[i].z;
+		}
+	}
+	else if (direction == LiDAR_degree::RIGHT) {
+		for (int i = 92; i <= 164; i++) {
+			examinee[i - 92] = pointCloud[i].x;
+		}
+	}
+	else if (direction == LiDAR_degree::BACK) {
+		for (int i = 220; i <= 292; i++) {
+			examinee[i - 220] = -1 * pointCloud[i].z;
+		}
+	}
+	else if (direction == LiDAR_degree::LEFT) {
+		for (int i = 348; i <= 420; i++) {
+			examinee[i - 348] = -1 * pointCloud[i].x;
+		}
+	}
+}
+
 void PointCloudLiDAR::displayAllfloatVector(vector<float>& vec) {
 	cout << "size;" << vec.size() << ", ";
 	for (int i = 0; i < vec.size(); i++) {
@@ -107,11 +130,18 @@ void PointCloudLiDAR::printVectorExcel2D(vector<XZcoordinate>& vec, int j)
 	}
 }
 
+void PointCloudLiDAR::printVectorExcel1D(vector<float>& vec, int j)
+{
+	for (int i = 0; i < vec.size(); i++) {
+		cout << vec[i] << endl;;
+	}
+}
+
 void PointCloudLiDAR::printVectorModel(vector<XZcoordinate>& vec, int& j, RangeLR range)
 {
-	cout << "{ " << range.left << ", " << range.right << " }, " << "{ ";
+	cout << "num; " << j << ";pcModelBox({ " << range.left << ", " << range.right << " }, " << "{ ";
 	for (int i = 0; i < vec.size(); i++) {
-		cout << vec[i].x << "F, ";
+		cout << abs(vec[i].x) << "F, ";
 	}
-	cout << "}" << endl;
+	cout << "})," << endl;
 }

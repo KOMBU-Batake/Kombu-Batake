@@ -65,6 +65,7 @@ InertialUnit* IMU = robot->getInertialUnit("IMU");
 Emitter* emitter = robot->getEmitter("emitter");
 Receiver* receiver = robot->getReceiver("receiver");
 
+int pcModelBox::counter = -1;
 ColorSensor colorsensor(colorCam);
 GyroZ gyro;
 GlobalPositioningSystem gps;
