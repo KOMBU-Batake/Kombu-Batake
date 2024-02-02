@@ -10,7 +10,7 @@ void DFS() {
 		cout << "R; " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << endl;
 		// 進行方向の選択
 		double angle = gyro.getGyro();
-		NEWS direction_of_travel = searchAround(angle);
+		NEWS direction_of_travel = searchAround(angle,tail,stack);
 		mapper.printMap();
 		cout << "========================================" << endl;
 		bool isHole = false;
@@ -28,7 +28,7 @@ void DFS() {
 		}
 		else if (direction_of_travel == NEWS::NO) {
 			cout << "No way to go" << endl;
-			while (robot->step(timeStep) != -1);
+			break;
 		}
 
 		angle = gyro.getGyro();
@@ -41,19 +41,24 @@ void DFS() {
 			// 現在のタイルの情報を取得、記録する
 			colorsensor.update();
 			TileState col = colorsensor.getTileColor();
-			mapper.markTileAs(mapper.currentTile_R, col);
+			TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
+			if (recordedTile != TileState::START){
+				mapper.markTileAs(mapper.currentTile_R, col);
+			}
 			if (col == TileState::AREA1to4 || col == TileState::AREA3to4) {
-				Area4IsThere(angle);
+				Area4IsThere(angle, tail, stack);
 			}
 			else {
 				// スタックに現在のタイルを追加
+				stack.push_back(mapper.currentTile_R);
 			}
 		}
 		
 	}
+	sendMap(mapper.map_A);
 }
 
-NEWS searchAround(double angle) {
+NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack) {
 	PotentialDirectionsOfTravel PDoT = { canGo::NO,canGo::NO,canGo::NO,canGo::NO };
 	pcLiDAR.update(gps.expectedPos);
 
@@ -90,19 +95,42 @@ NEWS searchAround(double angle) {
 	// 進行方向の選択
 	// 北 -> 東 -> 南 -> 西 の順に優先する
 	if (directionNEWS.north == canGo::GO) {
+		tail = -1;
 		return NEWS::NORTH;
 	}
 	else if (directionNEWS.east == canGo::GO) {
+		tail = -1;
 		return NEWS::EAST;
 	}
 	else if (directionNEWS.south == canGo::GO) {
+		tail = -1;
 		return NEWS::SOUTH;
 	}
 	else if (directionNEWS.west == canGo::GO) {
+		tail = -1;
 		return NEWS::WEST;
 	}
 	else { // スタックを拾っていく
-		return NEWS::NO;
+		int tmp = (int)stack.size() - 1 + tail;
+		if (tmp < 0) return NEWS::NO;
+		MapAddress nextTile = stack[tmp];
+		cout << "tail; " << tail << endl;
+		tail -= 2;
+		if (nextTile.x > mapper.currentTile_R.x) {
+			return NEWS::EAST;
+		}
+		else if (nextTile.x < mapper.currentTile_R.x) {
+			return NEWS::WEST;
+		}
+		else if (nextTile.z > mapper.currentTile_R.z) {
+			return NEWS::SOUTH;
+		}
+		else if (nextTile.z < mapper.currentTile_R.z) {
+			return NEWS::NORTH;
+		}
+		else {
+			return NEWS::NO;
+		}
 	}
 }
 
@@ -208,34 +236,66 @@ void HoleIsThere(const double& angle)
 	gps.returnTolastPos();
 }
 
-void Area4IsThere(const double& angle) // チェックポイントタイルだけ踏んでやるHAHAHA
+void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack) // チェックポイントタイルだけ踏んでやるHAHAHA
 {
 	if (abs(angle - 90) < 5) {
-		searchAround(angle);
+		searchAround(angle, tail, stack);
 		tank.gpsTrace(gps.moveTiles(1, 0), 4);
 		tank.gpsTrace(gps.moveTiles(-2, 0), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
-		searchAround(angle);
+		searchAround(angle, tail, stack);
 		tank.gpsTrace(gps.moveTiles(0, -1), 4);
 		tank.gpsTrace(gps.moveTiles(0, 2), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
-		searchAround(angle);
+		searchAround(angle, tail, stack);
 		tank.gpsTrace(gps.moveTiles(-1, 0), 4);
 		tank.gpsTrace(gps.moveTiles(2, 0), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		searchAround(angle);
+		searchAround(angle, tail, stack);
 		tank.gpsTrace(gps.moveTiles(0, 1), 4);
 		tank.gpsTrace(gps.moveTiles(0, -2), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
+	}
+}
+
+void sendMap(vector<vector<string>>& map)
+{
+	int width = map.size();
+	int height = map[0].size();
+	string flattened = "";
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+
+			flattened += map[i][j] + ","; // Flatten the array with comma separators
+		}
+	}
+
+	flattened.pop_back(); // Remove the last unnecessary comma
+
+	char *message=(char*)malloc(8 + flattened.size()); // Allocate memory for the message
+
+	memcpy(message, &width, sizeof(width)); // The first 2 integers in the message array are width, height
+	memcpy(&message[4], &height, sizeof(height));
+
+	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
+
+	while (robot->step(timeStep) != -1) {
+		emitter->send(message, 8+flattened.size()); // Send map data
+
+		char msg = 'M'; // Send map evaluate request
+		emitter->send(&msg, sizeof(msg));
+
+		msg = 'E'; // Send an Exit message to get Map Bonus
+		emitter->send(&msg, sizeof(msg));
 	}
 }

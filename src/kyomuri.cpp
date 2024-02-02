@@ -30,11 +30,7 @@ int main(int argc, char **argv) {
 
   // マップデータ提出
   cout << "end" << endl;
-  
-  // 終了コマンド
-  char message = 'E';
-  emitter->send(&message, 1);
-  //while (robot->step(timeStep) != -1);
+
 
   delete robot;
   return 0; // ばいばい～

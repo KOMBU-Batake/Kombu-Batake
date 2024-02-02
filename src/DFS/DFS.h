@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <map>
 #include <unordered_set>
+#include <webots/Receiver.hpp>
+#include <webots/Emitter.hpp>
 
 #include "../../lib/ColorSensor/ColorSensor.h"
 #include "../../lib/IMU/IMU.h"
@@ -29,6 +31,8 @@ extern Tank tank;
 extern LiDAR lidar;
 extern Map mapper;
 extern PointCloudLiDAR pcLiDAR;
+extern Receiver* receiver;
+extern Emitter* emitter;
 
 extern int timeStep;
 
@@ -61,14 +65,20 @@ typedef struct {
 	canGo west;
 } NEWSset;
 
+typedef struct {
+	MapAddress target;
+	NEWSset direction;
+} DESelement;
+
 void DFS();
 
 // マップデータとLiDARを基に進行方向を決定する エリア1飲みに対応
-NEWS searchAround(double angle);
+NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack);
 
 static void searchFront(PotentialDirectionsOfTravel& PDoT, WallSet& front_mp, const TileState& front_tile);
 static void searchBack(PotentialDirectionsOfTravel& PDoT, WallSet& back_mp, const TileState& back_tile);
 static void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, const TileState& left_tile);
 static void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const TileState& right_tile);
 static void HoleIsThere(const double& angle);
-static void Area4IsThere(const double& angle);
+static void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack);
+static void sendMap(vector<vector<string>>& map);
