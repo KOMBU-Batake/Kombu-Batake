@@ -3,16 +3,15 @@
 void DFS() {
 	vector<MapAddress> stack = {mapper.currentTile_R};
 	int tail = -1;
-
+	
 	mapper.printMap();
 	while (robot->step(timeStep) != -1) {
-		cout << "A; " << mapper.currentTile_A.x << " " << mapper.currentTile_A.z << endl;
-		cout << "R; " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << endl;
 		// is•ûŒü‚Ì‘I‘ğ
+		bool dontStack = false;
 		double angle = gyro.getGyro();
-		NEWS direction_of_travel = searchAround(angle,tail,stack);
+		NEWS direction_of_travel = searchAround(angle,tail,stack,dontStack);
 		mapper.printMap();
-		cout << "========================================" << endl;
+		cout << "stack size" << stack.size() << "========================================" << endl;
 		bool isHole = false;
 		if (direction_of_travel == NEWS::NORTH) {
 			isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4);
@@ -46,19 +45,18 @@ void DFS() {
 				mapper.markTileAs(mapper.currentTile_R, col);
 			}
 			if (col == TileState::AREA1to4 || col == TileState::AREA3to4) {
-				Area4IsThere(angle, tail, stack);
+				Area4IsThere(angle, tail, stack,dontStack);
 			}
 			else {
 				// ƒXƒ^ƒbƒN‚ÉŒ»İ‚Ìƒ^ƒCƒ‹‚ğ’Ç‰Á
-				stack.push_back(mapper.currentTile_R);
+				if (!dontStack) stack.push_back(mapper.currentTile_R);
 			}
 		}
-		
 	}
 	sendMap(mapper.map_A);
 }
 
-NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack) {
+NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dontStack) {
 	PotentialDirectionsOfTravel PDoT = { canGo::NO,canGo::NO,canGo::NO,canGo::NO };
 	pcLiDAR.update(gps.expectedPos);
 
@@ -95,27 +93,27 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack) {
 	// is•ûŒü‚Ì‘I‘ğ
 	// –k -> “Œ -> “ì -> ¼ ‚Ì‡‚É—Dæ‚·‚é
 	if (directionNEWS.north == canGo::GO) {
-		tail = -1;
 		return NEWS::NORTH;
 	}
 	else if (directionNEWS.east == canGo::GO) {
-		tail = -1;
 		return NEWS::EAST;
 	}
 	else if (directionNEWS.south == canGo::GO) {
-		tail = -1;
 		return NEWS::SOUTH;
 	}
 	else if (directionNEWS.west == canGo::GO) {
-		tail = -1;
 		return NEWS::WEST;
 	}
 	else { // ƒXƒ^ƒbƒN‚ğE‚Á‚Ä‚¢‚­
-		int tmp = (int)stack.size() - 1 + tail;
-		if (tmp < 0) return NEWS::NO;
+		int tmp = (int)stack.size() - 2;
+		if (tmp < 0) {
+			cout << "reach 0" << endl;
+			return NEWS::NO;
+		}
 		MapAddress nextTile = stack[tmp];
 		cout << "tail; " << tail << endl;
-		tail -= 2;
+		dontStack = true;
+		stack.pop_back();
 		if (nextTile.x > mapper.currentTile_R.x) {
 			return NEWS::EAST;
 		}
@@ -236,31 +234,31 @@ void HoleIsThere(const double& angle)
 	gps.returnTolastPos();
 }
 
-void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack) // ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgƒ^ƒCƒ‹‚¾‚¯“¥‚ñ‚Å‚â‚éHAHAHA
+void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack) // ƒ`ƒFƒbƒNƒ|ƒCƒ“ƒgƒ^ƒCƒ‹‚¾‚¯“¥‚ñ‚Å‚â‚éHAHAHA
 {
 	if (abs(angle - 90) < 5) {
-		searchAround(angle, tail, stack);
+		searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(1, 0), 4);
 		tank.gpsTrace(gps.moveTiles(-2, 0), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
-		searchAround(angle, tail, stack);
+		searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(0, -1), 4);
 		tank.gpsTrace(gps.moveTiles(0, 2), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
-		searchAround(angle, tail, stack);
+		searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(-1, 0), 4);
 		tank.gpsTrace(gps.moveTiles(2, 0), 4);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		searchAround(angle, tail, stack);
+		searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(0, 1), 4);
 		tank.gpsTrace(gps.moveTiles(0, -2), 4);
 		double angleN = gyro.getGyro();
@@ -270,32 +268,33 @@ void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack) // ƒ
 
 void sendMap(vector<vector<string>>& map)
 {
-	int width = map.size();
-	int height = map[0].size();
-	string flattened = "";
-	for (int i = 0; i < width; i++) {
-		for (int j = 0; j < height; j++) {
+	//int width = (int)map.size();
+	//int height = (int)map[0].size();
+	//string flattened = "";
+	//for (int i = 0; i < width; i++) {
+	//	for (int j = 0; j < height; j++) {
 
-			flattened += map[i][j] + ","; // Flatten the array with comma separators
-		}
-	}
+	//		flattened += map[i][j] + ","; // Flatten the array with comma separators
+	//	}
+	//}
 
-	flattened.pop_back(); // Remove the last unnecessary comma
+	//flattened.pop_back(); // Remove the last unnecessary comma
 
-	char *message=(char*)malloc(8 + flattened.size()); // Allocate memory for the message
+	//char *message=(char*)malloc(8 + flattened.size()); // Allocate memory for the message
 
-	memcpy(message, &width, sizeof(width)); // The first 2 integers in the message array are width, height
-	memcpy(&message[4], &height, sizeof(height));
+	//memcpy(message, &width, sizeof(width)); // The first 2 integers in the message array are width, height
+	//memcpy(&message[4], &height, sizeof(height));
 
-	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
+	//memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
 
-	while (robot->step(timeStep) != -1) {
-		emitter->send(message, 8+flattened.size()); // Send map data
+	//while (robot->step(timeStep) != -1) {
+	//	emitter->send(message, 8+(int)flattened.size()); // Send map data
 
-		char msg = 'M'; // Send map evaluate request
-		emitter->send(&msg, sizeof(msg));
+	//	char msg = 'M'; // Send map evaluate request
+	//	emitter->send(&msg, sizeof(msg));
 
-		msg = 'E'; // Send an Exit message to get Map Bonus
-		emitter->send(&msg, sizeof(msg));
-	}
+
+	//}
+	char  msg = 'E'; // Send an Exit message to get Map Bonus
+	emitter->send(&msg, sizeof(msg));
 }
