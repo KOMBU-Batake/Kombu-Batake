@@ -11,6 +11,8 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/IMU/IMU.h"
+#include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
+#include "../../lib/ColorSensor/ColorSensor.h"
 
 /* 提出用のマップを作りつつ、DFSにも利用するよ
  * 
@@ -36,21 +38,6 @@ typedef struct {
 	int z;
 }MapAddress;
 
-enum class TileState {
-	OTHER = 0,
-	WALL = 1,
-	HOLE = 2,
-	SWAMP = 3,
-	CHECKPOINT = 4,
-	START = 5,
-	AREA1to2 = 6,
-	AREA2to3 = 7,
-	AREA3to4 = 8,
-	AREA1to4 = 9,
-	UNKNOWN, // = "-
-	visited, // LiDARのクラスでは使わない
-};
-
 enum class VictimState {
 	H, // 重度の被災者
 	S, // 軽症の被災者
@@ -73,6 +60,23 @@ public:
 
 	// タイルの中心に到達したら初めに呼ぶ
 	void updatePostion(int dx_R, int dz_R);
+
+	void updatePostion(const double& angle) {
+		//cout << "upPos: " << currentTile_R.x << " " << currentTile_R.z << " " << angle << endl;
+		if (abs(angle - 90) < 5) {
+			updatePostion(1,0);
+		}
+		else if (abs(angle - 180) < 5) {
+			updatePostion(0,-1);
+		}
+		else if (abs(angle - 270) < 5) {
+			updatePostion(-1, 0);
+		}
+		else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+			updatePostion(0, 1);
+		}
+		//cout << "upedPos: " << currentTile_R.x << " " << currentTile_R.z << " " << angle << endl;
+	}
 
 	void markTileAs(MapAddress add_R, TileState tilestate) {
 		if (add_R.x < left_top_R.x) {
@@ -108,13 +112,13 @@ public:
 	void getAroundTileState(MapAddress addr_R, TileState& front, TileState& back, TileState& left, TileState& right, double angle = -1);
 
 	// とりあえずタイルを跨ぐような曲線とかの変な壁はないものとして考える。 ToDo: LiDARでユークリッド距離の比較を実装する
-	void markAroundWall(WallState NorthWall, WallState SouthWall, WallState WestWall, WallState EastWall);
+	void markAroundWall(WallSet NorthWall, WallSet SouthWall, WallSet WestWall, WallSet EastWall);
 
 	// 東西南北の壁をあてがう
-	void markNorthWall(MapAddress addr_R, WallState wall);
-	void markSouthWall(MapAddress addr_R, WallState wall);
-	void markWestWall(MapAddress addr_R, WallState wall);
-	void markEastWall(MapAddress addr_R, WallState wall);
+	void markNorthWall(MapAddress addr_R, WallSet wallset);
+	void markSouthWall(MapAddress addr_R, WallSet wallset);
+	void markWestWall(MapAddress addr_R, WallSet wallset);
+	void markEastWall(MapAddress addr_R, WallSet wallset);
 
 	// 壁の有無、未定義だけを調べる 具体的な種類は判別しない
 	void getAroundWallState(const MapAddress& addr_R, WallState& frontWall, WallState& backWall, WallState& leftWall, WallState& rightWall, double angle = -1);
@@ -188,6 +192,11 @@ private: // ********************************************************************
 		return true;
 	}
 
+	void rotate90Degrees(vector<vector<string>>& arr);
+
+	void paintTile(vector<vector<string>>& tile, const WallSet& wallset);
+	void drawTile(vector<vector<string>>& tile, MapAddress add_L);
+
 	WallState condition_getAroundWallState(int x, int z) {
 		if (WallAndVictim.find(map_A[z][x]) != WallAndVictim.end()) 
 		{
@@ -214,6 +223,20 @@ private: // ********************************************************************
 		{TileState::AREA3to4, "8"},
 		{TileState::AREA1to4, "9"},
 		{TileState::UNKNOWN, "-"},	
+	};
+
+	std::map<string,TileState> TileStateMap2 = {
+		{"0",TileState::OTHER},
+		{"1",TileState::WALL},
+		{"2",TileState::HOLE},
+		{"3",TileState::SWAMP},
+		{"4",TileState::CHECKPOINT},
+		{"5",TileState::START},
+		{"6",TileState::AREA1to2},
+		{"7",TileState::AREA2to3},
+		{"8",TileState::AREA3to4},
+		{"9",TileState::AREA1to4},
+		{"-",TileState::UNKNOWN},
 	};
 
 	std::map<VictimState, string> VictimStateMap = {

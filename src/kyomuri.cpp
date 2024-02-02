@@ -21,30 +21,12 @@ int main(int argc, char **argv) {
 
   cout << "start" << endl;
   
-  //for (int i = 0; i < 512; i++) {
-  //  cout << pcLiDAR.pointCloud[i].x << "," << pcLiDAR.pointCloud[i].z << endl;
-  //}
-  //pcLiDAR.modelSamplimg();
-  //tank.setDireciton(90,5);
   //pcLiDAR.update(gps.expectedPos);
-  //pcLiDAR.identifyWall(LiDAR_degree::LEFT);
-  //pcLiDAR.identifyWall(LiDAR_degree::RIGHT);
-  //pcLiDAR.identifyWall(LiDAR_degree::LEFT);
-  //pcLiDAR.identifyWall(LiDAR_degree::BACK);
+  //WallSet wallSet = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
+  //cout << (int)wallSet.left << "," << (int)wallSet.center << ", " << (int)wallSet.right << endl;
 
-  tank.setDireciton(90, 3);
-  for (int i = 0; i < 10; i++) {
-    pcLiDAR.update(gps.expectedPos);
-    WallSet left = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
-    cout << "left; " << (int)left.left << ", center; " << (int)left.center << ", right; " << (int)left.right << endl;
-    tank.gpsTrace(gps.moveTiles(1, 0), 5);
-  }
-
-  pcLiDAR.update(gps.expectedPos);
-  WallSet left = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
-  cout << "left; " << (int)left.left << ", center; " << (int)left.center << ", right; " << (int)left.right << endl;
   // 深さ優先探索
-  //DFS();
+  DFS();
 
   // マップデータ提出
   cout << "end" << endl;

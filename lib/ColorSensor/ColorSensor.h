@@ -5,10 +5,24 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
-#include "../../src/Map/Map.h"
 
 using namespace webots;
 using namespace std;
+
+enum class TileState {
+	OTHER = 0,
+	WALL = 1,
+	HOLE = 2,
+	SWAMP = 3,
+	CHECKPOINT = 4,
+	START = 5,
+	AREA1to2 = 6,
+	AREA2to3 = 7,
+	AREA3to4 = 8,
+	AREA1to4 = 9,
+	UNKNOWN, // = "-
+	visited, // LiDARのクラスでは使わない
+};
 
 typedef struct
 {
@@ -33,7 +47,7 @@ typedef struct {
 	int value_diff;
 } ColorRange;
 
-enum Colors {
+enum class Colors {
 	WHITE,
 	BLACK,
 	CHECKPOINT,
@@ -86,41 +100,41 @@ public:
 		return hsv;
 	}
 
-	int getColor() {
+	Colors getColor() {
 		/* HSVベースで床の色を判断する */
 		ColorHSV hsv = getHSV();
 		if (hsv.value < 50) {
-			return BLACK;
+			return Colors::BLACK;
 		}
 		else if (hsv.saturation < 1 && hsv.value > 230) {
-			return CHECKPOINT;
+			return Colors::CHECKPOINT;
 		}
 		else if (hsv.saturation < 1 && hsv.value > 200) {
-			return WHITE;
+			return Colors::WHITE;
 		}
 		else if (isTheColor(blueRange, hsv)){
-			return BLUE;
+			return Colors::BLUE;
 		}
 		else if (isTheColor(purpleRange, hsv)) {
-			return PURPLE;
+			return Colors::PURPLE;
 		}
 		else if (isTheColor(swampRange, hsv)) {
-			return SWAMP;
+			return Colors::SWAMP;
 		}
 		else if (isTheColor(greenRange, hsv)) {
-			return GREEN;
+			return Colors::GREEN;
 		}
 		else if (isTheColor(redRange, hsv)) {
-			return RED;
+			return Colors::RED;
 		}
 		else
 		{
-			return OTHERS;
+			return Colors::OTHERS;
 		}
 	}
 
 	TileState getTileColor() {
-		int col = getColor();
+		Colors col = getColor();
 		return tileColorMap[col];
 	}
 
@@ -143,15 +157,14 @@ private:
 		}
 	}
 
-	std::map<int, TileState> tileColorMap = {
-		{WHITE, TileState::OTHER},
-		{BLACK, TileState::HOLE},
-		{CHECKPOINT, TileState::CHECKPOINT},
-		{BLUE, TileState::AREA1to2},
-		{PURPLE, TileState::AREA2to3},
-		{GREEN,  TileState::AREA1to4},
-		{RED, TileState::AREA3to4},
-		{SWAMP, TileState::SWAMP},
+	std::map<Colors, TileState> tileColorMap = {
+		{Colors::WHITE, TileState::OTHER},
+		{Colors::BLACK, TileState::HOLE},
+		{Colors::CHECKPOINT, TileState::CHECKPOINT},
+		{Colors::BLUE, TileState::AREA1to2},
+		{Colors::PURPLE, TileState::AREA2to3},
+		{Colors::GREEN,  TileState::AREA1to4},
+		{Colors::RED, TileState::AREA3to4},
+		{Colors::SWAMP, TileState::SWAMP},
 	};
 };
-

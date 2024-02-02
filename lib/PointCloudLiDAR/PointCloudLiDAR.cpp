@@ -77,7 +77,7 @@ pcModelBox::pcModelBox(const RangeLR tagrange, const vector<float> _model) {
 				wallSet.left = WallType::type0;
 				break;
 		case 1:
-			left = estimatedWalls::type12;
+				left = estimatedWalls::type12;
 				wallSet.left = WallType::type1;
 				break;
 		case 2:

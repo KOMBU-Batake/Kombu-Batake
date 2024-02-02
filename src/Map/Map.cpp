@@ -3,6 +3,8 @@
 void Map::updatePostion(int dx_R, int dz_R) {
 	currentTile_R.x += dx_R;
 	currentTile_R.z += dz_R;
+	currentTile_A.x += dx_R;
+	currentTile_A.z += dz_R;
 	// マップ範囲外の場合は拡張
 	if (currentTile_R.x < left_top_R.x) {
 		addWest(left_top_R.x - currentTile_R.x);
@@ -33,7 +35,7 @@ void Map::addSouth(const int i) { // 下に追加
 	// map_Aの下に1行追加
 	//cout << "map_A.size() = " << map_A.size() << endl;
 	map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
-	right_bottom_R.z++;
+	right_bottom_R.z += 1;
 }
 
 void Map::addWest(const int j) { // 左に追加
@@ -97,44 +99,283 @@ void Map::markAroundTile(TileState front, TileState back, TileState left, TileSt
 	else cout << "unreliable angle in makeAround4" << endl;
 }
 
-void Map::markAroundWall(WallState NorthWall, WallState SouthWall, WallState WestWall, WallState EastWall) {
+void Map::markAroundWall(WallSet NorthWall, WallSet SouthWall, WallSet WestWall, WallSet EastWall) {
 	markNorthWall(currentTile_R, NorthWall);
 	markSouthWall(currentTile_R, SouthWall);
 	markWestWall(currentTile_R, WestWall);
 	markEastWall(currentTile_R, EastWall);
-	edge(currentTile_R);
 }
 
-void Map::markNorthWall(MapAddress addr_R, WallState wall) {
+void Map::markNorthWall(MapAddress addr_R, WallSet wallset) {
 	MapAddress add_L = convertRtoListPoint(addr_R);
-	vector<string> tmp = WallStateMap[wall];
-	map_A[add_L.z - 2][add_L.x - 1] = tmp[0];
-	map_A[add_L.z - 2][add_L.x] = tmp[1];
-	map_A[add_L.z - 2][add_L.x + 1] = tmp[2];
+	if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && wallset.right == WallType::type10) {
+		map_A[add_L.z - 2][add_L.x - 2] = "1";
+		map_A[add_L.z - 2][add_L.x - 1] = "1";
+		map_A[add_L.z - 2][add_L.x] = "1";
+		map_A[add_L.z - 2][add_L.x + 1] = "1";
+		map_A[add_L.z - 2][add_L.x + 2] = "1";
+	}
+	else {
+		if (!existTile_R({ addr_R.x,addr_R.z - 1 })) addNorth(1);
+		vector<vector<string>> wall = {
+				{"-", "-", "-", "-", "-"},
+				{"-", "-", "-", "-", "-"},
+				{"-", "-", "-", "-", "-"},
+				{"-", "-", "-", "-", "-"},
+				{"-", "-", "-", "-", "-"},
+		};
+		paintTile(wall, wallset);
+		// rotate90Degrees();
+		add_L = convertRtoListPoint(addr_R);
+		drawTile(wall, { add_L.x,add_L.z - 4 });
+	}
 }
 
-void Map::markSouthWall(MapAddress addr_R, WallState wall) {
+void Map::markSouthWall(MapAddress addr_R, WallSet wallset) {
 	MapAddress add_L = convertRtoListPoint(addr_R);
-	vector<string> tmp = WallStateMap[wall];
-	map_A[add_L.z + 2][add_L.x + 1] = tmp[0];
-	map_A[add_L.z + 2][add_L.x] = tmp[1];
-	map_A[add_L.z + 2][add_L.x - 1] = tmp[2];
+	if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && wallset.right == WallType::type10) {
+		map_A[add_L.z + 2][add_L.x - 2] = "1";
+		map_A[add_L.z + 2][add_L.x - 1] = "1";
+		map_A[add_L.z + 2][add_L.x] = "1";
+		map_A[add_L.z + 2][add_L.x + 1] = "1";
+		map_A[add_L.z + 2][add_L.x + 2] = "1";
+	}
+	else {
+		if (!existTile_R({ addr_R.x,addr_R.z + 1 })) addSouth(1);
+		vector<vector<string>> wall = {
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+		};
+		paintTile(wall, wallset);
+		rotate90Degrees(wall);
+		rotate90Degrees(wall);
+		add_L = convertRtoListPoint(addr_R);
+		drawTile(wall, { add_L.x,add_L.z + 4 });
+	}
 }
 
-void Map::markWestWall(MapAddress addr_R, WallState wall) {
+void Map::markWestWall(MapAddress addr_R, WallSet wallset) {
 	MapAddress add_L = convertRtoListPoint(addr_R);
-	vector<string> tmp = WallStateMap[wall];
-	map_A[add_L.z + 1][add_L.x - 2] = tmp[0];
-	map_A[add_L.z][add_L.x - 2] = tmp[1];
-	map_A[add_L.z - 1][add_L.x - 2] = tmp[2];
+	if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && wallset.right == WallType::type10) {
+		map_A[add_L.z - 2][add_L.x - 2] = "1";
+		map_A[add_L.z - 1][add_L.x - 2] = "1";
+		map_A[add_L.z][add_L.x - 2] = "1";
+		map_A[add_L.z + 1][add_L.x - 2] = "1";
+		map_A[add_L.z + 2][add_L.x - 2] = "1";
+	}
+	else {
+		if (!existTile_R({ addr_R.x - 1,addr_R.z })) addWest(1);
+		vector<vector<string>> wall = {
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+		};
+		paintTile(wall, wallset);
+		rotate90Degrees(wall);
+		rotate90Degrees(wall);
+		rotate90Degrees(wall);
+		add_L = convertRtoListPoint(addr_R);
+		drawTile(wall, { add_L.x - 4,add_L.z });
+	}
 }
 
-void Map::markEastWall(MapAddress addr_R, WallState wall) {
+void Map::markEastWall(MapAddress addr_R, WallSet wallset) {
 	MapAddress add_L = convertRtoListPoint(addr_R);
-	vector<string> tmp = WallStateMap[wall];
-	map_A[add_L.z - 1][add_L.x + 2] = tmp[0];
-	map_A[add_L.z][add_L.x + 2] = tmp[1];
-	map_A[add_L.z + 1][add_L.x + 2] = tmp[2];
+if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && wallset.right == WallType::type10) {
+		map_A[add_L.z - 2][add_L.x + 2] = "1";
+		map_A[add_L.z - 1][add_L.x + 2] = "1";
+		map_A[add_L.z][add_L.x + 2] = "1";
+		map_A[add_L.z + 1][add_L.x + 2] = "1";
+		map_A[add_L.z + 2][add_L.x + 2] = "1";
+	}
+	else {
+		if (!existTile_R({ addr_R.x + 1,addr_R.z })) addEast(1);
+		vector<vector<string>> wall = {
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+			{"-", "-", "-", "-", "-"},
+		};
+		paintTile(wall, wallset);
+		rotate90Degrees(wall);
+		add_L = convertRtoListPoint(addr_R);
+		drawTile(wall, { add_L.x + 4,add_L.z });
+	}
+}
+
+void Map::rotate90Degrees(vector<vector<string>>& arr) {
+	int n = (int)arr.size();
+	vector<vector<string>> rotated(n, vector<string>(n));
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			rotated[j][n - 1 - i] = arr[i][j];
+		}
+	}
+	arr = rotated;
+}
+
+void Map::paintTile(vector<vector<string>>& tile, const WallSet& wallset) {
+	switch (wallset.center) {
+	case WallType::center_o:
+		tile[0][2] = "1";
+		tile[1][2] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::center_s:
+		tile[2][2] = "1";
+		tile[3][2] = "1";
+		tile[4][2] = "1";
+		break;
+	}
+	switch (wallset.left) {
+	case WallType::type0:
+		tile[0][0] = "1";
+		tile[0][1] = "1";
+		tile[0][2] = "1";
+		break;
+	case WallType::type1:
+		tile[0][0] = "1";
+		tile[0][1] = "1";
+		tile[1][2] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type2:
+		tile[0][2] = "1";
+		tile[1][2] = "1";
+		tile[2][1] = "1";
+		tile[2][0] = "1";
+		break;
+	case WallType::type3:
+		tile[0][0] = "1";
+		tile[1][0] = "1";
+		tile[2][1] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type4:
+		tile[0][2] = "1";
+		tile[0][1] = "1";
+		tile[1][0] = "1";
+		tile[2][0] = "1";
+		break;
+	case WallType::type5:
+		tile[2][0] = "1";
+		tile[2][1] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type6:
+		tile[2][0] = "1";
+		tile[2][1] = "1";
+		tile[3][2] = "1";
+		tile[4][2] = "1";
+		break;
+	case WallType::type7:
+		tile[2][2] = "1";
+		tile[3][2] = "1";
+		tile[4][0] = "1";
+		tile[4][1] = "1";
+		break;
+	case WallType::type8:
+		tile[2][0] = "1";
+		tile[3][0] = "1";
+		tile[4][1] = "1";
+		tile[4][2] = "1";
+		break;
+	case WallType::type9:
+		tile[4][0] = "1";
+		tile[3][0] = "1";
+		tile[2][1] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type10:
+		tile[4][0] = "1";
+		tile[4][1] = "1";
+		tile[4][2] = "1";
+		break;
+	}
+	switch (wallset.right) {
+	case WallType::type0:
+		tile[0][2] = "1";
+		tile[0][3] = "1";
+		tile[0][4] = "1";
+		break;
+	case WallType::type1:
+		tile[0][2] = "1";
+		tile[0][3] = "1";
+		tile[1][4] = "1";
+		tile[2][4] = "1";
+		break;
+	case WallType::type2:
+		tile[0][4] = "1";
+		tile[1][4] = "1";
+		tile[2][3] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type3:
+		tile[0][2] = "1";
+		tile[1][2] = "1";
+		tile[2][3] = "1";
+		tile[2][4] = "1";
+		break;
+	case WallType::type4:
+		tile[0][4] = "1";
+		tile[0][3] = "1";
+		tile[1][2] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type5:
+		tile[2][4] = "1";
+		tile[2][3] = "1";
+		tile[2][2] = "1";
+		break;
+	case WallType::type6:
+		tile[2][2] = "1";
+		tile[2][3] = "1";
+		tile[3][4] = "1";
+		tile[4][4] = "1";
+		break;
+	case WallType::type7:
+		tile[2][4] = "1";
+		tile[3][4] = "1";
+		tile[4][2] = "1";
+		tile[4][3] = "1";
+		break;
+	case WallType::type8:
+		tile[2][2] = "1";
+		tile[3][2] = "1";
+		tile[4][3] = "1";
+		tile[4][4] = "1";
+		break;
+	case WallType::type9:
+		tile[2][4] = "1";
+		tile[2][3] = "1";
+		tile[3][2] = "1";
+		tile[4][2] = "1";
+		break;
+	case WallType::type10:
+		tile[4][2] = "1";
+		tile[4][3] = "1";
+		tile[4][4] = "1";
+		break;
+	}
+	if (tile[4][1] == "-") tile[4][1] = "0";
+	if (tile[4][2] == "-") tile[4][2] = "0";
+	if (tile[4][3] == "-") tile[4][3] = "0";
+}
+
+void Map::drawTile(vector<vector<string>>& tile, MapAddress add_L){
+	for (int i = 0; i < 5; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			if (map_A[add_L.z - 2 + i][add_L.x - 2 + j] == "-" && (tile[i][j] == "1" || tile[i][j] == "0")) {
+				map_A[add_L.z - 2 + i][add_L.x - 2 + j] = tile[i][j];
+			}
+		}
+	}
 }
 
 void Map::edge(MapAddress add_R, MapAddress add_L) {
@@ -208,13 +449,17 @@ TileState Map::getTileState(MapAddress addr_R) {
 		return TileState::UNKNOWN;
 	}
 	MapAddress addr_L = convertRtoListPoint(addr_R);
-	return static_cast<TileState>(stoi(map_A[addr_L.z + 1][addr_L.x + 1]));
+	//cout << "add_L" << addr_L.z + 1 << " " << addr_L.x + 1 << endl;
+	//cout << "mapa size" << map_A.size() << " " << map_A[0].size() << endl;
+	//return static_cast<TileState>(stoi(map_A[addr_L.z + 1][addr_L.x + 1]));
+	return TileStateMap2[map_A[addr_L.z + 1][addr_L.x + 1]];
 }
 
 void Map::getAroundTileState(MapAddress addr_R, TileState& front, TileState& back, TileState& left, TileState& right, double angle) {
 	if (angle == -1) {
 		angle = gyro.getGyro();
 	}
+	//cout << "angle = " << angle << endl;
 	if (abs(angle - 90) < 5) {
 		front = getTileState({ addr_R.x + 1, addr_R.z });
 		back = getTileState({ addr_R.x - 1, addr_R.z });
@@ -240,4 +485,5 @@ void Map::getAroundTileState(MapAddress addr_R, TileState& front, TileState& bac
 		right = getTileState({ addr_R.x - 1, addr_R.z });
 	}
 	else cout << "unreliable angle in getAroundTileState" << endl;
+	//cout << "front = " << (int)front << " back = " << (int)back << " left = " << (int)left << " right = " << (int)right << endl;
 }

@@ -8,6 +8,7 @@
 
 #include "../GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../IMU/IMU.h"
+#include "../ColorSensor/ColorSensor.h"
 
 using namespace webots;
 using namespace std;
@@ -42,6 +43,7 @@ extern Robot* robot;
 extern int timeStep;
 extern GlobalPositioningSystem gps;
 extern GyroZ gyro;
+extern ColorSensor colorsensor;
 
 class Tank {
 public:
@@ -100,7 +102,7 @@ public:
 	void setDireciton(double direction, double maxspeed /*最大速度*/, const unit unit = unit::degrees);
 
 	/* Ｘ軸方向、Y軸方向にGPSトレースする 位置はあらかたあっている前提で過度な修正はできない。 */
-	void gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 1000, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
+	bool gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 1000, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
 
 	static double pd_cm_to_rad(double cm) { // cmをラジアンに変換
 		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)
@@ -116,6 +118,15 @@ public:
 
 	static double pd_rad_to_degrees(double rad) {
 		return rad * 180 / 3.1415926535;
+	}
+
+	bool checkColor() {
+		colorsensor.update();
+		TileState tileColor = colorsensor.getTileColor();
+		if (tileColor == TileState::HOLE) {
+			return false;
+		}
+		return true;
 	}
 private:
 	enum class goalPosition :uint8_t{

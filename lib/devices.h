@@ -53,8 +53,8 @@ DistanceSensor* rightToFSensor = robot->getDistanceSensor("rightToF");
 Camera* colorCam = robot->getCamera("ColorSensor");
 
 /* ‚«‚á‚ß‚ç */
-Camera* leftCam = robot->getCamera("leftCamera");
-Camera* rightCam = robot->getCamera("rightCamera");
+//Camera* leftCam = robot->getCamera("leftCamera");
+//Camera* rightCam = robot->getCamera("rightCamera");
 
 /* ‚¶[‚Ò[‚¦‚· */
 GPS* gpsXZ = robot->getGPS("gps");
@@ -83,8 +83,8 @@ void enableDevices() {
 	leftToFSensor->enable(timeStep);
 	rightToFSensor->enable(timeStep);
 	colorCam->enable(timeStep);
-	leftCam->enable(timeStep);
-	rightCam->enable(timeStep);
+	//leftCam->enable(timeStep);
+	//rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
 	receiver->enable(timeStep);

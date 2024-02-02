@@ -102,7 +102,7 @@ void Tank::stop(const StopMode mode) {
 void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 {
 	if (unit == unit::rad) direction = pd_rad_to_degrees(direction);
-	cout << "direction: " << direction << endl;
+	//cout << "direction: " << direction << endl;
 	double startAngle = gyro.getGyro();
 	maxspeed = abs(maxspeed);
 	if (maxspeed > maxVelocity) maxspeed = maxVelocity;
@@ -178,8 +178,8 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 	robot->step(160);
 }
 
-// サイクロマティック複雑度53の力!!
-void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmode, int timeout_ms, Direction_of_Travel direction)
+// 出でよ!!サイクロマティック複雑度53の力!!
+bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmode, int timeout_ms, Direction_of_Travel direction)
 {
 	speed = abs(speed);
 	if (speed > maxVelocity) speed = maxVelocity;
@@ -193,7 +193,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 	double presentAngle = gyro.getGyro();
 	double angle_to_O = pd_angle(angle_to_goal);
 	if (abs(angle_to_O - presentAngle) > 10) { // 目的地への角度と現在の角度が10度以上ずれていたら 補正する
-		cout << "angle_to_0: " << angle_to_O << endl;
+		//cout << "angle_to_0: " << angle_to_O << endl;
 		setDireciton(angle_to_O, speed);
 	}
 	// 方向の修正
@@ -228,6 +228,10 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
 		double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
 		while (1) {
+			if (!checkColor()) {
+				stop(StopMode::HOLD);
+				return false;
+			}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// Ｘ軸方向のずれ
@@ -269,6 +273,10 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
 		double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
 		while (1) {
+			if (!checkColor()) {
+				stop(StopMode::HOLD);
+				return false;
+			}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// Z軸方向のずれ
@@ -317,6 +325,10 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		if (goal.z > presentPos.z) directionPorM = Direction_of_Travel::z_plus;
 		
 		do {
+			if (!checkColor()) {
+				stop(StopMode::HOLD);
+				return false;
+			}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			dx_d = presentPos.x - goal.x;
@@ -343,6 +355,7 @@ void Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		} while (abs(dz_d) > 0.05 && abs(dx_d) > 0.05 && robot->step(timeStep) != -1);
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
+	return true;
 }
 
 static double pd_angle(double angle) {

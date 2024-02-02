@@ -100,14 +100,26 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp">
       <Filter>default</Filter>
     </ClCompile>
-    <ClCompile Include="src\kyomuri.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="src\Map\Map.cpp">
+      <Filter>src\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DFS\DFS.cpp">
+      <Filter>src\DFS</Filter>
     </ClCompile>
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp">
       <Filter>lib\ColorSensor</Filter>
     </ClCompile>
+    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp">
+      <Filter>lib\easyLiDAR</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
+      <Filter>lib\GlobalPositioningSystem</Filter>
+    </ClCompile>
     <ClCompile Include="lib\IMU\IMU.cpp">
       <Filter>lib\IMU</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\myMath\myMath.cpp">
+      <Filter>lib\MyMath</Filter>
     </ClCompile>
     <ClCompile Include="lib\ToF\ToF.cpp">
       <Filter>lib\ToF</Filter>
@@ -115,78 +127,78 @@
     <ClCompile Include="lib\Tank\Tank.cpp">
       <Filter>lib\Tank</Filter>
     </ClCompile>
-    <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
-      <Filter>lib\GlobalPositioningSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp">
-      <Filter>lib\LiADR</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DFS\DFS.cpp">
-      <Filter>src\DFS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Map\Map.cpp">
-      <Filter>src\Map</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\myMath\myMath.cpp">
-      <Filter>lib\myMath</Filter>
-    </ClCompile>
     <ClCompile Include="lib\PointCloudLiDAR\PointCloudLiDAR.cpp">
-      <Filter>lib\pcLiDAR</Filter>
+      <Filter>lib\PointCloudLiDAR</Filter>
+    </ClCompile>
+    <ClCompile Include="src\kyomuri.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
-      <UniqueIdentifier>{6f503358-dc5b-4072-b107-24df5ba2b3b6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib">
-      <UniqueIdentifier>{a0bb6c6b-4d52-424b-b283-c2e64a6eb3a8}</UniqueIdentifier>
+      <UniqueIdentifier>{797a5085-64e3-4ae8-a486-14b88d65271c}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
-      <UniqueIdentifier>{ec5623e7-3894-44ac-a352-71b21c842788}</UniqueIdentifier>
+      <UniqueIdentifier>{30888d88-27b4-4cd5-9d27-47d693769a3c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\ColorSensor">
-      <UniqueIdentifier>{67031d20-4f43-48aa-9d0d-0a8ca3c55c88}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\IMU">
-      <UniqueIdentifier>{612c68f7-7828-4e06-98f2-63767d2fdf22}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\ToF">
-      <UniqueIdentifier>{16130f83-11a8-483c-8323-73a9821339db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\Tank">
-      <UniqueIdentifier>{5b59789f-60d5-4f9d-928b-53aeee8d5fc5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\GlobalPositioningSystem">
-      <UniqueIdentifier>{42b8fd6b-4d29-40e8-817f-f794c364084e}</UniqueIdentifier>
+    <Filter Include="lib">
+      <UniqueIdentifier>{7a1428f9-5497-4879-a3d4-2a3c61ed28aa}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\DFS">
-      <UniqueIdentifier>{343aeae6-7bb2-45be-bcc7-0b1ad55c2e4c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\LiADR">
-      <UniqueIdentifier>{c2734b17-7193-4b78-9913-65678f444660}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Docs">
-      <UniqueIdentifier>{467b1549-6725-46ab-8f01-51ee4f46eafd}</UniqueIdentifier>
+      <UniqueIdentifier>{8333b3af-1e78-4e2d-82f1-e40a64777bf2}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Map">
-      <UniqueIdentifier>{ec66fd6a-7715-45b8-8bdd-b0ea5e23c5ad}</UniqueIdentifier>
+      <UniqueIdentifier>{e34157a5-660c-4acd-8722-103da9923ed1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\myMath">
-      <UniqueIdentifier>{15177f5f-0901-4318-99d3-08b403578b38}</UniqueIdentifier>
+    <Filter Include="lib\ColorSensor">
+      <UniqueIdentifier>{f3be9f98-2434-4fde-b08b-bbef1cbc6c83}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\pcLiDAR">
-      <UniqueIdentifier>{c9ed7cf7-03ce-42e9-a1cd-023b69664d82}</UniqueIdentifier>
+    <Filter Include="lib\easyLiDAR">
+      <UniqueIdentifier>{93076581-ffa9-415e-9fb3-d5158cb244ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\GlobalPositioningSystem">
+      <UniqueIdentifier>{8c734cff-a168-401e-9959-d7352caf77ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\IMU">
+      <UniqueIdentifier>{3049e1ba-19d7-4318-b133-ba5faf8fdf08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\MyMath">
+      <UniqueIdentifier>{bc84b726-448f-49d8-9473-cf75f4d57b67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\PointCloudLiDAR">
+      <UniqueIdentifier>{f5392bcd-21af-4784-b6d7-2668c89dc1a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\Tank">
+      <UniqueIdentifier>{3dfa1bf3-38bc-46df-88e7-6428877f9bce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\ToF">
+      <UniqueIdentifier>{56c2886d-3969-4c51-8777-77bdc20f15af}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\ColorSensor\ColorSensor.h">
-      <Filter>lib\ColorSensor</Filter>
+    <ClInclude Include="src\Map\Map.h">
+      <Filter>src\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DFS\DFS.h">
+      <Filter>src\DFS</Filter>
     </ClInclude>
     <ClInclude Include="lib\devices.h">
       <Filter>lib</Filter>
     </ClInclude>
+    <ClInclude Include="lib\ColorSensor\ColorSensor.h">
+      <Filter>lib\ColorSensor</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h">
+      <Filter>lib\easyLiDAR</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
+      <Filter>lib\GlobalPositioningSystem</Filter>
+    </ClInclude>
     <ClInclude Include="lib\IMU\IMU.h">
       <Filter>lib\IMU</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\myMath\myMath.h">
+      <Filter>lib\MyMath</Filter>
     </ClInclude>
     <ClInclude Include="lib\ToF\ToF.h">
       <Filter>lib\ToF</Filter>
@@ -194,28 +206,8 @@
     <ClInclude Include="lib\Tank\Tank.h">
       <Filter>lib\Tank</Filter>
     </ClInclude>
-    <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
-      <Filter>lib\GlobalPositioningSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h">
-      <Filter>lib\LiADR</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DFS\DFS.h">
-      <Filter>src\DFS</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Map\Map.h">
-      <Filter>src\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\myMath\myMath.h">
-      <Filter>lib\myMath</Filter>
-    </ClInclude>
     <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h">
-      <Filter>lib\pcLiDAR</Filter>
+      <Filter>lib\PointCloudLiDAR</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Docs\map.md">
-      <Filter>Docs</Filter>
-    </None>
   </ItemGroup>
 </Project>
