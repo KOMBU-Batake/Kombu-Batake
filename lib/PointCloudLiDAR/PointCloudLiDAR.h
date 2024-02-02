@@ -29,28 +29,56 @@ typedef struct {
 }XZcoordinate;
 
 typedef struct {
-	int left;
-	int right;
+	int8_t left;
+	int8_t right;
 }RangeLR;
 
-enum class TagRange { // 測定範囲のタグ
-	LL, // left Large, right Lerge 
-	LS, // left Large, right Small
-	SL, // left Small, right Large
-	SS, // left Small, right Small
+enum class WallType :uint8_t{
+	type0, // 0
+	type1, // 1
+	type2, // 2
+	type3, // 3
+	type4, // 4
+	type5, // 5
+	type6, // 6
+	type7, // 7
+	type8, // 8
+	type9, // 9
+	type10, // 10
+	typeNo, // 11
+
+	center_s, // 12
+	center_o, // 13
+	center_n, // 14
+
+	gomi, // 15
 };
 
-enum class TagMinDistance { // 測定範囲の中で最も近い壁がどこにあるか
-	Nine,
-	Fifteen,
-	TwentyOne,
-	Nine_and_Fifteen,
-};
+typedef struct {
+	WallType left;
+	WallType center;
+	WallType right;
+} WallSet;
 
 enum class recoedingMode {
 	model,
 	//excel_1d,
 	excel_2d,
+};
+
+// タイル下から見て壁の端が何cmの位置にあるか
+enum class estimatedWalls :uint8_t{
+	type12,
+	type9,
+	type6,
+	type3,
+	type0,
+	// 中央の壁
+	frontWall,
+	backWall,
+	noCentralWall,
+
+	gomi,
 };
 
 /* 壁のモデルを格納するクラス
@@ -59,20 +87,15 @@ enum class recoedingMode {
  */
 class pcModelBox {
 public:
-	pcModelBox(const RangeLR tagrange, const vector<float> _model) {
-		model = _model;
-		range = tagrange;
-		size = range.left + range.right + 1;
-		ManagementNumber = ++counter;
-	}
+	pcModelBox(const RangeLR tagrange, const vector<float> _model);
 
 	vector<float> model;
 	RangeLR range;
-	int size;
-	int Square = 0;
-	int ManagementNumber;
+	int16_t ManagementNumber;
+	estimatedWalls left = estimatedWalls::type12, right = estimatedWalls::type12, center = estimatedWalls::noCentralWall;
+	WallSet wallSet = { WallType::typeNo, WallType::center_n, WallType::typeNo };
 private:
-	static int counter;
+	static int16_t counter;
 	//map<TagMinDistance, float> minDistanceMap = {
 	//	{TagMinDistance::Nine, (float)8},
 	//	{TagMinDistance::Fifteen, (float)14},
@@ -108,12 +131,7 @@ public:
 	}
 
 	// 修正する角度を指定してLiDARの値を更新する
-	void update(const float angle) {
-		rangeImage = centralLidar->getRangeImage();
-		converttoPointCloud();
-		float gyro_angle = (float)gyro.getGyro();
-		fixPointCloudAngle(angle,gyro_angle);
-	}
+	void update(const float angle);
 
 	float getDistance(const float angle_R) {
 		int angle512 = (int)round(angle_R * 512 / 360);
@@ -121,12 +139,100 @@ public:
 	}
 
 	// モデル照合
-	int identifyWall(LiDAR_degree direction) {
+	WallSet identifyWall(LiDAR_degree direction) {
 		vector<float> model;
 		int leftCount = 0, rightCount = 0;
+		bool isLeftClear = false, isRightClear = false;
 		get10cmAbs(direction, model, leftCount, rightCount);
-		printVectorExcel1D(model, 0);
-		return 0;
+
+		float max = *max_element(model.begin(), model.end());
+		float min = *min_element(model.begin(), model.end());
+		if (min > 18.0F) {
+			return { WallType::typeNo, WallType::center_n, WallType::typeNo }; // 完全に壁がない
+		} 
+		if (max > 18.0F) {
+			// 片方の壁がない
+			if (model[0] > 18.0F) {
+				isLeftClear = true;
+			} else isRightClear = true;
+			// 空白のところを全て壁で埋める
+			for (int i = 0; i < model.size(); i++) {
+				if (model[i] > 18.0F) {
+					model[i] = 17.44F;
+				}
+			}
+		}
+		if (max < 6.0F) { // 完全に壁
+			return {WallType::type10, WallType::center_n, WallType::type10 };
+		}
+		
+		// printVectorExcel1D(model,1);
+
+		estimatedWalls estimatedLeft, estimatedRight;
+		NarrowDownWalls(leftCount, rightCount, estimatedLeft, estimatedRight);
+		vector<errorBox> CumulativeDeviation;
+		for (int i = 0; i < models.size(); i++) {
+			if (models[i].left == estimatedWalls::gomi)continue;
+			if (models[i].left == estimatedLeft && models[i].right == estimatedRight) { // 壁の種類の大枠が一致
+				//cout << i << " ===========================" << endl;
+				float min = getError(models[i], model, leftCount, rightCount);
+				//cout << "the mininmum; " << min << endl;
+				CumulativeDeviation.push_back({ min, i });
+			}
+		}
+		errorBox minElement = *min_element(CumulativeDeviation.begin(), CumulativeDeviation.end(), [](const errorBox& a, const errorBox& b) {return a.error < b.error; });
+		WallSet tmp = models[minElement.num].wallSet;
+		//cout << "final: " << minElement.num << endl;
+		if (isLeftClear) tmp.left = WallType::typeNo;
+		if (isRightClear) tmp.right = WallType::typeNo;
+		return tmp;
+	}
+
+	float getError(const pcModelBox& models, const vector<float>& model, const int& leftCount, const int& rightCount) {
+		// 左側
+		vector<float> err_l(4, 0);
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j <= leftCount; j++) { // 真ん中も含める
+				float e = model[j] - models.model[j + i];
+				err_l[i] += (float)pow(e, 2);
+			}
+		}
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; (j + i) <= leftCount; j++) { // 真ん中も含める
+				float e = model[j + i] - models.model[j];
+				err_l[i+2] += (float)pow(e, 2);
+			}
+		}
+		float min_l = *min_element(err_l.begin(), err_l.end());
+		// 右側
+		vector<float> err_r(4, 0);
+		for (int i = 0; i < 2; i++) {
+			auto it1 = model.rbegin();
+			auto it2 = models.model.rbegin() + i;
+			for (int j = 0; j < rightCount; j++) { // 真ん中は含めない
+				float e = *it1 - *it2;
+				err_r[i] += (float)pow(e, 2);
+				//cout << e << "," << *it1 << "," << *it2 << endl;
+				it1++;
+				it2++;
+			}
+			//cout << "----" << endl;
+		}
+		for (int i = 0; i < 2; i++) {
+			auto it1 = model.rbegin() + i;
+			auto it2 = models.model.rbegin();
+			for (int j = 0; (j+i) < rightCount; j++) { // 真ん中は含めない
+				float e = *it1 - *it2;
+				err_r[i+2] += (float)pow(e, 2);
+				//cout << e << "," << *it1 << "," << *it2 << endl;
+				it1++;
+				it2++;
+			}
+			//cout << "----" << endl;
+		}
+		float min_r = *min_element(err_r.begin(), err_r.end());
+		//cout << "min_l:" << min_l << ", min_r:" << min_r << endl;
+		return min_l + min_r;
 	}
 
 	// LiDARの変換されたXZ平面上の点
@@ -136,6 +242,7 @@ public:
 	void modelSamplimg(recoedingMode mode = recoedingMode::model);
 	void move_update_display(GPSPosition goalPos, int j, recoedingMode mode);
 
+	void printNum();
 private:
 	const float* rangeImage = 0;
 	MyMath myMath;
@@ -147,30 +254,18 @@ private:
 		{LiDAR_degree::LEFT, 384}
 	};
 
-	void convertRELATIVEtoABSLOUTE(float& angle) { // 相対角を絶対角に変換
-		//double g_angle = 360 - gyro.getGyro();
-		//angle = 360 - angle; // 向きを反転
-		//angle -= g_angle;
-		angle = (float)gyro.getGyro() - angle;
-		if (angle < 0) angle += 360;
-	}
+	typedef struct {
+		float error;
+		int num;
+	}errorBox;
 
-	void convertRELATIVEtoABSLOUTE(float& angle, const float& gyro) { // 相対角を絶対角に変換 IMUの値を受け取るver
-		angle = gyro - angle;
-		if (angle < 0) angle += 360;
-	}
+	void convertRELATIVEtoABSLOUTE(float& angle);
 
-	void convertABSLOUTEtoRELATIVE(float& angle) { // 絶対角を相対角に変換
-		//double g_angle = 360 - gyro.getGyro();
-		//angle += g_angle;
-		angle += (float)gyro.getGyro();
-		if (angle > 360) angle -= 360;
-	}
+	void convertRELATIVEtoABSLOUTE(float& angle, const float& gyro);
 
-	void convertABSLOUTEtoRELATIVE(float& angle, const float& gyro) { // 絶対角を相対角に変換 IMUの値を受け取るver
-		angle += gyro;
-		if (angle > 360) angle -= 360;
-	}
+	void convertABSLOUTEtoRELATIVE(float& angle);
+
+	void convertABSLOUTEtoRELATIVE(float& angle, const float& gyro);
 
 	// ポイントクラウドに変換
 	void converttoPointCloud() {
@@ -255,7 +350,7 @@ private:
 		vector<float> model_right;
 
 		if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
-			model_left = { pointCloud[center].x };
+			model_left = { abs(pointCloud[center].x)};
 			float centralZ = pointCloud[center].z;
 			// 右方向
 			count_right = 0;
@@ -283,7 +378,7 @@ private:
 		} 
 		else 
 		{
-			model_left = { pointCloud[center].z };
+			model_left = { abs(pointCloud[center].z) };
 			float centralX = pointCloud[center].x;
 			// 右方向
 			count_right = 0;
@@ -313,6 +408,8 @@ private:
 		model_left.insert(model_left.end(), model_right.begin(), model_right.end());
 	}
 
+	void NarrowDownWalls(const int& leftCount, const int& rightCount, estimatedWalls& left, estimatedWalls& right);
+
 	double pd_degrees_to_rad(const double degrees) {
 		return degrees * 3.1415926535 / 180;
 	}
@@ -324,7 +421,7 @@ private:
 	void printVectorModel(vector<XZcoordinate>& vec, int& j, RangeLR range);
 
 	// モデルの嵐
-	vector<pcModelBox> models1 = {
+	const vector<pcModelBox> models = {
 		// p1
 		pcModelBox({ 22, 22 }, { 17.2555F, 17.2574F, 17.2594F, 17.2613F, 17.2632F, 17.2651F, 17.267F, 17.2694F, 17.2713F, 17.2731F, 17.275F, 17.2771F, 17.279F, 17.2809F, 17.2827F, 17.2846F, 17.2864F, 17.2883F, 17.2901F, 17.292F, 17.2938F, 17.2956F, 17.2973F, 17.2991F, 17.3009F, 17.3028F, 17.3046F, 17.3065F, 17.3083F, 17.3102F, 17.312F, 17.3139F, 17.3158F, 17.3179F, 17.3198F, 17.3217F, 17.3235F, 17.325F, 17.3269F, 17.3288F, 17.3308F, 17.3327F, 17.3346F, 17.3366F, 17.3386F, }),
 		pcModelBox({ 22, 28 }, { 17.44F, 17.4418F, 17.4436F, 17.4454F, 17.4472F, 17.449F, 17.4508F, 17.4531F, 17.4549F, 17.4567F, 17.4586F, 17.4633F, 17.4651F, 17.467F, 17.4688F, 17.4707F, 17.4725F, 17.4744F, 17.4762F, 17.4781F, 17.4799F, 17.4745F, 17.4735F, 17.4668F, 17.446F, 17.4225F, 17.3851F, 17.3449F, 17.291F, 17.2343F, 17.164F, 17.0913F, 17.005F, 16.8149F, 16.7108F, 16.593F, 16.4737F, 16.3399F, 16.2063F, 16.0581F, 15.9101F, 15.7469F, 15.5857F, 15.4077F, 15.2316F, 15.04F, 14.8487F, 14.6445F, 14.4371F, 14.22F, 13.7662F, }),

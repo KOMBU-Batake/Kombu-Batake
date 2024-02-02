@@ -40,7 +40,7 @@ typedef struct{
 void DFS();
 
 // マップデータとLiDARを基に進行方向を決定する エリア1飲みに対応
-static LiDAR_degree searchAround(double angle);
+LiDAR_degree searchAround(double angle);
 
 static void searchFront(PotentialDirectionsOfTravel& PDoT, WallState& front_mp, WallState& front_li, TileState& front_tile, double& angle);
 static void searchBack(PotentialDirectionsOfTravel& PDoT, WallState& back_mp, WallState& back_li, TileState& back_tile, double& angle);

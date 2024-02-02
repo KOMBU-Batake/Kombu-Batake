@@ -1,8 +1,196 @@
 #include "PointCloudLiDAR.h"
 
+pcModelBox::pcModelBox(const RangeLR tagrange, const vector<float> _model) {
+	model = _model;
+	range = tagrange;
+	ManagementNumber = ++counter;
+	if (range.left == -1) {
+		left = right = center = estimatedWalls::gomi; // åüçıèúÇØ
+		wallSet = { WallType::gomi,WallType::gomi,WallType::gomi };
+	}
+	else {
+		int tmp = ManagementNumber % 11;
+		switch (tmp)
+		{
+		case 0:
+			right = estimatedWalls::type12;
+			wallSet.right = WallType::type0;
+			break;
+		case 1:
+			right = estimatedWalls::type9;
+			wallSet.right = WallType::type1;
+			break;
+		case 2:
+			right = estimatedWalls::type9;
+			wallSet.right = WallType::type2;
+			break;
+		case 3:
+			right = estimatedWalls::type6;
+			wallSet.right = WallType::type3;
+			break;
+		case 4:
+			right = estimatedWalls::type12;
+			wallSet.right = WallType::type4;
+			break;
+		case 5:
+			right = estimatedWalls::type6;
+			wallSet.right = WallType::type5;
+			break;
+		case 6:
+			right = estimatedWalls::type3;
+			wallSet.right = WallType::type6;
+			break;
+		case 7:
+			right = estimatedWalls::type3;
+			wallSet.right = WallType::type7;
+			break;
+		case 8:
+			right = estimatedWalls::type0;
+			wallSet.right = WallType::type8;
+			break;
+		case 9:
+			right = estimatedWalls::type6;
+			wallSet.right = WallType::type9;
+			break;
+		case 10:
+			right = estimatedWalls::type0;
+			wallSet.right = WallType::type10;
+			break;
+		default:
+			break;
+		}
+
+		if (ManagementNumber >= 242) {
+			center = estimatedWalls::frontWall;
+			wallSet.center = WallType::center_s;
+		}
+		else if (ManagementNumber >= 121) {
+			center = estimatedWalls::backWall;
+			wallSet.center = WallType::center_o;
+		}
+
+		int tmp2 = (ManagementNumber / 11) % 11;
+		switch (tmp2)
+				{
+		case 0:
+				left = estimatedWalls::type12;
+				wallSet.left = WallType::type0;
+				break;
+		case 1:
+			left = estimatedWalls::type12;
+				wallSet.left = WallType::type1;
+				break;
+		case 2:
+			left = estimatedWalls::type6;
+			wallSet.left = WallType::type2;
+			break;
+		case 3:
+			left = estimatedWalls::type9;
+			wallSet.left = WallType::type3;
+			break;
+		case 4:
+			left = estimatedWalls::type9;
+			wallSet.left = WallType::type4;
+			break;
+		case 5:
+			left = estimatedWalls::type6;
+			wallSet.left = WallType::type5;
+			break;
+		case 6:
+			left = estimatedWalls::type6;
+			wallSet.left = WallType::type6;
+			break;
+		case 7:
+			left = estimatedWalls::type3;
+			wallSet.left = WallType::type7;
+			break;
+		case 8:
+			left = estimatedWalls::type3;
+			wallSet.left = WallType::type8;
+			break;
+		case 9:
+			left = estimatedWalls::type0;
+			wallSet.left = WallType::type9;
+			break;
+		case 10:
+			left = estimatedWalls::type0;
+			wallSet.left = WallType::type10;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void PointCloudLiDAR::update(const float angle) {
+	rangeImage = centralLidar->getRangeImage();
+	converttoPointCloud();
+	float gyro_angle = (float)gyro.getGyro();
+	fixPointCloudAngle(angle, gyro_angle);
+}
+
+void PointCloudLiDAR::NarrowDownWalls(const int& leftCount, const int& rightCount, estimatedWalls& left, estimatedWalls& right) {
+	if (leftCount < 25) {
+		left = estimatedWalls::type12;
+	}
+	else if (leftCount < 30) {
+		left = estimatedWalls::type9;
+	}
+	else if (leftCount <= 37) {
+		left = estimatedWalls::type6;
+	}
+	else if (leftCount < 50) {
+		left = estimatedWalls::type3;
+	}
+	else {
+		left = estimatedWalls::type0;
+	}
+
+	if (rightCount < 25) {
+		right = estimatedWalls::type12;
+	}
+	else if (rightCount < 30) {
+		right = estimatedWalls::type9;
+	}
+	else if (rightCount <= 37) {
+		right = estimatedWalls::type6;
+	}
+	else if (rightCount < 50) {
+		right = estimatedWalls::type3;
+	}
+	else {
+		right = estimatedWalls::type0;
+	}
+}
+
+void PointCloudLiDAR::convertRELATIVEtoABSLOUTE(float& angle) { // ëäëŒäpÇê‚ëŒäpÇ…ïœä∑
+	//double g_angle = 360 - gyro.getGyro();
+	//angle = 360 - angle; // å¸Ç´ÇîΩì]
+	//angle -= g_angle;
+	angle = (float)gyro.getGyro() - angle;
+	if (angle < 0) angle += 360;
+}
+
+void PointCloudLiDAR::convertRELATIVEtoABSLOUTE(float& angle, const float& gyro) { // ëäëŒäpÇê‚ëŒäpÇ…ïœä∑ IMUÇÃílÇéÛÇØéÊÇÈver
+	angle = gyro - angle;
+	if (angle < 0) angle += 360;
+}
+
+void PointCloudLiDAR::convertABSLOUTEtoRELATIVE(float& angle) { // ê‚ëŒäpÇëäëŒäpÇ…ïœä∑
+	//double g_angle = 360 - gyro.getGyro();
+	//angle += g_angle;
+	angle += (float)gyro.getGyro();
+	if (angle > 360) angle -= 360;
+}
+
+void PointCloudLiDAR::convertABSLOUTEtoRELATIVE(float& angle, const float& gyro) { // ê‚ëŒäpÇëäëŒäpÇ…ïœä∑ IMUÇÃílÇéÛÇØéÊÇÈver
+	angle += gyro;
+	if (angle > 360) angle -= 360;
+}
+
 void PointCloudLiDAR::modelSamplimg(recoedingMode mode) {
 	tank.setDireciton(90, 3);
-	move_update_display(gps.getPosition(), 1, mode);
+	move_update_display(gps.expectedPos, 1, mode);
 	for (int i = 2; i < 12; i++) {
 		GPSPosition goalPos = gps.moveTiles(1, 0);
 		tank.gpsTrace(goalPos, 3);
@@ -13,21 +201,11 @@ void PointCloudLiDAR::modelSamplimg(recoedingMode mode) {
 }
 
 void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMode mode) {
-	//cout << "==================================================" << endl;
-	//vector<float> model0(73);
-	//vector<float> model_LS(59);
-	//vector<float> model_SL(59);
-	//vector<float> model_SS(45);
-	//vector<XZcoordinate> model0_XZ(73);
-	//vector<XZcoordinate> model_LS_XZ(59);
-	//vector<XZcoordinate> model_SL_XZ(59);
-	//vector<XZcoordinate> model_SS_XZ(45);
-
 	update(goalPos);
 	vector<XZcoordinate> model_left = { pointCloud[384] }, model_right;
 	float centralZ = pointCloud[384].z;
 	// ç∂ï˚å¸ 
-	int count_left = 0;
+	int8_t count_left = 0;
 	while (1) {
 		count_left++;
 		if ((centralZ - pointCloud[384 - count_left].z) <= 5) {
@@ -41,7 +219,7 @@ void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMo
 		}
 	}
 	// âEï˚å¸
-	int count_right = 0;
+	int8_t count_right = 0;
 	while (1) {
 		count_right++;
 		if ((pointCloud[384 + count_right].z - centralZ) <= 5) {
@@ -60,25 +238,6 @@ void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMo
 	else if (mode == recoedingMode::excel_2d) {
 		printVectorExcel2D(model_left, j);
 	}
-	//for (int i = 348; i <= 420; i++) {
-	//	//model0[i - 348] = rangeImage[i + 1024];
-	//	model0_XZ[i - 348].x = pointCloud[i].x;
-	//	model0_XZ[i - 348].z = pointCloud[i].z;
-	//}
-	//copy(model0.begin(), model0.begin() + 59, model_LS.begin());
-	//copy(model0.begin() + 14, model0.end(), model_SL.begin());
-	//copy(model0.begin() + 14, model0.begin() + 59, model_SS.begin());
-	//copy(model0_XZ.begin(), model0_XZ.begin() + 59, model_LS_XZ.begin());
-	//copy(model0_XZ.begin() + 14, model0_XZ.end(), model_SL_XZ.begin());
-	//copy(model0_XZ.begin() + 14, model0_XZ.begin() + 59, model_SS_XZ.begin());
-	//displayAllfloatVector(model0);
-	//displayAllfloatVector(model_LS);
-	//displayAllfloatVector(model_SL);
-	//displayAllfloatVector(model_SS);
-	//displayAllXZcoordinateVector(model0_XZ, j);
-	//displayAllXZcoordinateVector(model_LS_XZ, j);
-	//displayAllXZcoordinateVector(model_SL_XZ, j);
-	//displayAllXZcoordinateVector(model_SS_XZ, j);
 }
 
 void PointCloudLiDAR::getRangeImage(vector<float>& examinee, const LiDAR_degree& direction) {
@@ -139,9 +298,17 @@ void PointCloudLiDAR::printVectorExcel1D(vector<float>& vec, int j)
 
 void PointCloudLiDAR::printVectorModel(vector<XZcoordinate>& vec, int& j, RangeLR range)
 {
-	cout << "num; " << j << ";pcModelBox({ " << range.left << ", " << range.right << " }, " << "{ ";
+	cout << "num; " << j << ";pcModelBox({ " << (int)range.left << ", " << (int)range.right << " }, " << "{ ";
 	for (int i = 0; i < vec.size(); i++) {
 		cout << abs(vec[i].x) << "F, ";
 	}
 	cout << "})," << endl;
+}
+
+
+void PointCloudLiDAR::printNum() {
+	for (int i = 0; i < 363; i++) {
+		//cout << "MN; " << models[i].ManagementNumber << ", left; " << (int)models[i].left << ", right; " << (int)models[i].right << ", center; " << (int)models[i].center << endl;
+		cout << "MN; " << models[i].ManagementNumber << ", left; " << (int)models[i].wallSet.left << ", right; " << (int)models[i].wallSet.right << ", center; " << (int)models[i].wallSet.center << endl;
+	}
 }
