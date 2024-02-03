@@ -10,20 +10,22 @@ void DFS() {
 		bool dontStack = false;
 		double angle = gyro.getGyro();
 		NEWS direction_of_travel = searchAround(angle,tail,stack,dontStack);
+		// îÌç–é“
+		cout << "x: " << endl;
 		mapper.printMap();
 		cout << "stack size" << stack.size() << "========================================" << endl;
 		bool isHole = false;
 		if (direction_of_travel == NEWS::NORTH) {
-			isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4);
+			isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4.5);
 		}
 		else  if (direction_of_travel == NEWS::EAST) {
-			isHole = tank.gpsTrace(gps.moveTiles(1, 0), 4);
+			isHole = tank.gpsTrace(gps.moveTiles(1, 0), 4.5);
 		}
 		else if (direction_of_travel == NEWS::SOUTH) {
-			isHole = tank.gpsTrace(gps.moveTiles(0, 1), 4);
+			isHole = tank.gpsTrace(gps.moveTiles(0, 1), 4.5);
 		}
 		else if (direction_of_travel == NEWS::WEST) {
-			isHole = tank.gpsTrace(gps.moveTiles(-1, 0), 4);
+			isHole = tank.gpsTrace(gps.moveTiles(-1, 0), 4.5);
 		}
 		else if (direction_of_travel == NEWS::NO) {
 			cout << "No way to go" << endl;
@@ -53,6 +55,8 @@ void DFS() {
 			}
 		}
 	}
+	mapper.replaceLineTo0();
+	mapper.printMap();
 	sendMap(mapper.map_A);
 }
 
@@ -238,29 +242,29 @@ void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool
 {
 	if (abs(angle - 90) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(1, 0), 4);
-		tank.gpsTrace(gps.moveTiles(-2, 0), 4);
+		tank.gpsTrace(gps.moveTiles(1, 0), 5);
+		tank.gpsTrace(gps.moveTiles(-2, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, -1), 4);
-		tank.gpsTrace(gps.moveTiles(0, 2), 4);
+		tank.gpsTrace(gps.moveTiles(0, -1), 5);
+		tank.gpsTrace(gps.moveTiles(0, 2), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(-1, 0), 4);
-		tank.gpsTrace(gps.moveTiles(2, 0), 4);
+		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
+		tank.gpsTrace(gps.moveTiles(2, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, 1), 4);
-		tank.gpsTrace(gps.moveTiles(0, -2), 4);
+		tank.gpsTrace(gps.moveTiles(0, 1), 5);
+		tank.gpsTrace(gps.moveTiles(0, -2), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
@@ -268,33 +272,34 @@ void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool
 
 void sendMap(vector<vector<string>>& map)
 {
-	//int width = (int)map.size();
-	//int height = (int)map[0].size();
-	//string flattened = "";
-	//for (int i = 0; i < width; i++) {
-	//	for (int j = 0; j < height; j++) {
+	int width = (int)map.size();
+	int height = (int)map[0].size();
+	string flattened = "";
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
 
-	//		flattened += map[i][j] + ","; // Flatten the array with comma separators
-	//	}
-	//}
+			flattened += map[i][j] + ","; // Flatten the array with comma separators
+		}
+	}
 
-	//flattened.pop_back(); // Remove the last unnecessary comma
+	flattened.pop_back(); // Remove the last unnecessary comma
 
-	//char *message=(char*)malloc(8 + flattened.size()); // Allocate memory for the message
+	char *message=(char*)malloc(8 + flattened.size()); // Allocate memory for the message
 
-	//memcpy(message, &width, sizeof(width)); // The first 2 integers in the message array are width, height
-	//memcpy(&message[4], &height, sizeof(height));
+	memcpy(message, &width, sizeof(width)); // The first 2 integers in the message array are width, height
+	memcpy(&message[4], &height, sizeof(height));
 
-	//memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
+	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
 
 	//while (robot->step(timeStep) != -1) {
-	//	emitter->send(message, 8+(int)flattened.size()); // Send map data
+	emitter->send(message, 8+(int)flattened.size()); // Send map data
 
-	//	char msg = 'M'; // Send map evaluate request
+	char msg = 'M'; // Send map evaluate request
+	emitter->send(&msg, sizeof(msg));
+
+	//	msg = 'E'; // Send an Exit message to get Map Bonus
 	//	emitter->send(&msg, sizeof(msg));
-
-
 	//}
-	char  msg = 'E'; // Send an Exit message to get Map Bonus
+	msg = 'E'; // Send an Exit message to get Map Bonus
 	emitter->send(&msg, sizeof(msg));
 }

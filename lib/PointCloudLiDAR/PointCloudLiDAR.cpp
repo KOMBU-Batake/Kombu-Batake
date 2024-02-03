@@ -189,15 +189,15 @@ void PointCloudLiDAR::convertABSLOUTEtoRELATIVE(float& angle, const float& gyro)
 }
 
 void PointCloudLiDAR::modelSamplimg(recoedingMode mode) {
-	tank.setDireciton(90, 3);
-	move_update_display(gps.expectedPos, 1, mode);
-	for (int i = 2; i < 12; i++) {
-		GPSPosition goalPos = gps.moveTiles(1, 0);
-		tank.gpsTrace(goalPos, 3);
-		move_update_display(goalPos,i,mode);
-	}
-	tank.gpsTrace(gps.moveTiles(-10, 0), 3);
-	tank.setDireciton(90, 3);
+	//tank.setDireciton(90, 3);
+	//move_update_display(gps.expectedPos, 1, mode);
+	//for (int i = 2; i < 12; i++) {
+	//	GPSPosition goalPos = gps.moveTiles(1, 0);
+	//	tank.gpsTrace(goalPos, 3);
+	//	move_update_display(goalPos,i,mode);
+	//}
+	//tank.gpsTrace(gps.moveTiles(-10, 0), 3);
+	//tank.setDireciton(90, 3);
 }
 
 void PointCloudLiDAR::move_update_display(GPSPosition goalPos,int j, recoedingMode mode) {

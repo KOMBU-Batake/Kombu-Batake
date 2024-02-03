@@ -6,7 +6,6 @@
 #include <webots/Robot.hpp>
 #include <webots/Lidar.hpp>
 #include "../IMU/IMU.h"
-#include "../Tank/Tank.h"
 
 /* #easy‚È‚í‚¯‚È‚¢‚¾‚ë */
 
@@ -107,6 +106,10 @@ public:
 		if (degree == 512) degree = 0; // 512”Ô‚Ì’l‚Í‘¶İ‚µ‚È‚¢(0‚Æ“™‚µ‚¢)
 		int num = (int)degree;
 		return rangeImage[num + 1024] * 100;
+	}
+
+	float getDIstanceSimple(int angle512) {
+		return rangeImage[angle512+1024] * 100;
 	}
 
 	WallState isWall(LiDAR_degree direction, float degree = 0);

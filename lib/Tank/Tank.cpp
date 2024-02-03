@@ -181,6 +181,9 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 // 出でよ!!サイクロマティック複雑度53の力!!
 bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmode, int timeout_ms, Direction_of_Travel direction)
 {
+	myCam.update();
+	myCam.detectAndReportRight();
+	myCam.detectAndReportLeft();
 	speed = abs(speed);
 	if (speed > maxVelocity) speed = maxVelocity;
 	// 現在地を取得
@@ -195,6 +198,10 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 	if (abs(angle_to_O - presentAngle) > 10) { // 目的地への角度と現在の角度が10度以上ずれていたら 補正する
 		//cout << "angle_to_0: " << angle_to_O << endl;
 		setDireciton(angle_to_O, speed);
+		cout << "c: " << endl;
+		myCam.update();
+		myCam.detectAndReportRight();
+		myCam.detectAndReportLeft();
 	}
 	// 方向の修正
   if (angle_to_O < 3 || angle_to_O > 357 || (angle_to_O > 177 && angle_to_O < 183)) {

@@ -22,6 +22,7 @@
 //#include "../lib/myMath/myMath.h"
 #include "../src/Map/Map.h"
 #include "../src/DFS/DFS.h"
+#include "../lib/MyCam/MyCam.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -53,8 +54,8 @@ DistanceSensor* rightToFSensor = robot->getDistanceSensor("rightToF");
 Camera* colorCam = robot->getCamera("ColorSensor");
 
 /* きゃめら */
-//Camera* leftCam = robot->getCamera("leftCamera");
-//Camera* rightCam = robot->getCamera("rightCamera");
+Camera* leftCam = robot->getCamera("leftCamera");
+Camera* rightCam = robot->getCamera("rightCamera");
 
 /* じーぴーえす */
 GPS* gpsXZ = robot->getGPS("gps");
@@ -74,6 +75,7 @@ Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 LiDAR lidar;
 Map mapper;
 PointCloudLiDAR pcLiDAR;
+MyCam myCam;
 //MyMath myMath;
 
 void enableDevices() {
@@ -83,8 +85,8 @@ void enableDevices() {
 	leftToFSensor->enable(timeStep);
 	rightToFSensor->enable(timeStep);
 	colorCam->enable(timeStep);
-	//leftCam->enable(timeStep);
-	//rightCam->enable(timeStep);
+	leftCam->enable(timeStep);
+	rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
 	receiver->enable(timeStep);

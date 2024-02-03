@@ -157,6 +157,7 @@
     <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
+    <ClCompile Include="lib\MyCam\MyCam.cpp" />
     <ClCompile Include="lib\myMath\myMath.cpp" />
     <ClCompile Include="lib\PointCloudLiDAR\PointCloudLiDAR.cpp" />
     <ClCompile Include="lib\Tank\Tank.cpp" />
@@ -171,12 +172,16 @@
     <ClInclude Include="lib\easyLiDAR\easyLiDAR.h" />
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h" />
     <ClInclude Include="lib\IMU\IMU.h" />
+    <ClInclude Include="lib\MyCam\MyCam.h" />
     <ClInclude Include="lib\myMath\myMath.h" />
     <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h" />
     <ClInclude Include="lib\Tank\Tank.h" />
     <ClInclude Include="lib\ToF\ToF.h" />
     <ClInclude Include="src\DFS\DFS.h" />
     <ClInclude Include="src\Map\Map.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Docs\map.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,11 +13,9 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/myMath/myMath.h"
 #include "../../lib/easyLiDAR/easyLiDAR.h"
-#include "../../lib/Tank/Tank.h"
 
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
-extern Tank tank;
 
 extern Robot* robot;
 extern Lidar* centralLidar;
@@ -136,6 +134,10 @@ public:
 	float getDistance(const float angle_R) {
 		int angle512 = (int)round(angle_R * 512 / 360);
 		return rangeImage[angle512 + 1024];
+	}
+
+	XZcoordinate getXZdistance(const int angle512) {
+		return pointCloud[angle512];
 	}
 
 	// モデル照合

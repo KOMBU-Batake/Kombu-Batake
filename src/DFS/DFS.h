@@ -18,6 +18,7 @@
 #include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../Map/Map.h"
+#include "../../lib/MyCam/MyCam.h"
 
 using namespace webots;
 using namespace std;
@@ -33,6 +34,7 @@ extern Map mapper;
 extern PointCloudLiDAR pcLiDAR;
 extern Receiver* receiver;
 extern Emitter* emitter;
+extern MyCam myCam;
 
 extern int timeStep;
 

@@ -133,6 +133,9 @@
     <ClCompile Include="src\kyomuri.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="lib\MyCam\MyCam.cpp">
+      <Filter>lib\MyCam</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -174,6 +177,12 @@
     <Filter Include="lib\ToF">
       <UniqueIdentifier>{56c2886d-3969-4c51-8777-77bdc20f15af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\MyCam">
+      <UniqueIdentifier>{f5f24d18-46e6-48c2-b900-0fd5f646f936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{b0fd8bf1-d45b-4b48-b646-f1dd70a4bd6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Map\Map.h">
@@ -209,5 +218,13 @@
     <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h">
       <Filter>lib\PointCloudLiDAR</Filter>
     </ClInclude>
+    <ClInclude Include="lib\MyCam\MyCam.h">
+      <Filter>lib\MyCam</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Docs\map.md">
+      <Filter>Docs</Filter>
+    </None>
   </ItemGroup>
 </Project>

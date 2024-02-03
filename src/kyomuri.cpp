@@ -8,7 +8,6 @@
 #include <thread>
 #include <mutex>
 #include "../lib/devices.h"
-#include <opencv2/opencv.hpp>
 
 using namespace webots;
 using namespace std;
@@ -30,7 +29,6 @@ int main(int argc, char **argv) {
 
   // マップデータ提出
   cout << "end" << endl;
-
 
   delete robot;
   return 0; // ばいばい～
