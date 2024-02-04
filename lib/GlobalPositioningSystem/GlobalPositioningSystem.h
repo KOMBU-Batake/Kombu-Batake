@@ -52,6 +52,10 @@ public:
 		return expectedPos;
 	}
 
+	void returnTolastPos() {
+		expectedPos = last_expectedPos;
+	}
+
 	GPSPosition startPos , expectedPos , last_expectedPos;
 
 	bool comparePositions(bool ifchange = false) {

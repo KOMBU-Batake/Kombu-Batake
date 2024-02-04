@@ -9,6 +9,8 @@
 #include <webots/Lidar.hpp>
 #include <webots/GPS.hpp>
 #include <webots/InertialUnit.hpp>
+#include <webots/Receiver.hpp>
+#include <webots/Emitter.hpp>
 
 #include "../lib/ColorSensor/ColorSensor.h"
 #include "../lib/IMU/IMU.h"
@@ -16,6 +18,11 @@
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
 #include "../lib/easyLiDAR/easyLiDAR.h"
+#include "../lib/PointCloudLiDAR/PointCloudLiDAR.h"
+//#include "../lib/myMath/myMath.h"
+#include "../src/Map/Map.h"
+#include "../src/DFS/DFS.h"
+#include "../lib/MyCam/MyCam.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -56,12 +63,20 @@ GPS* gpsXZ = robot->getGPS("gps");
 /* あいえむゆぅ */
 InertialUnit* IMU = robot->getInertialUnit("IMU");
 
+Emitter* emitter = robot->getEmitter("emitter");
+Receiver* receiver = robot->getReceiver("receiver");
+
+int16_t pcModelBox::counter = -1;
 ColorSensor colorsensor(colorCam);
 GyroZ gyro;
 GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 LiDAR lidar;
+Map mapper;
+PointCloudLiDAR pcLiDAR;
+MyCam myCam;
+//MyMath myMath;
 
 void enableDevices() {
 	leftEncoder->enable(timeStep);
@@ -74,6 +89,7 @@ void enableDevices() {
 	rightCam->enable(timeStep);
 	IMU->enable(timeStep);
 	gpsXZ->enable(timeStep);
-	robot->step(timeStep);
+	receiver->enable(timeStep);
+	robot->step(timeStep); // delay 16ms
 	gps.recoedStartPosition();
 }

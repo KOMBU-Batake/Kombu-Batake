@@ -110,13 +110,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)/include/controller/cpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\OpenCV4.8.0\build\include;$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)/include/controller/cpp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(WEBOTS_HOME)/lib/controller</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;controller.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\OpenCV4.8.0\build\x64\vc16\lib;$(WEBOTS_HOME)/lib/controller</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;controller.lib;opencv_world480.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -157,9 +157,14 @@
     <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
+    <ClCompile Include="lib\MyCam\MyCam.cpp" />
+    <ClCompile Include="lib\myMath\myMath.cpp" />
+    <ClCompile Include="lib\PointCloudLiDAR\PointCloudLiDAR.cpp" />
     <ClCompile Include="lib\Tank\Tank.cpp" />
     <ClCompile Include="lib\ToF\ToF.cpp" />
+    <ClCompile Include="src\DFS\DFS.cpp" />
     <ClCompile Include="src\kyomuri.cpp" />
+    <ClCompile Include="src\Map\Map.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />
@@ -167,8 +172,16 @@
     <ClInclude Include="lib\easyLiDAR\easyLiDAR.h" />
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h" />
     <ClInclude Include="lib\IMU\IMU.h" />
+    <ClInclude Include="lib\MyCam\MyCam.h" />
+    <ClInclude Include="lib\myMath\myMath.h" />
+    <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h" />
     <ClInclude Include="lib\Tank\Tank.h" />
     <ClInclude Include="lib\ToF\ToF.h" />
+    <ClInclude Include="src\DFS\DFS.h" />
+    <ClInclude Include="src\Map\Map.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Docs\map.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

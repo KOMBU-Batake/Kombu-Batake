@@ -19,44 +19,16 @@ int main(int argc, char **argv) {
   // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
 
   cout << "start" << endl;
+  
+  //pcLiDAR.update(gps.expectedPos);
+  //WallSet wallSet = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
+  //cout << (int)wallSet.left << "," << (int)wallSet.center << ", " << (int)wallSet.right << endl;
 
-  lidar.uodateLiDAR();
-  cout << "front-left; " << lidar.getDistance(LiDAR_degree::FRONT_LEFT) << endl;
-  cout << "front-right; " << lidar.getDistance(LiDAR_degree::FRONT_RIGHT) << endl;
-  cout << "--------" << endl;
-  cout << "front" << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
-  cout << "back" << (int)lidar.isWall(LiDAR_degree::BACK) << endl;
-  cout << "left" << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
-  cout << "right" << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
-  cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
-  cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
-  cout << "========" << endl;
-  tank.setDireciton(270, 3);
-  lidar.uodateLiDAR();
-  cout << "front-left; " << lidar.getDistance(LiDAR_degree::FRONT_LEFT) << endl;
-  cout << "front-right; " << lidar.getDistance(LiDAR_degree::FRONT_RIGHT) << endl;
-  cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
-  cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
-  cout << "========" << endl;
+  // [‚³—Dæ’Tõ
+  DFS();
 
-  tank.gpsTrace(gps.moveTiles(-1, 0), 3);
-  lidar.uodateLiDAR();
-  cout << "front; " << lidar.getDistance(LiDAR_degree::FRONT) << endl;
-  cout << "back; " << lidar.getDistance(LiDAR_degree::BACK) << endl;
-  cout << "left; " << lidar.getDistance(LiDAR_degree::LEFT) << endl;
-  cout << "right; " << lidar.getDistance(LiDAR_degree::RIGHT) << endl;
-  cout << "--------" << endl;
-
-  cout << "front; " << (int)lidar.isWall(LiDAR_degree::FRONT) << endl;
-  cout << "back; " << (int)lidar.isWall(LiDAR_degree::BACK) << endl;
-  cout << "left; " << (int)lidar.isWall(LiDAR_degree::LEFT) << endl;
-  cout << "right; " << (int)lidar.isWall(LiDAR_degree::RIGHT) << endl;
-  cout << "front-left; " << (int)lidar.isWall(LiDAR_degree::FRONT_LEFT) << endl;
-  cout << "front-right; " << (int)lidar.isWall(LiDAR_degree::FRONT_RIGHT) << endl;
-
-  while (robot->step(timeStep) != -1) {
-
-  };
+  // ƒ}ƒbƒvƒf[ƒ^’ño
+  cout << "end" << endl;
 
   delete robot;
   return 0; // ‚Î‚¢‚Î‚¢`

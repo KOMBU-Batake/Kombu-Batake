@@ -3,9 +3,26 @@
 #include <webots/Robot.hpp>
 #include <webots/Camera.hpp>
 #include <iostream>
+#include <algorithm>
+#include <map>
 
 using namespace webots;
 using namespace std;
+
+enum class TileState {
+	OTHER = 0,
+	WALL = 1,
+	HOLE = 2,
+	SWAMP = 3,
+	CHECKPOINT = 4,
+	START = 5,
+	AREA1to2 = 6,
+	AREA2to3 = 7,
+	AREA3to4 = 8,
+	AREA1to4 = 9,
+	UNKNOWN, // = "-
+	visited, // LiDARのクラスでは使わない
+};
 
 typedef struct
 {
@@ -30,12 +47,14 @@ typedef struct {
 	int value_diff;
 } ColorRange;
 
-enum Colors {
+enum class Colors {
 	WHITE,
 	BLACK,
 	CHECKPOINT,
 	BLUE,
 	PURPLE,
+	GREEN,
+	RED,
 	SWAMP,
 	OTHERS,
 };
@@ -81,30 +100,42 @@ public:
 		return hsv;
 	}
 
-	int getColor() {
+	Colors getColor() {
 		/* HSVベースで床の色を判断する */
 		ColorHSV hsv = getHSV();
 		if (hsv.value < 50) {
-			return BLACK;
+			return Colors::BLACK;
 		}
 		else if (hsv.saturation < 1 && hsv.value > 230) {
-			return CHECKPOINT;
+			return Colors::CHECKPOINT;
 		}
 		else if (hsv.saturation < 1 && hsv.value > 200) {
-			return WHITE;
+			return Colors::WHITE;
 		}
 		else if (isTheColor(blueRange, hsv)){
-			return BLUE;
+			return Colors::BLUE;
 		}
 		else if (isTheColor(purpleRange, hsv)) {
-			return PURPLE;
+			return Colors::PURPLE;
 		}
 		else if (isTheColor(swampRange, hsv)) {
-			return SWAMP;
+			return Colors::SWAMP;
 		}
-		else {
-			return OTHERS;
+		else if (isTheColor(greenRange, hsv)) {
+			return Colors::GREEN;
 		}
+		else if (isTheColor(redRange, hsv)) {
+			return Colors::RED;
+		}
+		else
+		{
+			return Colors::OTHERS;
+		}
+	}
+
+	TileState getTileColor() {
+		Colors col = getColor();
+		return tileColorMap[col];
 	}
 
 	ColorRGB RGB = { 0,0,0 };
@@ -114,6 +145,8 @@ private:
 	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // 許容誤差はとりま5 実験では2未満
 	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };
 	ColorRange swampRange= { 40, 5, 53, 5, 197, 5 };
+	ColorRange greenRange = { 120, 5, 87, 5, 244, 5 };
+	ColorRange redRange = { 0, 5, 77, 5, 248, 5 };
 
 	bool isTheColor(const ColorRange& range, const ColorHSV& hsv) {
 		if (abs(hsv.hue - range.hue) <= range.hue_diff && abs(hsv.saturation - range.saturation) <= range.saturation_diff && abs(hsv.value - range.value) <= range.value_diff) {
@@ -123,5 +156,15 @@ private:
 			return false;
 		}
 	}
-};
 
+	std::map<Colors, TileState> tileColorMap = {
+		{Colors::WHITE, TileState::OTHER},
+		{Colors::BLACK, TileState::HOLE},
+		{Colors::CHECKPOINT, TileState::CHECKPOINT},
+		{Colors::BLUE, TileState::AREA1to2},
+		{Colors::PURPLE, TileState::AREA2to3},
+		{Colors::GREEN,  TileState::AREA1to4},
+		{Colors::RED, TileState::AREA3to4},
+		{Colors::SWAMP, TileState::SWAMP},
+	};
+};
