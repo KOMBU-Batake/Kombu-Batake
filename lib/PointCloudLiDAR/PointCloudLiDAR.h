@@ -121,7 +121,7 @@ public:
 		else if (abs(gyro_angle - 270) < 5) {
 			fixPointCloudAngle(270, gyro_angle);
 		}
-		else if ((gyro_angle <= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
+		else if ((gyro_angle >= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
 			fixPointCloudAngle(0, gyro_angle);
 		}
 		GPSPosition nowPos = gps.getPosition();
@@ -331,7 +331,7 @@ private:
 				pointCloud[i].z -= dx;
 			}
 		}
-		else if ((gyro_angle <= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
+		else if ((gyro_angle >= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
 			//cout << "0" << endl;
 			for (int i = 0; i < 512; i++) {
 				pointCloud[i].x -= dx;

@@ -11,7 +11,6 @@ void DFS() {
 		double angle = gyro.getGyro();
 		NEWS direction_of_travel = searchAround(angle,tail,stack,dontStack);
 		// îÌç–é“
-		cout << "x: " << endl;
 		mapper.printMap();
 		cout << "stack size" << stack.size() << "========================================" << endl;
 		bool isHole = false;
@@ -88,7 +87,7 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dont
 		mapper.markAroundWall(right_mp, left_mp, front_mp, back_mp);
 		directionNEWS = { PDoT.right, PDoT.back, PDoT.left, PDoT.front };
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
 		directionNEWS = { PDoT.back, PDoT.left, PDoT.front, PDoT.right };
 	}
@@ -231,7 +230,7 @@ void HoleIsThere(const double& angle)
 	else if (abs(angle - 270) < 5) {
 		mapper.markTileAs({ mapper.currentTile_R.x - 1,mapper.currentTile_R.z }, TileState::HOLE);
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 1 }, TileState::HOLE);
 	}
 	tank.gpsTrace(gps.last_expectedPos,4);
@@ -242,29 +241,25 @@ void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool
 {
 	if (abs(angle - 90) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(1, 0), 5);
-		tank.gpsTrace(gps.moveTiles(-2, 0), 5);
+		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, -1), 5);
-		tank.gpsTrace(gps.moveTiles(0, 2), 5);
+		tank.gpsTrace(gps.moveTiles(0, 1), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
-		tank.gpsTrace(gps.moveTiles(2, 0), 5);
+		tank.gpsTrace(gps.moveTiles(1, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, 1), 5);
-		tank.gpsTrace(gps.moveTiles(0, -2), 5);
+		tank.gpsTrace(gps.moveTiles(0, -1), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}

@@ -90,7 +90,7 @@ void Map::markAroundTile(TileState front, TileState back, TileState left, TileSt
 		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, left);
 		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, right);
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, front);
 		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, back);
 		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, left);
@@ -430,7 +430,7 @@ void Map::getAroundWallState(const MapAddress& addr_R, WallState& frontWall, Wal
 		leftWall  = condition_getAroundWallState(add_L.x, add_L.z + 2);
 		rightWall = condition_getAroundWallState(add_L.x, add_L.z - 2);
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		frontWall = condition_getAroundWallState(add_L.x, add_L.z + 2);
 		backWall  = condition_getAroundWallState(add_L.x, add_L.z - 2);
 		leftWall  = condition_getAroundWallState(add_L.x + 2, add_L.z);
@@ -478,12 +478,12 @@ void Map::getAroundTileState(MapAddress addr_R, TileState& front, TileState& bac
 		left = getTileState({ addr_R.x, addr_R.z + 1 });
 		right = getTileState({ addr_R.x, addr_R.z - 1 });
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		front = getTileState({ addr_R.x, addr_R.z + 1 });
 		back = getTileState({ addr_R.x, addr_R.z - 1 });
 		left = getTileState({ addr_R.x + 1, addr_R.z });
 		right = getTileState({ addr_R.x - 1, addr_R.z });
 	}
-	else cout << "unreliable angle in getAroundTileState" << endl;
+	else cout << "unreliable angle in getAroundTileState, " << angle << endl;
 	//cout << "front = " << (int)front << " back = " << (int)back << " left = " << (int)left << " right = " << (int)right << endl;
 }

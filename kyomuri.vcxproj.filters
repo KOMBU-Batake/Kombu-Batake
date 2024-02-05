@@ -136,6 +136,9 @@
     <ClCompile Include="lib\MyCam\MyCam.cpp">
       <Filter>lib\MyCam</Filter>
     </ClCompile>
+    <ClCompile Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.cpp">
+      <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -183,6 +186,9 @@
     <Filter Include="Docs">
       <UniqueIdentifier>{b0fd8bf1-d45b-4b48-b646-f1dd70a4bd6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\PointCloudLiDAR\RecognizingSpace">
+      <UniqueIdentifier>{c9f98a3e-2e3a-4340-b571-d64067f1b551}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Map\Map.h">
@@ -220,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="lib\MyCam\MyCam.h">
       <Filter>lib\MyCam</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.h">
+      <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -72,7 +72,7 @@ public:
 		else if (abs(angle - 270) < 5) {
 			updatePostion(-1, 0);
 		}
-		else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 			updatePostion(0, 1);
 		}
 		//cout << "upedPos: " << currentTile_R.x << " " << currentTile_R.z << " " << angle << endl;
