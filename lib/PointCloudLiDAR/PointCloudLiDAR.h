@@ -13,6 +13,7 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/myMath/myMath.h"
 #include "../../lib/easyLiDAR/easyLiDAR.h"
+#include "./RecognizingSpace/RecognizingSpace.h"
 
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
@@ -20,11 +21,6 @@ extern GlobalPositioningSystem gps;
 extern Robot* robot;
 extern Lidar* centralLidar;
 extern int timeStep;
-
-typedef struct {
-	float x;
-	float z;
-}XZcoordinate;
 
 typedef struct {
 	int8_t left;
