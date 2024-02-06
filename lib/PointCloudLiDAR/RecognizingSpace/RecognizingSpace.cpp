@@ -7,7 +7,7 @@ RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns)
 	bool notWall = true;
 	// ‘O•ûŒü
 	XZcoordinate centerPoint = { 0, 0 };
-	while (robot->step(timeStep) != -1 && notWall) {
+	while (notWall) {
 		centerPoint = { centerPoint.x, centerPoint.z+6 };
 		for (auto & point : poitns) {
 			if ((pow(centerPoint.x - point.x, 2) + pow(centerPoint.z - point.z, 2)) < 12.25) {
@@ -21,7 +21,7 @@ RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns)
 	// Œã•ûŒü
 	notWall = true;
 	centerPoint = { 0, 0 };
-	while (robot->step(timeStep) != -1 && notWall) {
+	while (notWall) {
 		centerPoint = { centerPoint.x, centerPoint.z - 6 };
 		for (auto & point : poitns) {
 			if ((pow(centerPoint.x - point.x, 2) + pow(centerPoint.z - point.z, 2)) < 12.25) {
@@ -35,7 +35,7 @@ RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns)
 	// ‰E•ûŒü
 	notWall = true;
 	centerPoint = { 0, 0 };
-	while (robot->step(timeStep) != -1 && notWall) {
+	while (notWall) {
 		centerPoint = { centerPoint.x + 6, centerPoint.z };
 		for (auto& point : poitns) {
 			if (pow(centerPoint.x - point.x, 2) + pow(centerPoint.z - point.z, 2) < 12.25) {
@@ -49,7 +49,7 @@ RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns)
 	// ¶•ûŒü
 	notWall = true;
 	centerPoint = { 0, 0 };
-	while (robot->step(timeStep) != -1 && notWall) {
+	while (notWall) {
 		centerPoint = { centerPoint.x - 6, centerPoint.z };
 		for (auto& point : poitns) {
 			if (pow(centerPoint.x - point.x, 2) + pow(centerPoint.z - point.z, 2) < 12.25) {

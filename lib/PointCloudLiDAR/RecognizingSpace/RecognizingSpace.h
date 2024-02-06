@@ -35,5 +35,5 @@ typedef struct {
 }RoadAccess;
 
 // 前後左右方向に進むことができる距離
-// この値を基にマップを拡張してマッピングボーナスを少しでも確実にこそげ取る
+// この値を基にマップを拡張してマッピングボーナスを少しでも確実にこそげ取るぱわー
 RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns);

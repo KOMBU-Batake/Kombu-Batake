@@ -166,6 +166,7 @@
     <ClCompile Include="src\DFS\DFS.cpp" />
     <ClCompile Include="src\kyomuri.cpp" />
     <ClCompile Include="src\Map\Map.cpp" />
+    <ClCompile Include="src\Map\Map2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />
@@ -181,6 +182,7 @@
     <ClInclude Include="lib\ToF\ToF.h" />
     <ClInclude Include="src\DFS\DFS.h" />
     <ClInclude Include="src\Map\Map.h" />
+    <ClInclude Include="src\Map\Map2.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Docs\map.md" />
