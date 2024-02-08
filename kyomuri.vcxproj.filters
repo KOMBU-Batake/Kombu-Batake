@@ -139,9 +139,6 @@
     <ClCompile Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.cpp">
       <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
     </ClCompile>
-    <ClCompile Include="src\Map\Map2.cpp">
-      <Filter>src\Map</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -232,9 +229,6 @@
     </ClInclude>
     <ClInclude Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.h">
       <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Map\Map2.h">
-      <Filter>src\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

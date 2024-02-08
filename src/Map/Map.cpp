@@ -26,16 +26,16 @@ void Map::addNorth(const int i) { // 上に追加
 	map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
 	// map_Aの要素を下に4iずつずらす
 	rotate(map_A.rbegin(), map_A.rbegin() + 4 * i, map_A.rend());
-	startTile_A.z++;
-	currentTile_A.z++;
-	left_top_R.z--;
+	startTile_A.z += 2;
+	currentTile_A.z += 2;
+	left_top_R.z -= 2;
 }
 
 void Map::addSouth(const int i) { // 下に追加
 	// map_Aの下に1行追加
 	//cout << "map_A.size() = " << map_A.size() << endl;
 	map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
-	right_bottom_R.z += 1;
+	right_bottom_R.z += 2;
 }
 
 void Map::addWest(const int j) { // 左に追加
@@ -47,9 +47,9 @@ void Map::addWest(const int j) { // 左に追加
 	for (int i = 0; i < map_A.size(); ++i) {
 		rotate(map_A[i].rbegin(), map_A[i].rbegin() + 4 * j, map_A[i].rend());
 	}
-	startTile_A.x++;
-	currentTile_A.x++;
-	left_top_R.x--;
+	startTile_A.x += 2;
+	currentTile_A.x += 2;
+	left_top_R.x -= 2;
 }
 
 void Map::addEast(const int j) { // 右に追加
@@ -57,13 +57,19 @@ void Map::addEast(const int j) { // 右に追加
 	for (int i = 0; i < map_A.size(); ++i) {
 		map_A[i].resize(map_A[i].size() + 4 * j, "-");
 	}
-	right_bottom_R.x++;
+	right_bottom_R.x += 2;
 }
 
 void Map::printMap() {
+	MapAddress add_L = convertRtoListPoint(currentTile_R);
+	cout << "currentTile_R = (" << currentTile_R.x << ", " << currentTile_R.z << ")" << endl;
+	cout << "currentTile_A = (" << currentTile_A.x << ", " << currentTile_A.z << ")" << endl;
+	cout << "add_L = (" << add_L.x << ", " << add_L.z << ")" << endl;
 	for (int i = 0; i < map_A.size(); ++i) {
 		for (int j = 0; j < map_A[i].size(); ++j) {
-			cout << map_A[i][j] << " ";
+			if (add_L.z == i && add_L.x == j) {
+				if (map_A[i][j] == "1") { cout << "G "; } else cout << "R ";
+			} else cout << map_A[i][j] << " ";
 		}
 		cout << endl;
 	}
@@ -73,28 +79,28 @@ void Map::markAroundTile(TileState front, TileState back, TileState left, TileSt
 	MapAddress tmpAddr = currentTile_R;
 	if (angle == -1) angle = (float)gyro.getGyro();
 	if (abs(angle - 90) < 5) {
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, front);
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, back);
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, left);
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, right);
+		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, front, angle);
+		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, back, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, left, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, right, angle);
 	}
 	else if (abs(angle - 180) < 5) {
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, front);
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, back);
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, left);
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, right);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, front, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, back, angle);
+		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, left, angle);
+		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, right, angle);
 	}
 	else if (abs(angle - 270) < 5) {
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, front);
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, back);
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, left);
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, right);
+		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, front, angle);
+		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, back, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, left, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, right, angle);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, front);
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, back);
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, left);
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, right);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, front, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, back, angle);
+		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, left, angle);
+		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, right, angle);
 	}
 	else cout << "unreliable angle in makeAround4" << endl;
 }
@@ -444,14 +450,12 @@ void Map::replaceLineTo0() {
 	}
 }
 
-TileState Map::getTileState(MapAddress addr_R) {
+TileState Map::getTileState(MapAddress addr_R, int16_t relative_angle) {
 	if (!existTile_R(addr_R)) {
 		return TileState::UNKNOWN;
 	}
 	MapAddress addr_L = convertRtoListPoint(addr_R);
-	//cout << "add_L" << addr_L.z + 1 << " " << addr_L.x + 1 << endl;
-	//cout << "mapa size" << map_A.size() << " " << map_A[0].size() << endl;
-	//return static_cast<TileState>(stoi(map_A[addr_L.z + 1][addr_L.x + 1]));
+	if (relative_angle == -1) return TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 1]];
 	return TileStateMap2[map_A[addr_L.z + 1][addr_L.x + 1]];
 }
 
@@ -461,28 +465,28 @@ void Map::getAroundTileState(MapAddress addr_R, TileState& front, TileState& bac
 	}
 	//cout << "angle = " << angle << endl;
 	if (abs(angle - 90) < 5) {
-		front = getTileState({ addr_R.x + 1, addr_R.z });
-		back = getTileState({ addr_R.x - 1, addr_R.z });
-		left = getTileState({ addr_R.x, addr_R.z - 1 });
-		right = getTileState({ addr_R.x, addr_R.z + 1 });
+		front = getTileState({ addr_R.x + 1, addr_R.z }, -1);
+		back = getTileState({ addr_R.x - 1, addr_R.z }, 1);
+		left = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
+		right = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
 	}
 	else if (abs(angle - 180) < 5) {
-		front = getTileState({ addr_R.x, addr_R.z - 1 });
-		back = getTileState({ addr_R.x, addr_R.z + 1 });
-		left = getTileState({ addr_R.x - 1, addr_R.z });
-		right = getTileState({ addr_R.x + 1, addr_R.z });
+		front = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
+		back = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
+		left = getTileState({ addr_R.x - 1, addr_R.z }, 1);
+		right = getTileState({ addr_R.x + 1, addr_R.z }, -1);
 	}
 	else if (abs(angle - 270) < 5) {
-		front = getTileState({ addr_R.x - 1, addr_R.z });
-		back = getTileState({ addr_R.x + 1, addr_R.z });
-		left = getTileState({ addr_R.x, addr_R.z + 1 });
-		right = getTileState({ addr_R.x, addr_R.z - 1 });
+		front = getTileState({ addr_R.x - 1, addr_R.z }, 1);
+		back = getTileState({ addr_R.x + 1, addr_R.z }, -1);
+		left = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
+		right = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		front = getTileState({ addr_R.x, addr_R.z + 1 });
-		back = getTileState({ addr_R.x, addr_R.z - 1 });
-		left = getTileState({ addr_R.x + 1, addr_R.z });
-		right = getTileState({ addr_R.x - 1, addr_R.z });
+		front = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
+		back = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
+		left = getTileState({ addr_R.x + 1, addr_R.z }, -1);
+		right = getTileState({ addr_R.x - 1, addr_R.z }, 1);
 	}
 	else cout << "unreliable angle in getAroundTileState, " << angle << endl;
 	//cout << "front = " << (int)front << " back = " << (int)back << " left = " << (int)left << " right = " << (int)right << endl;

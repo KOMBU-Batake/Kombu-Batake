@@ -43,7 +43,7 @@ void DFS() {
 			TileState col = colorsensor.getTileColor();
 			TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
 			if (recordedTile != TileState::START){
-				mapper.markTileAs(mapper.currentTile_R, col);
+				mapper.markTileAs(mapper.currentTile_R, col, angle);
 			}
 			if (col == TileState::AREA1to4 || col == TileState::AREA3to4) {
 				Area4IsThere(angle, tail, stack,dontStack);
@@ -67,6 +67,7 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dont
 	TileState front_tile, back_tile, left_tile, right_tile;
 
 	mapper.getAroundTileState(mapper.currentTile_R, front_tile, back_tile, left_tile, right_tile, angle); // マップ上での周囲のタイルの有無を取得
+	cout << "front tile: " << (int)front_tile << ", back tile: " << (int)back_tile << ", left tile: " << (int)left_tile << ", right tile: " << (int)right_tile << endl;
 
 	searchFront(PDoT, front_mp, front_tile); // 前
 	searchBack(PDoT, back_mp, back_tile); // 後ろ
@@ -222,16 +223,16 @@ void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const Til
 void HoleIsThere(const double& angle)
 {
 	if (abs(angle - 90) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x + 1,mapper.currentTile_R.z }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x + 1,mapper.currentTile_R.z }, TileState::HOLE, angle);
 	}
 	else if (abs(angle - 180) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 1 }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 1 }, TileState::HOLE, angle);
 	}
 	else if (abs(angle - 270) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x - 1,mapper.currentTile_R.z }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x - 1,mapper.currentTile_R.z }, TileState::HOLE, angle);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 1 }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 1 }, TileState::HOLE, angle);
 	}
 	tank.gpsTrace(gps.last_expectedPos,4);
 	gps.returnTolastPos();

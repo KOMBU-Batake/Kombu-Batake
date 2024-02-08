@@ -3,7 +3,7 @@
 // 6cm‚¸‚Â“®‚©‚·
 RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns)
 {
-	RoadAccess roadAccess;
+	RoadAccess roadAccess = {6,6,6,6};
 	bool notWall = true;
 	// ‘O•ûŒü
 	XZcoordinate centerPoint = { 0, 0 };
