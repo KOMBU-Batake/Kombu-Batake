@@ -223,16 +223,16 @@ void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const Til
 void HoleIsThere(const double& angle)
 {
 	if (abs(angle - 90) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x + 1,mapper.currentTile_R.z }, TileState::HOLE, angle);
+		mapper.markTileAs({ mapper.currentTile_R.x + 2,mapper.currentTile_R.z }, TileState::HOLE, angle);
 	}
 	else if (abs(angle - 180) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 1 }, TileState::HOLE, angle);
+		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 2 }, TileState::HOLE, angle);
 	}
 	else if (abs(angle - 270) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x - 1,mapper.currentTile_R.z }, TileState::HOLE, angle);
+		mapper.markTileAs({ mapper.currentTile_R.x - 2,mapper.currentTile_R.z }, TileState::HOLE, angle);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 1 }, TileState::HOLE, angle);
+		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 2 }, TileState::HOLE, angle);
 	}
 	tank.gpsTrace(gps.last_expectedPos,4);
 	gps.returnTolastPos();

@@ -48,11 +48,17 @@ enum class WallType :uint8_t{
 	gomi, // 15
 };
 
-typedef struct {
+typedef struct WallSet WallSet;
+
+struct WallSet {
 	WallType left;
 	WallType center;
 	WallType right;
-} WallSet;
+
+	bool operator==(const WallSet& other) const {
+		return left == other.left && right == other.right && center == other.center;
+	}
+};
 
 enum class recoedingMode {
 	model,

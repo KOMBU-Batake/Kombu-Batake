@@ -131,9 +131,24 @@ void Map::markNorthWall(MapAddress addr_R, WallSet wallset) {
 				{"-", "-", "-", "-", "-"},
 		};
 		paintTile(wall, wallset);
+		bool isOnlyFront = isBackClear(wall);
 		// rotate90Degrees();
 		add_L = convertRtoListPoint(addr_R);
-		drawTile(wall, { add_L.x,add_L.z - 4 });
+		if (isOnlyFront) {
+			add_L.z -= 4;
+			for (int i = 0; i <= 2; ++i) {
+				for (int j = -2; j <= 2; ++j) {
+					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
+						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+					}
+				}
+			}
+		}
+		else {
+			if (!existTile_R2({ addr_R.x,addr_R.z - 1 })) addNorth(1);
+			add_L = convertRtoListPoint(addr_R);
+			drawTile(wall, { add_L.x,add_L.z - 4 });
+		}
 	}
 }
 
@@ -156,10 +171,25 @@ void Map::markSouthWall(MapAddress addr_R, WallSet wallset) {
 			{"-", "-", "-", "-", "-"},
 		};
 		paintTile(wall, wallset);
+		bool isOnlyFront = isBackClear(wall);
 		rotate90Degrees(wall);
 		rotate90Degrees(wall);
 		add_L = convertRtoListPoint(addr_R);
-		drawTile(wall, { add_L.x,add_L.z + 4 });
+		if (isOnlyFront) {
+			add_L.z += 4;
+			for (int8_t i = -2; i <= 0; i++) {
+				for (int8_t j = -2; j <= 2; j++){
+					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
+						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+					}
+				}
+			}
+		}
+		else {
+			if (!existTile_R2({ addr_R.x,addr_R.z + 1 })) addSouth(1);
+			add_L = convertRtoListPoint(addr_R);
+			drawTile(wall, { add_L.x,add_L.z + 4 });
+		}
 	}
 }
 
@@ -182,11 +212,26 @@ void Map::markWestWall(MapAddress addr_R, WallSet wallset) {
 			{"-", "-", "-", "-", "-"},
 		};
 		paintTile(wall, wallset);
+		bool isOnlyFront = isBackClear(wall);
 		rotate90Degrees(wall);
 		rotate90Degrees(wall);
 		rotate90Degrees(wall);
 		add_L = convertRtoListPoint(addr_R);
-		drawTile(wall, { add_L.x - 4,add_L.z });
+		if (isOnlyFront) {
+			add_L.x -= 4;
+			for (int8_t i = -2; i <= 2; i++) {
+				for (int8_t j = 0; j <= 2; j++) {
+					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
+						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+					}
+				}
+			}
+		}
+		else {
+			if (!existTile_R2({ addr_R.x - 1,addr_R.z })) addWest(1);
+			add_L = convertRtoListPoint(addr_R);
+			drawTile(wall, { add_L.x - 4,add_L.z });
+		}
 	}
 }
 
@@ -209,9 +254,24 @@ if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && 
 			{"-", "-", "-", "-", "-"},
 		};
 		paintTile(wall, wallset);
+		bool isOnlyFront = isBackClear(wall);
 		rotate90Degrees(wall);
 		add_L = convertRtoListPoint(addr_R);
-		drawTile(wall, { add_L.x + 4,add_L.z });
+		if (isOnlyFront) {
+			add_L.x += 4;
+			for (int8_t i = -2; i <= 2; i++) {
+				for (int8_t j = -2; j <= 0; j++) {
+					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
+						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+					}
+				}
+			}
+		}
+		else {
+			if (!existTile_R2({ addr_R.x + 1,addr_R.z })) addEast(1);
+			add_L = convertRtoListPoint(addr_R);
+			drawTile(wall, { add_L.x + 4,add_L.z });
+		}
 	}
 }
 
@@ -378,10 +438,21 @@ void Map::drawTile(vector<vector<string>>& tile, MapAddress add_L){
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
 			if (map_A[add_L.z - 2 + i][add_L.x - 2 + j] == "-" && (tile[i][j] == "1" || tile[i][j] == "0")) {
-				map_A[add_L.z - 2 + i][add_L.x - 2 + j] = tile[i][j];
+				if (tile[i][j] != "-") map_A[add_L.z - 2 + i][add_L.x - 2 + j] = tile[i][j];
 			}
 		}
 	}
+}
+
+// ƒ^ƒCƒ‹‚ÌŒã‚ë”¼•ª‚É•Ç‚ª‚ ‚Á‚½‚çfalseA‚È‚©‚Á‚½‚çtrue‚ð•Ô‚·
+bool Map::isBackClear(vector<vector<string>>& tile){ 
+	for (const auto& row : tile[0]) {
+		if (row == "1") return false;
+	}
+	for (const auto& row : tile[1]) {
+		if (row == "1") return false;
+	}
+	return true;
 }
 
 void Map::edge(MapAddress add_R, MapAddress add_L) {
@@ -455,7 +526,10 @@ TileState Map::getTileState(MapAddress addr_R, int16_t relative_angle) {
 		return TileState::UNKNOWN;
 	}
 	MapAddress addr_L = convertRtoListPoint(addr_R);
-	if (relative_angle == -1) return TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 1]];
+	
+	if (relative_angle == -1) {
+		return TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 1]];
+	}
 	return TileStateMap2[map_A[addr_L.z + 1][addr_L.x + 1]];
 }
 
@@ -465,28 +539,28 @@ void Map::getAroundTileState(MapAddress addr_R, TileState& front, TileState& bac
 	}
 	//cout << "angle = " << angle << endl;
 	if (abs(angle - 90) < 5) {
-		front = getTileState({ addr_R.x + 1, addr_R.z }, -1);
-		back = getTileState({ addr_R.x - 1, addr_R.z }, 1);
-		left = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
-		right = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
+		front = getTileState({ addr_R.x + 2, addr_R.z }, -1);
+		back = getTileState({ addr_R.x - 2, addr_R.z }, 1);
+		left = getTileState({ addr_R.x, addr_R.z - 2 }, 1);
+		right = getTileState({ addr_R.x, addr_R.z + 2 }, -1);
 	}
 	else if (abs(angle - 180) < 5) {
-		front = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
-		back = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
-		left = getTileState({ addr_R.x - 1, addr_R.z }, 1);
-		right = getTileState({ addr_R.x + 1, addr_R.z }, -1);
+		front = getTileState({ addr_R.x, addr_R.z - 2 }, 1);
+		back = getTileState({ addr_R.x, addr_R.z + 2 }, -1);
+		left = getTileState({ addr_R.x - 2, addr_R.z }, 1);
+		right = getTileState({ addr_R.x + 2, addr_R.z }, -1);
 	}
 	else if (abs(angle - 270) < 5) {
-		front = getTileState({ addr_R.x - 1, addr_R.z }, 1);
-		back = getTileState({ addr_R.x + 1, addr_R.z }, -1);
-		left = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
-		right = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
+		front = getTileState({ addr_R.x - 2, addr_R.z }, 1);
+		back = getTileState({ addr_R.x + 2, addr_R.z }, -1);
+		left = getTileState({ addr_R.x, addr_R.z + 2 }, -1);
+		right = getTileState({ addr_R.x, addr_R.z - 2 }, 1);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		front = getTileState({ addr_R.x, addr_R.z + 1 }, -1);
-		back = getTileState({ addr_R.x, addr_R.z - 1 }, 1);
-		left = getTileState({ addr_R.x + 1, addr_R.z }, -1);
-		right = getTileState({ addr_R.x - 1, addr_R.z }, 1);
+		front = getTileState({ addr_R.x, addr_R.z + 2 }, -1);
+		back = getTileState({ addr_R.x, addr_R.z - 2 }, 1);
+		left = getTileState({ addr_R.x + 2, addr_R.z }, -1);
+		right = getTileState({ addr_R.x - 2, addr_R.z }, 1);
 	}
 	else cout << "unreliable angle in getAroundTileState, " << angle << endl;
 	//cout << "front = " << (int)front << " back = " << (int)back << " left = " << (int)left << " right = " << (int)right << endl;

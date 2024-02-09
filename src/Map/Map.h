@@ -33,10 +33,16 @@ extern GlobalPositioningSystem gps;
 
 extern int timeStep;
 
-typedef struct {
+typedef struct MapAddress MapAddress;
+
+struct MapAddress {
 	int x;
 	int z;
-}MapAddress;
+
+	bool operator==(const MapAddress& other) const {
+		return x == other.x && z == other.z;
+	}
+};
 
 enum class VictimState {
 	H, // 重度の被災者
@@ -92,6 +98,22 @@ public:
 		MapAddress add_L = convertRtoListPoint(add_R);
 		string tile = "0";
 		
+		// 穴の場合は無条件に2を入れる
+		if (tilestate == TileState::HOLE) {
+			if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = "2";
+			if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = "2";
+			if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = "2";
+			if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = "2";
+
+			// 壁の情報が入るマス
+			if (map_A[add_L.z - 1][add_L.x] == "-") map_A[add_L.z - 1][add_L.x] = "0";
+			if (map_A[add_L.z + 1][add_L.x] == "-") map_A[add_L.z + 1][add_L.x] = "0";
+			if (map_A[add_L.z][add_L.x - 1] == "-") map_A[add_L.z][add_L.x - 1] = "0";
+			if (map_A[add_L.z][add_L.x + 1] == "-") map_A[add_L.z][add_L.x + 1] = "0";
+			if (map_A[add_L.z][add_L.x] == "-") map_A[add_L.z][add_L.x] = "0";
+			return;
+		}
+
 		// 偶数かつ偶数 or 奇数かつ偶数かつZ軸 or 偶数かつ奇数かつ角度がX軸
 		if (( add_R.x % 2 == 0 && add_R.z % 2 == 0 ) ||
 				( add_R.x % 2 == 1 && add_R.z % 2 == 0 && (abs(angle - 180) < 5 || ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ) || 
@@ -239,6 +261,7 @@ private: // ********************************************************************
 	}
 
 	bool existTile_R(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (addr_R.x < left_top_R.x) {
 			return false;
 		}
@@ -254,10 +277,32 @@ private: // ********************************************************************
 		return true;
 	}
 
+	bool existTile_R2(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (addr_L.x - 2 < 0) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.z - 2 < 0) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.x + 3 > map_A[0].size()) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.z + 3 > map_A.size()) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		return true;
+	}
+
 	void rotate90Degrees(vector<vector<string>>& arr);
 
 	void paintTile(vector<vector<string>>& tile, const WallSet& wallset);
 	void drawTile(vector<vector<string>>& tile, MapAddress add_L);
+	bool isBackClear(vector<vector<string>>& tile);
 
 	WallState condition_getAroundWallState(int x, int z) {
 		if (WallAndVictim.find(map_A[z][x]) != WallAndVictim.end()) 
