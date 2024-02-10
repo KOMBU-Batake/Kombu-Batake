@@ -12,7 +12,7 @@ void DFS() {
 		NEWS direction_of_travel = searchAround(angle,tail,stack,dontStack);
 		// îÌç–é“
 		mapper.printMap();
-		cout << "stack size" << stack.size() << "========================================" << endl;
+		cout << "stack size. " << stack.size() << " ========================================" << endl;
 		bool isHole = false;
 		if (direction_of_travel == NEWS::NORTH) {
 			isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4.5);
@@ -136,11 +136,22 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dont
 	}
 }
 
+bool condirtion_canGo(const WallSet& wallset)
+{
+	uint8_t left = static_cast<uint8_t>(wallset.left);
+	uint8_t right = static_cast<uint8_t>(wallset.right);
+	uint8_t center = static_cast<uint8_t>(wallset.center);
+	if ((left <= 5U || left == 11U) && (right <= 5U || right == 11U) && center >= 13U) {
+		return true;
+	}
+	return false;
+}
+
 void searchFront(PotentialDirectionsOfTravel& PDoT, WallSet& front_mp, const TileState& front_tile)
 {
 	WallSet front = pcLiDAR.identifyWall(LiDAR_degree::FRONT);
 	std::cout << "front: " << (int)front.left << " " << (int)front.center << " " << (int)front.right;
-	if ((front.left == WallType::type0 || front.left == WallType::typeNo) && front.center == WallType::center_n && (front.right == WallType::type0 || front.right == WallType::typeNo)) {
+	if (condirtion_canGo(front)) {
 		if (front_tile == TileState::UNKNOWN) { // ñ¢íTçı
 			PDoT.front = canGo::GO;
 		}
@@ -161,7 +172,7 @@ void searchBack(PotentialDirectionsOfTravel& PDoT, WallSet& back_mp, const TileS
 {
 	WallSet back = pcLiDAR.identifyWall(LiDAR_degree::BACK);
 	std::cout << ", back: " << (int)back.left << " " << (int)back.center << " " << (int)back.right;
-	if ((back.left == WallType::type0 || back.left == WallType::typeNo) && back.center == WallType::center_n && (back.right == WallType::type0 || back.right == WallType::typeNo)) {
+	if (condirtion_canGo(back)) {
 		if (back_tile == TileState::UNKNOWN) { // ñ¢íTçı
 			PDoT.back = canGo::GO;
 		}
@@ -182,7 +193,7 @@ void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, const TileS
 {
 	WallSet left = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
 	std::cout << ", left: " << (int)left.left << " " << (int)left.center << " " << (int)left.right;
-	if ((left.left == WallType::type0 || left.left == WallType::typeNo) && left.center == WallType::center_n && (left.right == WallType::type0 || left.right == WallType::typeNo)) {
+	if (condirtion_canGo(left)) {
 		if (left_tile == TileState::UNKNOWN) { // ñ¢íTçı
 			PDoT.left = canGo::GO;
 		}
@@ -203,7 +214,7 @@ void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const Til
 {
 	WallSet right = pcLiDAR.identifyWall(LiDAR_degree::RIGHT);
 	std::cout << ", right: " << (int)right.left << " " << (int)right.center << " " << (int)right.right << endl;
-	if ((right.left == WallType::type0 || right.left == WallType::typeNo) && right.center == WallType::center_n && (right.right == WallType::type0 || right.right == WallType::typeNo)) {
+	if (condirtion_canGo(right)) {
 		if (right_tile == TileState::UNKNOWN) { // ñ¢íTçı
 			PDoT.right = canGo::GO;
 		}

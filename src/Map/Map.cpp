@@ -64,7 +64,7 @@ void Map::printMap() {
 	MapAddress add_L = convertRtoListPoint(currentTile_R);
 	cout << "currentTile_R = (" << currentTile_R.x << ", " << currentTile_R.z << ")" << endl;
 	cout << "currentTile_A = (" << currentTile_A.x << ", " << currentTile_A.z << ")" << endl;
-	cout << "add_L = (" << add_L.x << ", " << add_L.z << ")" << endl;
+	//cout << "add_L = (" << add_L.x << ", " << add_L.z << ")" << endl;
 	for (int i = 0; i < map_A.size(); ++i) {
 		for (int j = 0; j < map_A[i].size(); ++j) {
 			if (add_L.z == i && add_L.x == j) {
@@ -79,28 +79,28 @@ void Map::markAroundTile(TileState front, TileState back, TileState left, TileSt
 	MapAddress tmpAddr = currentTile_R;
 	if (angle == -1) angle = (float)gyro.getGyro();
 	if (abs(angle - 90) < 5) {
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, front, angle);
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, back, angle);
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, left, angle);
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, right, angle);
+		markTileAs({ tmpAddr.x + 2, tmpAddr.z }, front, angle);
+		markTileAs({ tmpAddr.x - 2, tmpAddr.z }, back, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 2 }, left, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 2 }, right, angle);
 	}
 	else if (abs(angle - 180) < 5) {
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, front, angle);
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, back, angle);
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, left, angle);
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, right, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 2 }, front, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 2 }, back, angle);
+		markTileAs({ tmpAddr.x - 2, tmpAddr.z }, left, angle);
+		markTileAs({ tmpAddr.x + 2, tmpAddr.z }, right, angle);
 	}
 	else if (abs(angle - 270) < 5) {
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, front, angle);
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, back, angle);
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, left, angle);
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, right, angle);
+		markTileAs({ tmpAddr.x - 2, tmpAddr.z }, front, angle);
+		markTileAs({ tmpAddr.x + 2, tmpAddr.z }, back, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 2 }, left, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 2 }, right, angle);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		markTileAs({ tmpAddr.x, tmpAddr.z + 1 }, front, angle);
-		markTileAs({ tmpAddr.x, tmpAddr.z - 1 }, back, angle);
-		markTileAs({ tmpAddr.x + 1, tmpAddr.z }, left, angle);
-		markTileAs({ tmpAddr.x - 1, tmpAddr.z }, right, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z + 2 }, front, angle);
+		markTileAs({ tmpAddr.x, tmpAddr.z - 2 }, back, angle);
+		markTileAs({ tmpAddr.x + 2, tmpAddr.z }, left, angle);
+		markTileAs({ tmpAddr.x - 2, tmpAddr.z }, right, angle);
 	}
 	else cout << "unreliable angle in makeAround4" << endl;
 }
@@ -122,7 +122,7 @@ void Map::markNorthWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z - 2][add_L.x + 2] = "1";
 	}
 	else {
-		if (!existTile_R({ addr_R.x,addr_R.z - 1 })) addNorth(1);
+		if (!existTile_R({ addr_R.x,addr_R.z - 2 })) addNorth(1);
 		vector<vector<string>> wall = {
 				{"-", "-", "-", "-", "-"},
 				{"-", "-", "-", "-", "-"},
@@ -139,13 +139,14 @@ void Map::markNorthWall(MapAddress addr_R, WallSet wallset) {
 			for (int i = 0; i <= 2; ++i) {
 				for (int j = -2; j <= 2; ++j) {
 					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
-						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+						if (wall[i + 2][j + 2] != "-") write_map_A(add_L.x + j, add_L.z + i, wall[i + 2][j + 2]);
+						
 					}
 				}
 			}
 		}
 		else {
-			if (!existTile_R2({ addr_R.x,addr_R.z - 1 })) addNorth(1);
+			if (!existTile_R2({ addr_R.x,addr_R.z - 2 })) addNorth(1);
 			add_L = convertRtoListPoint(addr_R);
 			drawTile(wall, { add_L.x,add_L.z - 4 });
 		}
@@ -162,7 +163,7 @@ void Map::markSouthWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z + 2][add_L.x + 2] = "1";
 	}
 	else {
-		if (!existTile_R({ addr_R.x,addr_R.z + 1 })) addSouth(1);
+		if (!existTile_R({ addr_R.x,addr_R.z + 2 })) addSouth(1);
 		vector<vector<string>> wall = {
 			{"-", "-", "-", "-", "-"},
 			{"-", "-", "-", "-", "-"},
@@ -180,13 +181,13 @@ void Map::markSouthWall(MapAddress addr_R, WallSet wallset) {
 			for (int8_t i = -2; i <= 0; i++) {
 				for (int8_t j = -2; j <= 2; j++){
 					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
-						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+						if (wall[i + 2][j + 2] != "-") write_map_A(add_L.x + j, add_L.z + i, wall[i + 2][j + 2]);
 					}
 				}
 			}
 		}
 		else {
-			if (!existTile_R2({ addr_R.x,addr_R.z + 1 })) addSouth(1);
+			if (!existTile_R2({ addr_R.x,addr_R.z + 2 })) addSouth(1);
 			add_L = convertRtoListPoint(addr_R);
 			drawTile(wall, { add_L.x,add_L.z + 4 });
 		}
@@ -203,7 +204,7 @@ void Map::markWestWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z + 2][add_L.x - 2] = "1";
 	}
 	else {
-		if (!existTile_R({ addr_R.x - 1,addr_R.z })) addWest(1);
+		if (!existTile_R({ addr_R.x - 2,addr_R.z })) addWest(1);
 		vector<vector<string>> wall = {
 			{"-", "-", "-", "-", "-"},
 			{"-", "-", "-", "-", "-"},
@@ -222,13 +223,13 @@ void Map::markWestWall(MapAddress addr_R, WallSet wallset) {
 			for (int8_t i = -2; i <= 2; i++) {
 				for (int8_t j = 0; j <= 2; j++) {
 					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
-						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+						if (wall[i + 2][j + 2] != "-") write_map_A(add_L.x + j, add_L.z + i, wall[i + 2][j + 2]);
 					}
 				}
 			}
 		}
 		else {
-			if (!existTile_R2({ addr_R.x - 1,addr_R.z })) addWest(1);
+			if (!existTile_R2({ addr_R.x - 2,addr_R.z })) addWest(1);
 			add_L = convertRtoListPoint(addr_R);
 			drawTile(wall, { add_L.x - 4,add_L.z });
 		}
@@ -245,7 +246,7 @@ if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && 
 		map_A[add_L.z + 2][add_L.x + 2] = "1";
 	}
 	else {
-		if (!existTile_R({ addr_R.x + 1,addr_R.z })) addEast(1);
+		if (!existTile_R({ addr_R.x + 2,addr_R.z })) addEast(1);
 		vector<vector<string>> wall = {
 			{"-", "-", "-", "-", "-"},
 			{"-", "-", "-", "-", "-"},
@@ -262,13 +263,13 @@ if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && 
 			for (int8_t i = -2; i <= 2; i++) {
 				for (int8_t j = -2; j <= 0; j++) {
 					if (map_A[add_L.z + i][add_L.x + j] == "-" || map_A[add_L.z + i][add_L.x + j] == "0" || map_A[add_L.z + i][add_L.x + j] == "1") {
-						if (wall[i + 2][j + 2] != "-") map_A[add_L.z + i][add_L.x + j] = wall[i + 2][j + 2];
+						if (wall[i + 2][j + 2] != "-") write_map_A(add_L.x + j, add_L.z + i, wall[i + 2][j + 2]);
 					}
 				}
 			}
 		}
 		else {
-			if (!existTile_R2({ addr_R.x + 1,addr_R.z })) addEast(1);
+			if (!existTile_R2({ addr_R.x + 2,addr_R.z })) addEast(1);
 			add_L = convertRtoListPoint(addr_R);
 			drawTile(wall, { add_L.x + 4,add_L.z });
 		}
@@ -438,7 +439,7 @@ void Map::drawTile(vector<vector<string>>& tile, MapAddress add_L){
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
 			if (map_A[add_L.z - 2 + i][add_L.x - 2 + j] == "-" && (tile[i][j] == "1" || tile[i][j] == "0")) {
-				if (tile[i][j] != "-") map_A[add_L.z - 2 + i][add_L.x - 2 + j] = tile[i][j];
+				if (tile[i][j] != "-") write_map_A(add_L.x - 2 + j, add_L.z - 2 + i, tile[i][j]);
 			}
 		}
 	}
@@ -523,6 +524,7 @@ void Map::replaceLineTo0() {
 
 TileState Map::getTileState(MapAddress addr_R, int16_t relative_angle) {
 	if (!existTile_R(addr_R)) {
+		//cout << "tile not found " << addr_R.x << " " << addr_R.z << ", " << relative_angle << endl;
 		return TileState::UNKNOWN;
 	}
 	MapAddress addr_L = convertRtoListPoint(addr_R);

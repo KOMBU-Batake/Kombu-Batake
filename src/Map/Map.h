@@ -260,23 +260,37 @@ private: // ********************************************************************
 		return convertAtoR(convertListPointtoA(addr_list));
 	}
 
+	// íÜêSÇ™ë∂ç›Ç∑ÇÈÇ©
 	bool existTile_R(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
-		if (addr_R.x < left_top_R.x) {
+		//if (addr_R.x < left_top_R.x) {
+		//	return false;
+		//}
+		//else if (addr_R.x > right_bottom_R.x) {
+		//	return false;
+		//}
+		//if (addr_R.z < left_top_R.z) {
+		//	return false;
+		//}
+		//else if (addr_R.z > right_bottom_R.z) {
+		//	return false;
+		//}
+		if (addr_L.x < 0) {
 			return false;
 		}
-		else if (addr_R.x > right_bottom_R.x) {
+		else if (addr_L.z < 0) {
 			return false;
 		}
-		if (addr_R.z < left_top_R.z) {
+		else if (addr_L.x >= map_A[0].size()) {
 			return false;
 		}
-		else if (addr_R.z > right_bottom_R.z) {
+		else if (addr_L.z >= map_A.size()) {
 			return false;
 		}
 		return true;
 	}
 
+	//Å@ëSëÃÇ™ë∂ç›Ç∑ÇÈÇ©
 	bool existTile_R2(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (addr_L.x - 2 < 0) {
@@ -303,6 +317,17 @@ private: // ********************************************************************
 	void paintTile(vector<vector<string>>& tile, const WallSet& wallset);
 	void drawTile(vector<vector<string>>& tile, MapAddress add_L);
 	bool isBackClear(vector<vector<string>>& tile);
+
+	void write_map_A(int x, int z, string part) {
+		if (z < 0 || x < 0 || z >= map_A.size() || x >= map_A[0].size()) {
+			while (robot->step(timeStep) != -1) {
+				cout << "can not write map_A !! " << endl;
+				cout << "x: " << x << " z: " << z << " x size: " << map_A[0].size() << " z size: " << map_A.size() << endl;
+				robot->step(timeStep * 100);
+			}
+		}
+		map_A[z][x] = part;
+	}
 
 	WallState condition_getAroundWallState(int x, int z) {
 		if (WallAndVictim.find(map_A[z][x]) != WallAndVictim.end()) 
