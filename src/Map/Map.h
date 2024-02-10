@@ -106,11 +106,11 @@ public:
 			if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = "2";
 
 			// 壁の情報が入るマス
-			if (map_A[add_L.z - 1][add_L.x] == "-") map_A[add_L.z - 1][add_L.x] = "0";
-			if (map_A[add_L.z + 1][add_L.x] == "-") map_A[add_L.z + 1][add_L.x] = "0";
-			if (map_A[add_L.z][add_L.x - 1] == "-") map_A[add_L.z][add_L.x - 1] = "0";
-			if (map_A[add_L.z][add_L.x + 1] == "-") map_A[add_L.z][add_L.x + 1] = "0";
-			if (map_A[add_L.z][add_L.x] == "-") map_A[add_L.z][add_L.x] = "0";
+			ifBarWrite(add_L.x, add_L.z - 1, "0");
+			ifBarWrite(add_L.x, add_L.z + 1, "0");
+			ifBarWrite(add_L.x - 1, add_L.z, "0");
+			ifBarWrite(add_L.x + 1, add_L.z, "0");
+			ifBarWrite(add_L.x, add_L.z, "0");
 			return;
 		}
 
@@ -121,52 +121,52 @@ public:
 			){
 			if (!(add_R.x % 2 == 0 && add_R.z % 2 == 0)) tile = TileStateMap[tilestate];
 			if (abs(angle - 90) < 5) {
-				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z    ][add_L.x + 1] == "-") map_A[add_L.z    ][add_L.x + 1] = tile;
+				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile; // 下3行要らんかも
+				if (map_A[add_L.z    ][add_L.x + 1] == "-") map_A[add_L.z    ][add_L.x + 1] = "0";
 				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x + 2] == "-") map_A[add_L.z - 1][add_L.x + 2] = tile;
-				if (map_A[add_L.z    ][add_L.x + 2] == "-") map_A[add_L.z    ][add_L.x + 2] = tile;
-				if (map_A[add_L.z + 1][add_L.x + 2] == "-") map_A[add_L.z + 1][add_L.x + 2] = tile;
+				if (map_A[add_L.z - 1][add_L.x + 2] == "-") map_A[add_L.z - 1][add_L.x + 2] = "0";
+				if (map_A[add_L.z    ][add_L.x + 2] == "-") map_A[add_L.z    ][add_L.x + 2] = "0";
+				if (map_A[add_L.z + 1][add_L.x + 2] == "-") map_A[add_L.z + 1][add_L.x + 2] = "0";
 			}
 			else if (abs(angle - 180) < 5) {
 				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = tile;
+				if (map_A[add_L.z - 1][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = "0";
 				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z - 2][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 2][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = tile;
-				if (map_A[add_L.z - 2][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
+				if (map_A[add_L.z - 2][add_L.x - 1] == "-") map_A[add_L.z - 2][add_L.x - 1] = "0";
+				if (map_A[add_L.z - 2][add_L.x    ] == "-") map_A[add_L.z - 2][add_L.x    ] = "0";
+				if (map_A[add_L.z - 2][add_L.x + 1] == "-") map_A[add_L.z - 2][add_L.x + 1] = "0";
 			}
 			else if (abs(angle - 270) < 5) {
 				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z    ][add_L.x - 1] == "-") map_A[add_L.z    ][add_L.x - 1] = tile;
+				if (map_A[add_L.z    ][add_L.x - 1] == "-") map_A[add_L.z    ][add_L.x - 1] = "0";
 				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x - 2] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z    ][add_L.x - 2] == "-") map_A[add_L.z    ][add_L.x - 1] = tile;
-				if (map_A[add_L.z + 1][add_L.x - 2] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
+				if (map_A[add_L.z - 1][add_L.x - 2] == "-") map_A[add_L.z - 1][add_L.x - 2] = "0";
+				if (map_A[add_L.z    ][add_L.x - 2] == "-") map_A[add_L.z    ][add_L.x - 2] = "0";
+				if (map_A[add_L.z + 1][add_L.x - 2] == "-") map_A[add_L.z + 1][add_L.x - 2] = "0";
 			}
 			else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z + 1][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = tile;
+				if (map_A[add_L.z + 1][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = "0";
 				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z + 2][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z + 2][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = tile;
-				if (map_A[add_L.z + 2][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
+				if (map_A[add_L.z + 2][add_L.x - 1] == "-") map_A[add_L.z + 2][add_L.x - 1] = "0";
+				if (map_A[add_L.z + 2][add_L.x    ] == "-") map_A[add_L.z + 2][add_L.x    ] = "0";
+				if (map_A[add_L.z + 2][add_L.x + 1] == "-") map_A[add_L.z + 2][add_L.x + 1] = "0";
 			}
 			return;
 		}
 
 		// 奇数かつ偶数かつX軸 or 偶数かつ奇数かつZ軸
-		if ((add_R.x % 2 == 0 && add_R.z % 2 == 1 && (abs(angle - 180) < 5 || ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)))) || 
+		if ((add_R.x % 2 == 0 && add_R.z % 2 == 1 && (abs(angle - 180) < 5 || (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) || 
 				(add_R.x % 2 == 1 && add_R.z % 2 == 0 && (abs(angle - 90) < 5 || abs(angle - 270) < 5))){
-			if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = "0";
-			if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = "0";
-			if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = "0";
-			if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = "0";
-			if (map_A[add_L.z - 1][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = "0";
-			if (map_A[add_L.z + 1][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = "0";
-			if (map_A[add_L.z    ][add_L.x - 1] == "-") map_A[add_L.z    ][add_L.x - 1] = "0";
-			if (map_A[add_L.z    ][add_L.x + 1] == "-") map_A[add_L.z    ][add_L.x + 1] = "0";
-			if (map_A[add_L.z    ][add_L.x    ] == "-") map_A[add_L.z    ][add_L.x    ] = "0";
+			ifBarWrite(add_L.x - 1, add_L.z - 1, "0");
+			ifBarWrite(add_L.x + 1, add_L.z - 1, "0");
+			ifBarWrite(add_L.x - 1, add_L.z + 1, "0");
+			ifBarWrite(add_L.x + 1, add_L.z + 1, "0");
+			ifBarWrite(add_L.x    , add_L.z - 1, "0");
+			ifBarWrite(add_L.x    , add_L.z + 1, "0");
+			ifBarWrite(add_L.x - 1, add_L.z    , "0");
+			ifBarWrite(add_L.x + 1, add_L.z    , "0");
+			ifBarWrite(add_L.x    , add_L.z    , "0");
 			return;
 		}
 
@@ -180,11 +180,11 @@ public:
 		if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
 
 		// 壁の情報が入るマス
-		if (map_A[add_L.z - 1][add_L.x] == "-") map_A[add_L.z - 1][add_L.x] = "0";
-		if (map_A[add_L.z + 1][add_L.x] == "-") map_A[add_L.z + 1][add_L.x] = "0";
-		if (map_A[add_L.z][add_L.x - 1] == "-") map_A[add_L.z][add_L.x - 1] = "0";
-		if (map_A[add_L.z][add_L.x + 1] == "-") map_A[add_L.z][add_L.x + 1] = "0";
-		if (map_A[add_L.z][add_L.x]     == "-") map_A[add_L.z][add_L.x]     = "0";
+		ifBarWrite(add_L.x, add_L.z -1, "0");
+		ifBarWrite(add_L.x, add_L.z +1, "0");
+		ifBarWrite(add_L.x -1, add_L.z, "0");
+		ifBarWrite(add_L.x +1, add_L.z, "0");
+		ifBarWrite(add_L.x, add_L.z, "0");
 	}
 
 	/* 何に使うねんこれ怒 */
@@ -210,11 +210,32 @@ public:
 	// 角の処理 使わない
 	void edge(MapAddress add_R, MapAddress add_L = { -1,-1 });
 
-	
 	void addNorth(const int i = 1); // 北方向にタイルを追加
 	void addSouth(const int i = 1); // 南方向にタイルを追加
 	void addWest(const int j = 1); // 西方向にタイルを追加
 	void addEast(const int j = 1); // 東方向にタイルを追加
+
+	//　全体が存在するか
+	bool existTile_R2(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (addr_L.x - 2 < 0) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.z - 2 < 0) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.x + 3 > map_A[0].size()) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.z + 3 > map_A.size()) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		return true;
+	}
 
 	// マップ全体を表示する
 	void printMap();
@@ -224,6 +245,8 @@ public:
 
 	MapAddress startTile_A = { 1, 1 }, startTile_R = { 1, 1 };
 	MapAddress currentTile_A = { 1, 1 }, currentTile_R = { 1, 1 };
+	unordered_set<TileState> ColoredTiles = { TileState::CHECKPOINT, TileState::AREA1to2, TileState::AREA2to3, TileState::AREA3to4, TileState::AREA1to4, TileState::SWAMP };
+
 private: // ************************************************************************************
 	/* なんだコレ */
 	int convertTiletoList(int tile) {
@@ -263,18 +286,6 @@ private: // ********************************************************************
 	// 中心が存在するか
 	bool existTile_R(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
-		//if (addr_R.x < left_top_R.x) {
-		//	return false;
-		//}
-		//else if (addr_R.x > right_bottom_R.x) {
-		//	return false;
-		//}
-		//if (addr_R.z < left_top_R.z) {
-		//	return false;
-		//}
-		//else if (addr_R.z > right_bottom_R.z) {
-		//	return false;
-		//}
 		if (addr_L.x < 0) {
 			return false;
 		}
@@ -285,28 +296,6 @@ private: // ********************************************************************
 			return false;
 		}
 		else if (addr_L.z >= map_A.size()) {
-			return false;
-		}
-		return true;
-	}
-
-	//　全体が存在するか
-	bool existTile_R2(const MapAddress& addr_R) {
-		MapAddress addr_L = convertRtoListPoint(addr_R);
-		if (addr_L.x - 2 < 0) {
-			cout << "existTile_R2" << endl;
-			return false;
-		}
-		else if (addr_L.z - 2 < 0) {
-			cout << "existTile_R2" << endl;
-			return false;
-		}
-		else if (addr_L.x + 3 > map_A[0].size()) {
-			cout << "existTile_R2" << endl;
-			return false;
-		}
-		else if (addr_L.z + 3 > map_A.size()) {
-			cout << "existTile_R2" << endl;
 			return false;
 		}
 		return true;
@@ -327,6 +316,12 @@ private: // ********************************************************************
 			}
 		}
 		map_A[z][x] = part;
+	}
+
+	void ifBarWrite(int x, int z, string part) {
+		if (map_A[z][x] == "-") {
+			map_A[z][x] = part;
+		}
 	}
 
 	WallState condition_getAroundWallState(int x, int z) {

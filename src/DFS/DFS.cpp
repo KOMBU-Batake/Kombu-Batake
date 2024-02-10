@@ -298,15 +298,13 @@ void sendMap(vector<vector<string>>& map)
 
 	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
 
-	//while (robot->step(timeStep) != -1) {
 	emitter->send(message, 8+(int)flattened.size()); // Send map data
 
 	char msg = 'M'; // Send map evaluate request
 	emitter->send(&msg, sizeof(msg));
 
-	//	msg = 'E'; // Send an Exit message to get Map Bonus
-	//	emitter->send(&msg, sizeof(msg));
-	//}
-	msg = 'E'; // Send an Exit message to get Map Bonus
-	emitter->send(&msg, sizeof(msg));
+	while (robot->step(timeStep) != -1) {
+		msg = 'E'; // Send an Exit message to get Map Bonus
+		emitter->send(&msg, sizeof(msg));
+	}
 }
