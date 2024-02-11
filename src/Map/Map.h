@@ -116,8 +116,8 @@ public:
 
 		// ‹ô”‚©‚Â‹ô” or Šï”‚©‚Â‹ô”‚©‚ÂZ² or ‹ô”‚©‚ÂŠï”‚©‚ÂŠp“x‚ªX²
 		if (( add_R.x % 2 == 0 && add_R.z % 2 == 0 ) ||
-				( add_R.x % 2 == 1 && add_R.z % 2 == 0 && (abs(angle - 180) < 5 || ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ) || 
-				( add_R.x % 2 == 0 && add_R.z % 2 == 1 && (abs(angle - 90) < 5 || abs(angle - 270) < 5) )
+				( abs(add_R.x % 2) == 1 && add_R.z % 2 == 0 && (abs(angle - 180) < 5 || ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)))) ||
+				( add_R.x % 2 == 0 && abs(add_R.z % 2) == 1 && (abs(angle - 90) < 5 || abs(angle - 270) < 5))
 			){
 			if (!(add_R.x % 2 == 0 && add_R.z % 2 == 0)) tile = TileStateMap[tilestate];
 			if (abs(angle - 90) < 5) {
@@ -156,8 +156,8 @@ public:
 		}
 
 		// Šï”‚©‚Â‹ô”‚©‚ÂX² or ‹ô”‚©‚ÂŠï”‚©‚ÂZ²
-		if ((add_R.x % 2 == 0 && add_R.z % 2 == 1 && (abs(angle - 180) < 5 || (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) || 
-				(add_R.x % 2 == 1 && add_R.z % 2 == 0 && (abs(angle - 90) < 5 || abs(angle - 270) < 5))){
+		if ((add_R.x % 2 == 0 && abs(add_R.z % 2) == 1 && (abs(angle - 180) < 5 || (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(abs(add_R.x % 2) == 1 && add_R.z % 2 == 0 && (abs(angle - 90) < 5 || abs(angle - 270) < 5))) {
 			ifBarWrite(add_L.x - 1, add_L.z - 1, "0");
 			ifBarWrite(add_L.x + 1, add_L.z - 1, "0");
 			ifBarWrite(add_L.x - 1, add_L.z + 1, "0");

@@ -157,6 +157,9 @@ public:
 		if (max > 18.0F) {
 			// 片方の壁がない
 			if (model[0] > 18.0F) {
+				if (model[model.size() - 1] > 18.0F) {
+					return { WallType::typeNo, WallType::center_s, WallType::typeNo };
+				}
 				isLeftClear = true;
 			} else isRightClear = true;
 			// 空白のところを全て壁で埋める
