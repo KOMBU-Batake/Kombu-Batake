@@ -11,9 +11,8 @@ void DFS() {
 		double angle = gyro.getGyro();
 		NEWS direction_of_travel = searchAround(angle,tail,stack,dontStack);
 		// 被災者
-		cout << "x: " << endl;
 		mapper.printMap();
-		cout << "stack size" << stack.size() << "========================================" << endl;
+		cout << "stack size. " << stack.size() << " ========================================" << endl;
 		bool isHole = false;
 		if (direction_of_travel == NEWS::NORTH) {
 			isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4.5);
@@ -44,7 +43,7 @@ void DFS() {
 			TileState col = colorsensor.getTileColor();
 			TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
 			if (recordedTile != TileState::START){
-				mapper.markTileAs(mapper.currentTile_R, col);
+				mapper.markTileAs(mapper.currentTile_R, col, angle);
 			}
 			if (col == TileState::AREA1to4 || col == TileState::AREA3to4) {
 				Area4IsThere(angle, tail, stack,dontStack);
@@ -68,6 +67,7 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dont
 	TileState front_tile, back_tile, left_tile, right_tile;
 
 	mapper.getAroundTileState(mapper.currentTile_R, front_tile, back_tile, left_tile, right_tile, angle); // マップ上での周囲のタイルの有無を取得
+	cout << "front tile: " << (int)front_tile << ", back tile: " << (int)back_tile << ", left tile: " << (int)left_tile << ", right tile: " << (int)right_tile << endl;
 
 	searchFront(PDoT, front_mp, front_tile); // 前
 	searchBack(PDoT, back_mp, back_tile); // 後ろ
@@ -88,7 +88,7 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dont
 		mapper.markAroundWall(right_mp, left_mp, front_mp, back_mp);
 		directionNEWS = { PDoT.right, PDoT.back, PDoT.left, PDoT.front };
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
 		directionNEWS = { PDoT.back, PDoT.left, PDoT.front, PDoT.right };
 	}
@@ -136,11 +136,22 @@ NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dont
 	}
 }
 
+bool condirtion_canGo(const WallSet& wallset)
+{
+	uint8_t left = static_cast<uint8_t>(wallset.left);
+	uint8_t right = static_cast<uint8_t>(wallset.right);
+	uint8_t center = static_cast<uint8_t>(wallset.center);
+	if ((left <= 5U || left == 11U) && (right <= 5U || right == 11U) && center >= 13U) {
+		return true;
+	}
+	return false;
+}
+
 void searchFront(PotentialDirectionsOfTravel& PDoT, WallSet& front_mp, const TileState& front_tile)
 {
 	WallSet front = pcLiDAR.identifyWall(LiDAR_degree::FRONT);
 	std::cout << "front: " << (int)front.left << " " << (int)front.center << " " << (int)front.right;
-	if ((front.left == WallType::type0 || front.left == WallType::typeNo) && front.center == WallType::center_n && (front.right == WallType::type0 || front.right == WallType::typeNo)) {
+	if (condirtion_canGo(front)) {
 		if (front_tile == TileState::UNKNOWN) { // 未探索
 			PDoT.front = canGo::GO;
 		}
@@ -161,7 +172,7 @@ void searchBack(PotentialDirectionsOfTravel& PDoT, WallSet& back_mp, const TileS
 {
 	WallSet back = pcLiDAR.identifyWall(LiDAR_degree::BACK);
 	std::cout << ", back: " << (int)back.left << " " << (int)back.center << " " << (int)back.right;
-	if ((back.left == WallType::type0 || back.left == WallType::typeNo) && back.center == WallType::center_n && (back.right == WallType::type0 || back.right == WallType::typeNo)) {
+	if (condirtion_canGo(back)) {
 		if (back_tile == TileState::UNKNOWN) { // 未探索
 			PDoT.back = canGo::GO;
 		}
@@ -182,7 +193,7 @@ void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, const TileS
 {
 	WallSet left = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
 	std::cout << ", left: " << (int)left.left << " " << (int)left.center << " " << (int)left.right;
-	if ((left.left == WallType::type0 || left.left == WallType::typeNo) && left.center == WallType::center_n && (left.right == WallType::type0 || left.right == WallType::typeNo)) {
+	if (condirtion_canGo(left)) {
 		if (left_tile == TileState::UNKNOWN) { // 未探索
 			PDoT.left = canGo::GO;
 		}
@@ -203,7 +214,7 @@ void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const Til
 {
 	WallSet right = pcLiDAR.identifyWall(LiDAR_degree::RIGHT);
 	std::cout << ", right: " << (int)right.left << " " << (int)right.center << " " << (int)right.right << endl;
-	if ((right.left == WallType::type0 || right.left == WallType::typeNo) && right.center == WallType::center_n && (right.right == WallType::type0 || right.right == WallType::typeNo)) {
+	if (condirtion_canGo(right)) {
 		if (right_tile == TileState::UNKNOWN) { // 未探索
 			PDoT.right = canGo::GO;
 		}
@@ -223,16 +234,16 @@ void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const Til
 void HoleIsThere(const double& angle)
 {
 	if (abs(angle - 90) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x + 1,mapper.currentTile_R.z }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x + 2,mapper.currentTile_R.z }, TileState::HOLE, angle);
 	}
 	else if (abs(angle - 180) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 1 }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 2 }, TileState::HOLE, angle);
 	}
 	else if (abs(angle - 270) < 5) {
-		mapper.markTileAs({ mapper.currentTile_R.x - 1,mapper.currentTile_R.z }, TileState::HOLE);
+		mapper.markTileAs({ mapper.currentTile_R.x - 2,mapper.currentTile_R.z }, TileState::HOLE, angle);
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 1 }, TileState::HOLE);
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+		mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 2 }, TileState::HOLE, angle);
 	}
 	tank.gpsTrace(gps.last_expectedPos,4);
 	gps.returnTolastPos();
@@ -242,29 +253,25 @@ void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool
 {
 	if (abs(angle - 90) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(1, 0), 5);
-		tank.gpsTrace(gps.moveTiles(-2, 0), 5);
+		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, -1), 5);
-		tank.gpsTrace(gps.moveTiles(0, 2), 5);
+		tank.gpsTrace(gps.moveTiles(0, 1), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
-		tank.gpsTrace(gps.moveTiles(2, 0), 5);
+		tank.gpsTrace(gps.moveTiles(1, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
-	else if ((angle <= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, 1), 5);
-		tank.gpsTrace(gps.moveTiles(0, -2), 5);
+		tank.gpsTrace(gps.moveTiles(0, -1), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
@@ -291,15 +298,13 @@ void sendMap(vector<vector<string>>& map)
 
 	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
 
-	//while (robot->step(timeStep) != -1) {
 	emitter->send(message, 8+(int)flattened.size()); // Send map data
 
 	char msg = 'M'; // Send map evaluate request
 	emitter->send(&msg, sizeof(msg));
 
-	//	msg = 'E'; // Send an Exit message to get Map Bonus
-	//	emitter->send(&msg, sizeof(msg));
-	//}
-	msg = 'E'; // Send an Exit message to get Map Bonus
-	emitter->send(&msg, sizeof(msg));
+	while (robot->step(timeStep) != -1) {
+		msg = 'E'; // Send an Exit message to get Map Bonus
+		emitter->send(&msg, sizeof(msg));
+	}
 }

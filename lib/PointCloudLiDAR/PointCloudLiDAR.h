@@ -13,6 +13,7 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/myMath/myMath.h"
 #include "../../lib/easyLiDAR/easyLiDAR.h"
+#include "./RecognizingSpace/RecognizingSpace.h"
 
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
@@ -20,11 +21,6 @@ extern GlobalPositioningSystem gps;
 extern Robot* robot;
 extern Lidar* centralLidar;
 extern int timeStep;
-
-typedef struct {
-	float x;
-	float z;
-}XZcoordinate;
 
 typedef struct {
 	int8_t left;
@@ -52,11 +48,17 @@ enum class WallType :uint8_t{
 	gomi, // 15
 };
 
-typedef struct {
+typedef struct WallSet WallSet;
+
+struct WallSet {
 	WallType left;
 	WallType center;
 	WallType right;
-} WallSet;
+
+	bool operator==(const WallSet& other) const {
+		return left == other.left && right == other.right && center == other.center;
+	}
+};
 
 enum class recoedingMode {
 	model,
@@ -121,7 +123,7 @@ public:
 		else if (abs(gyro_angle - 270) < 5) {
 			fixPointCloudAngle(270, gyro_angle);
 		}
-		else if ((gyro_angle <= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
+		else if ((gyro_angle >= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
 			fixPointCloudAngle(0, gyro_angle);
 		}
 		GPSPosition nowPos = gps.getPosition();
@@ -155,6 +157,9 @@ public:
 		if (max > 18.0F) {
 			// 片方の壁がない
 			if (model[0] > 18.0F) {
+				if (model[model.size() - 1] > 18.0F) {
+					return { WallType::typeNo, WallType::center_s, WallType::typeNo };
+				}
 				isLeftClear = true;
 			} else isRightClear = true;
 			// 空白のところを全て壁で埋める
@@ -331,7 +336,7 @@ private:
 				pointCloud[i].z -= dx;
 			}
 		}
-		else if ((gyro_angle <= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
+		else if ((gyro_angle >= 0 && gyro_angle < 5) || (gyro_angle > 355 && gyro_angle <= 360)) {
 			//cout << "0" << endl;
 			for (int i = 0; i < 512; i++) {
 				pointCloud[i].x -= dx;

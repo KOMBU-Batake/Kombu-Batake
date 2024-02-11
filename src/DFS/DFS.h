@@ -83,4 +83,7 @@ static void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, cons
 static void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const TileState& right_tile);
 static void HoleIsThere(const double& angle);
 static void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack);
+static bool condirtion_canGo(const WallSet& wallset);
+
+// マップデータ提出できてエライ!!天才!!神!!
 static void sendMap(vector<vector<string>>& map);

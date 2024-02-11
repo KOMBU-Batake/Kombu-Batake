@@ -198,10 +198,6 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 	if (abs(angle_to_O - presentAngle) > 10) { // 目的地への角度と現在の角度が10度以上ずれていたら 補正する
 		//cout << "angle_to_0: " << angle_to_O << endl;
 		setDireciton(angle_to_O, speed);
-		cout << "c: " << endl;
-		myCam.update();
-		myCam.detectAndReportRight();
-		myCam.detectAndReportLeft();
 	}
 	// 方向の修正
   if (angle_to_O < 3 || angle_to_O > 357 || (angle_to_O > 177 && angle_to_O < 183)) {

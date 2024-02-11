@@ -47,8 +47,8 @@ public:
 
 	GPSPosition moveTiles(int x, int z) {
 		last_expectedPos = expectedPos;
-		expectedPos.x += x * 12;
-		expectedPos.z += z * 12;
+		expectedPos.x += x * 6;
+		expectedPos.z += z * 6;
 		return expectedPos;
 	}
 

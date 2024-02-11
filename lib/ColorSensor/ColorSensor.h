@@ -81,7 +81,7 @@ public:
 		uint8_t min = std::min(RGB.red, std::min(RGB.green, RGB.blue));
 		float diff = (float)(max - min);
 		if (diff == 0) {
-			hsv.hue = 1024;
+			hsv.hue = 0;
 		}
 		else if (max == RGB.red) {
 			hsv.hue = 60 * ((float)(RGB.green - RGB.blue) / diff);
@@ -103,7 +103,12 @@ public:
 	Colors getColor() {
 		/* HSVベースで床の色を判断する */
 		ColorHSV hsv = getHSV();
-		if (hsv.value < 50) {
+		if (hsv.value < 35) {
+			cout << "under 35 hue: " << hsv.hue << " sat: " << hsv.saturation << " val: " << hsv.value << endl;
+			return Colors::SWAMP;
+		}
+		else if (hsv.value < 40) {
+			cout << "hue: " << hsv.hue << " sat: " << hsv.saturation << " val: " << hsv.value << endl;
 			return Colors::BLACK;
 		}
 		else if (hsv.saturation < 1 && hsv.value > 230) {

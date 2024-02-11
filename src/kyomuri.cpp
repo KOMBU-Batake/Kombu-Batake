@@ -5,29 +5,19 @@
 // Modifications:
 
 #include <iostream>
-#include <thread>
-#include <mutex>
 #include "../lib/devices.h"
 
 using namespace webots;
 using namespace std;
 
-// The arguments of the main function can be specified by the
-// "controllerArgs" field of the Robot node
 int main(int argc, char **argv) {
   enableDevices();
-  // ƒƒCƒ“ƒ‹ƒEƒEƒEƒEƒDƒDƒDƒDƒDƒDƒv
 
   cout << "start" << endl;
-  
-  //pcLiDAR.update(gps.expectedPos);
-  //WallSet wallSet = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
-  //cout << (int)wallSet.left << "," << (int)wallSet.center << ", " << (int)wallSet.right << endl;
 
   // [‚³—Dæ’Tõ
   DFS();
 
-  // ƒ}ƒbƒvƒf[ƒ^’ño
   cout << "end" << endl;
 
   delete robot;

@@ -19,6 +19,7 @@
 #include "../lib/Tank/Tank.h"
 #include "../lib/easyLiDAR/easyLiDAR.h"
 #include "../lib/PointCloudLiDAR/PointCloudLiDAR.h"
+#include "../lib/PointCloudLiDAR/RecognizingSpace/RecognizingSpace.h"
 //#include "../lib/myMath/myMath.h"
 #include "../src/Map/Map.h"
 #include "../src/DFS/DFS.h"

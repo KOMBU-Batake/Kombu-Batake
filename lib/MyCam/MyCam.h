@@ -48,111 +48,111 @@ public:
 	}
 
 	void update() {
-		lidar.updateLiDAR();
-		updateLeft();
-		updateRight();
+		//lidar.updateLiDAR();
+		//updateLeft();
+		//updateRight();
 	}
 
 	void detectAndReportLeft() {
-		if (abs(lidar.getDIstanceSimple(384))<6) {
-			// O ============================================================================================
-			cv::Scalar lowerb2 = cv::Scalar(40 * 0.5, 120, 78);  // 下限(H, S, V)
-			cv::Scalar upperb2 = cv::Scalar(70 * 0.5, 255, 255); // 上限(H, S, V)
+		//if (abs(lidar.getDIstanceSimple(384))<6) {
+		//	// O ============================================================================================
+		//	cv::Scalar lowerb2 = cv::Scalar(40 * 0.5, 120, 78);  // 下限(H, S, V)
+		//	cv::Scalar upperb2 = cv::Scalar(70 * 0.5, 255, 255); // 上限(H, S, V)
 
-			// 閾値を満たすピクセルを抽出
-			cv::Mat mask2;
-			cv::inRange(Leftframe, lowerb2, upperb2, mask2);
+		//	// 閾値を満たすピクセルを抽出
+		//	cv::Mat mask2;
+		//	cv::inRange(Leftframe, lowerb2, upperb2, mask2);
 
-			// ピクセル数をカウント
-			int count2 = cv::countNonZero(mask2);
-			std::cout << "Number of pixels LO: " << count2 << std::endl;
-			if (count2 > 50) {
-				delay(1300);
-				char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
-				GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
-				int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
-				cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
-				memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
-				message[8] = 'O'; // The victim type is harmed
-				emitter->send(message, sizeof(message));
-				robot->step(timeStep);
-				return;
-			}
+		//	// ピクセル数をカウント
+		//	int count2 = cv::countNonZero(mask2);
+		//	std::cout << "Number of pixels LO: " << count2 << std::endl;
+		//	if (count2 > 50) {
+		//		delay(1300);
+		//		char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+		//		GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+		//		int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+		//		cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+		//		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+		//		message[8] = 'O'; // The victim type is harmed
+		//		emitter->send(message, sizeof(message));
+		//		robot->step(timeStep);
+		//		return;
+		//	}
 
-			// F ============================================================================================
-			cv::Scalar lowerb = cv::Scalar(300*0.5, 102, 78);  // 下限(H, S, V)
-			cv::Scalar upperb = cv::Scalar(359 * 0.5, 255, 255); // 上限(H, S, V)
+		//	// F ============================================================================================
+		//	cv::Scalar lowerb = cv::Scalar(300*0.5, 102, 78);  // 下限(H, S, V)
+		//	cv::Scalar upperb = cv::Scalar(359 * 0.5, 255, 255); // 上限(H, S, V)
 
-			// 閾値を満たすピクセルを抽出
-			cv::Mat mask;
-			cv::inRange(Leftframe, lowerb, upperb, mask);
+		//	// 閾値を満たすピクセルを抽出
+		//	cv::Mat mask;
+		//	cv::inRange(Leftframe, lowerb, upperb, mask);
 
-			// ピクセル数をカウント
-			int count = cv::countNonZero(mask);
-			if (count > 50) {
-				delay(1300);
-				char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
-				GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
-				int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z)};
-				memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
-				message[8] = 'F'; // The victim type is harmed
-				emitter->send(message, sizeof(message));
-				robot->step(timeStep);
-			}
-		}
+		//	// ピクセル数をカウント
+		//	int count = cv::countNonZero(mask);
+		//	if (count > 50) {
+		//		delay(1300);
+		//		char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+		//		GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+		//		int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z)};
+		//		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+		//		message[8] = 'F'; // The victim type is harmed
+		//		emitter->send(message, sizeof(message));
+		//		robot->step(timeStep);
+		//	}
+		//}
 	}
 
 	void detectAndReportRight() {
-		if (abs(lidar.getDIstanceSimple(128)) < 6) {
-			// O ============================================================================================
-			cv::Scalar lowerb2 = cv::Scalar(40 * 0.5, 120, 78);  // 下限(H, S, V)
-			cv::Scalar upperb2 = cv::Scalar(70 * 0.5, 255, 255); // 上限(H, S, V)
+		//if (abs(lidar.getDIstanceSimple(128)) < 6) {
+		//	// O ============================================================================================
+		//	cv::Scalar lowerb2 = cv::Scalar(40 * 0.5, 120, 78);  // 下限(H, S, V)
+		//	cv::Scalar upperb2 = cv::Scalar(70 * 0.5, 255, 255); // 上限(H, S, V)
 
-			// 閾値を満たすピクセルを抽出
-			cv::Mat mask2;
-			cv::inRange(Rightframe, lowerb2, upperb2, mask2);
+		//	// 閾値を満たすピクセルを抽出
+		//	cv::Mat mask2;
+		//	cv::inRange(Rightframe, lowerb2, upperb2, mask2);
 
-			// ピクセル数をカウント
-			int count2 = cv::countNonZero(mask2);
-			std::cout << "Number of pixels RO: " << count2 << std::endl;
-			if (count2 > 50) {
-				delay(1300);
-				char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
-				GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
-				int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
-				cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
-				memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
-				message[8] = 'O'; // The victim type is harmed
-				emitter->send(message, sizeof(message));
-				robot->step(timeStep);
-				return;
-			}
+		//	// ピクセル数をカウント
+		//	int count2 = cv::countNonZero(mask2);
+		//	std::cout << "Number of pixels RO: " << count2 << std::endl;
+		//	if (count2 > 50) {
+		//		delay(1300);
+		//		char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+		//		GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+		//		int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+		//		cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+		//		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+		//		message[8] = 'O'; // The victim type is harmed
+		//		emitter->send(message, sizeof(message));
+		//		robot->step(timeStep);
+		//		return;
+		//	}
 
-			// F ============================================================================================
-			cv::Scalar lowerb = cv::Scalar(300 * 0.5, 102, 78);  // 下限(H, S, V)
-			cv::Scalar upperb = cv::Scalar(359 * 0.5, 255, 255); // 上限(H, S, V)
+		//	// F ============================================================================================
+		//	cv::Scalar lowerb = cv::Scalar(300 * 0.5, 102, 78);  // 下限(H, S, V)
+		//	cv::Scalar upperb = cv::Scalar(359 * 0.5, 255, 255); // 上限(H, S, V)
 
-			// 閾値を満たすピクセルを抽出
-			cv::Mat mask;
-			cv::inRange(Rightframe, lowerb, upperb, mask);
+		//	// 閾値を満たすピクセルを抽出
+		//	cv::Mat mask;
+		//	cv::inRange(Rightframe, lowerb, upperb, mask);
 
-			// ピクセル数をカウント
-			int count = cv::countNonZero(mask);
-			if (count > 50) {
-				delay(1300);
-				//std::cout << "Number of pixels: " << count << std::endl;
-				char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+		//	// ピクセル数をカウント
+		//	int count = cv::countNonZero(mask);
+		//	if (count > 50) {
+		//		delay(1300);
+		//		//std::cout << "Number of pixels: " << count << std::endl;
+		//		char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
 
-				GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
-				int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
-				//cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+		//		GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+		//		int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+		//		//cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
 
-				memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
-				message[8] = 'F'; // The victim type is harmed
-				emitter->send(message, sizeof(message));
-				robot->step(timeStep);
-			}
-		}
+		//		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+		//		message[8] = 'F'; // The victim type is harmed
+		//		emitter->send(message, sizeof(message));
+		//		robot->step(timeStep);
+		//	}
+		//}
 	}
 
 	void saveLeftImage(string filename) {
