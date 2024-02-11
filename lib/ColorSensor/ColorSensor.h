@@ -107,7 +107,7 @@ public:
 			cout << "under 35 hue: " << hsv.hue << " sat: " << hsv.saturation << " val: " << hsv.value << endl;
 			return Colors::SWAMP;
 		}
-		else if (hsv.value < 50) {
+		else if (hsv.value < 40) {
 			cout << "hue: " << hsv.hue << " sat: " << hsv.saturation << " val: " << hsv.value << endl;
 			return Colors::BLACK;
 		}

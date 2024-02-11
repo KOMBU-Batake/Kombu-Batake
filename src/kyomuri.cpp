@@ -16,13 +16,7 @@ int main(int argc, char **argv) {
   cout << "start" << endl;
 
   // [‚³—Dæ’Tõ
-  //DFS();
-  
-  pcLiDAR.update(gps.expectedPos);
-  cout << robot->getTime() << endl;
-  RoadAccess access = RecognizingSpace(pcLiDAR.pointCloud);
-  cout << "front: " << (int)access.front << ", left: " << (int)access.left << ", right: " << (int)access.right << ", back: " << (int)access.back << endl;
-  cout << robot->getTime() << endl;
+  DFS();
 
   cout << "end" << endl;
 

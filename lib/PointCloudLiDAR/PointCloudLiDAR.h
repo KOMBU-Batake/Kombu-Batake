@@ -48,11 +48,17 @@ enum class WallType :uint8_t{
 	gomi, // 15
 };
 
-typedef struct {
+typedef struct WallSet WallSet;
+
+struct WallSet {
 	WallType left;
 	WallType center;
 	WallType right;
-} WallSet;
+
+	bool operator==(const WallSet& other) const {
+		return left == other.left && right == other.right && center == other.center;
+	}
+};
 
 enum class recoedingMode {
 	model,
@@ -151,6 +157,9 @@ public:
 		if (max > 18.0F) {
 			// 片方の壁がない
 			if (model[0] > 18.0F) {
+				if (model[model.size() - 1] > 18.0F) {
+					return { WallType::typeNo, WallType::center_s, WallType::typeNo };
+				}
 				isLeftClear = true;
 			} else isRightClear = true;
 			// 空白のところを全て壁で埋める

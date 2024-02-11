@@ -33,10 +33,16 @@ extern GlobalPositioningSystem gps;
 
 extern int timeStep;
 
-typedef struct {
+typedef struct MapAddress MapAddress;
+
+struct MapAddress {
 	int x;
 	int z;
-}MapAddress;
+
+	bool operator==(const MapAddress& other) const {
+		return x == other.x && z == other.z;
+	}
+};
 
 enum class VictimState {
 	H, // 重度の被災者
@@ -51,11 +57,11 @@ enum class VictimState {
 class Map {
 public:
 	// ↓↓命と同じくらい大事↓↓
-	vector<vector<string>> map_A = vector<vector<string>>(5, vector<string>(5, "-")); // とりあえず1x1のマップを作る
+	vector<vector<string>> map_A = vector<vector<string>>(5, vector<string>(5, "-")); // とりあえず2x2のマップを作る
 	// ↑↑命と同じくらい大事↑↑
 
 	Map() {
-		markTileAs({ 0, 0 }, TileState::START);
+		markTileAs({ 1, 1 }, TileState::START, 1); // スタートタイルをマーク 角度は適当
 	}
 
 	// タイルの中心に到達したら初めに呼ぶ
@@ -78,7 +84,7 @@ public:
 		//cout << "upedPos: " << currentTile_R.x << " " << currentTile_R.z << " " << angle << endl;
 	}
 
-	void markTileAs(MapAddress add_R, TileState tilestate) {
+	void markTileAs(MapAddress add_R, TileState tilestate, const double& angle) {
 		if (add_R.x < left_top_R.x) {
 			addWest(left_top_R.x - add_R.x);
 		} else if (add_R.x > right_bottom_R.x) {
@@ -90,28 +96,106 @@ public:
 			addSouth(add_R.z - right_bottom_R.z);
 		}
 		MapAddress add_L = convertRtoListPoint(add_R);
-		string tile = TileStateMap[tilestate];
-		map_A[add_L.z - 1][add_L.x - 1] = tile;
-		map_A[add_L.z - 1][add_L.x + 1] = tile;
-		map_A[add_L.z + 1][add_L.x - 1] = tile;
-		map_A[add_L.z + 1][add_L.x + 1] = tile;
+		string tile = "0";
+		
+		// 穴の場合は無条件に2を入れる
+		if (tilestate == TileState::HOLE) {
+			if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = "2";
+			if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = "2";
+			if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = "2";
+			if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = "2";
 
-		map_A[add_L.z - 1][add_L.x] = "0";
-		map_A[add_L.z + 1][add_L.x] = "0";
-		map_A[add_L.z][add_L.x - 1] = "0";
-		map_A[add_L.z][add_L.x + 1] = "0";
-		map_A[add_L.z][add_L.x] = "0";
+			// 壁の情報が入るマス
+			ifBarWrite(add_L.x, add_L.z - 1, "0");
+			ifBarWrite(add_L.x, add_L.z + 1, "0");
+			ifBarWrite(add_L.x - 1, add_L.z, "0");
+			ifBarWrite(add_L.x + 1, add_L.z, "0");
+			ifBarWrite(add_L.x, add_L.z, "0");
+			return;
+		}
+
+		// 偶数かつ偶数 or 奇数かつ偶数かつZ軸 or 偶数かつ奇数かつ角度がX軸
+		if (( add_R.x % 2 == 0 && add_R.z % 2 == 0 ) ||
+				( abs(add_R.x % 2) == 1 && add_R.z % 2 == 0 && (abs(angle - 180) < 5 || ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)))) ||
+				( add_R.x % 2 == 0 && abs(add_R.z % 2) == 1 && (abs(angle - 90) < 5 || abs(angle - 270) < 5))
+			){
+			if (!(add_R.x % 2 == 0 && add_R.z % 2 == 0)) tile = TileStateMap[tilestate];
+			if (abs(angle - 90) < 5) {
+				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile; // 下3行要らんかも
+				if (map_A[add_L.z    ][add_L.x + 1] == "-") map_A[add_L.z    ][add_L.x + 1] = "0";
+				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
+				if (map_A[add_L.z - 1][add_L.x + 2] == "-") map_A[add_L.z - 1][add_L.x + 2] = "0";
+				if (map_A[add_L.z    ][add_L.x + 2] == "-") map_A[add_L.z    ][add_L.x + 2] = "0";
+				if (map_A[add_L.z + 1][add_L.x + 2] == "-") map_A[add_L.z + 1][add_L.x + 2] = "0";
+			}
+			else if (abs(angle - 180) < 5) {
+				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
+				if (map_A[add_L.z - 1][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = "0";
+				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
+				if (map_A[add_L.z - 2][add_L.x - 1] == "-") map_A[add_L.z - 2][add_L.x - 1] = "0";
+				if (map_A[add_L.z - 2][add_L.x    ] == "-") map_A[add_L.z - 2][add_L.x    ] = "0";
+				if (map_A[add_L.z - 2][add_L.x + 1] == "-") map_A[add_L.z - 2][add_L.x + 1] = "0";
+			}
+			else if (abs(angle - 270) < 5) {
+				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
+				if (map_A[add_L.z    ][add_L.x - 1] == "-") map_A[add_L.z    ][add_L.x - 1] = "0";
+				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
+				if (map_A[add_L.z - 1][add_L.x - 2] == "-") map_A[add_L.z - 1][add_L.x - 2] = "0";
+				if (map_A[add_L.z    ][add_L.x - 2] == "-") map_A[add_L.z    ][add_L.x - 2] = "0";
+				if (map_A[add_L.z + 1][add_L.x - 2] == "-") map_A[add_L.z + 1][add_L.x - 2] = "0";
+			}
+			else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
+				if (map_A[add_L.z + 1][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = "0";
+				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
+				if (map_A[add_L.z + 2][add_L.x - 1] == "-") map_A[add_L.z + 2][add_L.x - 1] = "0";
+				if (map_A[add_L.z + 2][add_L.x    ] == "-") map_A[add_L.z + 2][add_L.x    ] = "0";
+				if (map_A[add_L.z + 2][add_L.x + 1] == "-") map_A[add_L.z + 2][add_L.x + 1] = "0";
+			}
+			return;
+		}
+
+		// 奇数かつ偶数かつX軸 or 偶数かつ奇数かつZ軸
+		if ((add_R.x % 2 == 0 && abs(add_R.z % 2) == 1 && (abs(angle - 180) < 5 || (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(abs(add_R.x % 2) == 1 && add_R.z % 2 == 0 && (abs(angle - 90) < 5 || abs(angle - 270) < 5))) {
+			ifBarWrite(add_L.x - 1, add_L.z - 1, "0");
+			ifBarWrite(add_L.x + 1, add_L.z - 1, "0");
+			ifBarWrite(add_L.x - 1, add_L.z + 1, "0");
+			ifBarWrite(add_L.x + 1, add_L.z + 1, "0");
+			ifBarWrite(add_L.x    , add_L.z - 1, "0");
+			ifBarWrite(add_L.x    , add_L.z + 1, "0");
+			ifBarWrite(add_L.x - 1, add_L.z    , "0");
+			ifBarWrite(add_L.x + 1, add_L.z    , "0");
+			ifBarWrite(add_L.x    , add_L.z    , "0");
+			return;
+		}
+
+		// 奇数且つ奇数の奇跡
+		tile = TileStateMap[tilestate];
+
+		// タイルの情報が入るマス
+		if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
+		if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
+		if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
+		if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
+
+		// 壁の情報が入るマス
+		ifBarWrite(add_L.x, add_L.z -1, "0");
+		ifBarWrite(add_L.x, add_L.z +1, "0");
+		ifBarWrite(add_L.x -1, add_L.z, "0");
+		ifBarWrite(add_L.x +1, add_L.z, "0");
+		ifBarWrite(add_L.x, add_L.z, "0");
 	}
 
 	/* 何に使うねんこれ怒 */
 	void markAroundTile(TileState front, TileState back, TileState left, TileState right, float angle = -1);
 
-	TileState getTileState(MapAddress addr_R);
+	TileState getTileState(MapAddress addr_R, int16_t relative_angle = 1);
 
-	// 中の壁までは調べてない
+	// 中の壁までは調べない
 	void getAroundTileState(MapAddress addr_R, TileState& front, TileState& back, TileState& left, TileState& right, double angle = -1);
 
-	// とりあえずタイルを跨ぐような曲線とかの変な壁はないものとして考える。 ToDo: LiDARでユークリッド距離の比較を実装する
+	// とりあえずタイルを跨ぐような曲線とかの変な壁はないものとして考える。
 	void markAroundWall(WallSet NorthWall, WallSet SouthWall, WallSet WestWall, WallSet EastWall);
 
 	// 東西南北の壁をあてがう
@@ -120,17 +204,38 @@ public:
 	void markWestWall(MapAddress addr_R, WallSet wallset);
 	void markEastWall(MapAddress addr_R, WallSet wallset);
 
-	// 壁の有無、未定義だけを調べる 具体的な種類は判別しない
+	// 壁の有無、未定義だけを調べる 具体的な種類は判別しない 使わない
 	void getAroundWallState(const MapAddress& addr_R, WallState& frontWall, WallState& backWall, WallState& leftWall, WallState& rightWall, double angle = -1);
 
-	// 角の処理
+	// 角の処理 使わない
 	void edge(MapAddress add_R, MapAddress add_L = { -1,-1 });
 
-	
 	void addNorth(const int i = 1); // 北方向にタイルを追加
 	void addSouth(const int i = 1); // 南方向にタイルを追加
 	void addWest(const int j = 1); // 西方向にタイルを追加
 	void addEast(const int j = 1); // 東方向にタイルを追加
+
+	//　全体が存在するか
+	bool existTile_R2(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (addr_L.x - 2 < 0) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.z - 2 < 0) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.x + 3 > map_A[0].size()) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		else if (addr_L.z + 3 > map_A.size()) {
+			cout << "existTile_R2" << endl;
+			return false;
+		}
+		return true;
+	}
 
 	// マップ全体を表示する
 	void printMap();
@@ -138,8 +243,10 @@ public:
 	// 最後に"-"を"0"に変更して少しでもポイントを稼ごうと足掻く
 	void replaceLineTo0();
 
-	MapAddress startTile_A = { 0, 0 }, startTile_R = { 0, 0 };
-	MapAddress currentTile_A = { 0, 0 }, currentTile_R = { 0, 0 };
+	MapAddress startTile_A = { 1, 1 }, startTile_R = { 1, 1 };
+	MapAddress currentTile_A = { 1, 1 }, currentTile_R = { 1, 1 };
+	unordered_set<TileState> ColoredTiles = { TileState::CHECKPOINT, TileState::AREA1to2, TileState::AREA2to3, TileState::AREA3to4, TileState::AREA1to4, TileState::SWAMP };
+
 private: // ************************************************************************************
 	/* なんだコレ */
 	int convertTiletoList(int tile) {
@@ -148,22 +255,22 @@ private: // ********************************************************************
 
 	/* 絶対座標を相対座標に変換 */
 	MapAddress convertAtoR(const MapAddress& addr_A) {
-		return { addr_A.x - startTile_A.x, addr_A.z - startTile_A.z };
+		return { addr_A.x - startTile_A.x + 1, addr_A.z - startTile_A.z + 1 };
 	}
 
 	/* 相対座標を絶対座標に変換 */
 	MapAddress convertRtoA(const MapAddress& addr_R) {
-		return { addr_R.x + startTile_A.x, addr_R.z + startTile_A.z };
+		return { addr_R.x + startTile_A.x -1, addr_R.z + startTile_A.z -1 };
 	}
 
 	/* タイル座標からリストのタイル中心の座標に変換 */
 	MapAddress convertAtoListPoint(const MapAddress& addr_A) {
-		return { addr_A.x * 4 + 2, addr_A.z * 4 + 2 };
+		return { addr_A.x * 2, addr_A.z * 2 };
 	}
 
 	/* リストのタイル中心の座標からタイル座標に変換 */
 	MapAddress convertListPointtoA(const MapAddress& addr_list) {
-		return { (addr_list.x - 2) / 4, (addr_list.z - 2) / 4 };
+		return { (addr_list.x) / 2, (addr_list.z) / 2 };
 	}
 
 	/* 相対座標からリストのタイル中心の座標に変換 */
@@ -176,17 +283,19 @@ private: // ********************************************************************
 		return convertAtoR(convertListPointtoA(addr_list));
 	}
 
+	// 中心が存在するか
 	bool existTile_R(const MapAddress& addr_R) {
-		if (addr_R.x < left_top_R.x) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (addr_L.x < 0) {
 			return false;
 		}
-		else if (addr_R.x > right_bottom_R.x) {
+		else if (addr_L.z < 0) {
 			return false;
 		}
-		if (addr_R.z < left_top_R.z) {
+		else if (addr_L.x >= map_A[0].size()) {
 			return false;
 		}
-		else if (addr_R.z > right_bottom_R.z) {
+		else if (addr_L.z >= map_A.size()) {
 			return false;
 		}
 		return true;
@@ -196,6 +305,24 @@ private: // ********************************************************************
 
 	void paintTile(vector<vector<string>>& tile, const WallSet& wallset);
 	void drawTile(vector<vector<string>>& tile, MapAddress add_L);
+	bool isBackClear(vector<vector<string>>& tile);
+
+	void write_map_A(int x, int z, string part) {
+		if (z < 0 || x < 0 || z >= map_A.size() || x >= map_A[0].size()) {
+			while (robot->step(timeStep) != -1) {
+				cout << "can not write map_A !! " << endl;
+				cout << "x: " << x << " z: " << z << " x size: " << map_A[0].size() << " z size: " << map_A.size() << endl;
+				robot->step(timeStep * 100);
+			}
+		}
+		map_A[z][x] = part;
+	}
+
+	void ifBarWrite(int x, int z, string part) {
+		if (map_A[z][x] == "-") {
+			map_A[z][x] = part;
+		}
+	}
 
 	WallState condition_getAroundWallState(int x, int z) {
 		if (WallAndVictim.find(map_A[z][x]) != WallAndVictim.end()) 
@@ -259,5 +386,5 @@ private: // ********************************************************************
 	};
 
 	std::unordered_set<string> WallAndVictim = { "1","H","S","U","F","P","C","O" };
-	MapAddress left_top_R = { 0, 0 }, right_bottom_R = { 0, 0 };
+	MapAddress left_top_R = { 1, 1 }, right_bottom_R = { 1, 1 };
 };
