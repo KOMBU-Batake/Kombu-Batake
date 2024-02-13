@@ -17,7 +17,6 @@
 #include "../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
-#include "../lib/easyLiDAR/easyLiDAR.h"
 #include "../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../lib/PointCloudLiDAR/RecognizingSpace/RecognizingSpace.h"
 //#include "../lib/myMath/myMath.h"
@@ -73,7 +72,6 @@ GyroZ gyro;
 GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
-LiDAR lidar;
 Map mapper;
 PointCloudLiDAR pcLiDAR;
 MyCam myCam;

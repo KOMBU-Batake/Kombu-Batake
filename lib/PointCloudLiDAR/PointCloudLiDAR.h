@@ -12,7 +12,6 @@
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/myMath/myMath.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "./RecognizingSpace/RecognizingSpace.h"
 
 extern GyroZ gyro;
@@ -79,6 +78,43 @@ enum class estimatedWalls :uint8_t{
 	noCentralWall,
 
 	gomi,
+};
+
+enum class LiDAR_degree {
+	RELATIVE, // 機体から見た相対的な角度
+	ABSOLUTE, // フィールドから見た絶対的な角度(方位とも言える)
+
+	LEFT, // 機体の左側
+	RIGHT,
+	FRONT,
+	BACK,
+
+	LEFT_HALF,
+	RIGHT_HALF,
+	FRONT_HALF,
+	BACK_HALF,
+
+	FRONT_RIGHT,
+	FRONT_LEFT,
+};
+
+enum class WallState { // これから尋常じゃないレベルで増える予定は未定
+	noWALL,     // 0
+	WALL,       // 1
+	leftWALL,   // 2
+	rightWALL,  // 3
+	cneterWALL, // 4
+	maybeWALL,  // 5
+	maybeNOWALL,// 6
+	unknown,    // 7 
+	visited, // LiDARのクラスでは使わない
+};
+
+enum class relativeDirection {
+	FRONT,
+	RIGHT,
+	BACK,
+	LEFT,
 };
 
 /* 壁のモデルを格納するクラス
@@ -248,7 +284,7 @@ public:
 	void move_update_display(GPSPosition goalPos, int j, recoedingMode mode);
 
 	void printNum();
-private:
+protected:
 	const float* rangeImage = 0;
 	MyMath myMath;
 

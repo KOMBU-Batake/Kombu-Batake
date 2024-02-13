@@ -154,11 +154,11 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp" />
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp" />
-    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
     <ClCompile Include="lib\MyCam\MyCam.cpp" />
     <ClCompile Include="lib\myMath\myMath.cpp" />
+    <ClCompile Include="lib\PointCloudLiDAR\LiDAR2.cpp" />
     <ClCompile Include="lib\PointCloudLiDAR\PointCloudLiDAR.cpp" />
     <ClCompile Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.cpp" />
     <ClCompile Include="lib\Tank\Tank.cpp" />
@@ -170,11 +170,11 @@
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />
     <ClInclude Include="lib\devices.h" />
-    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h" />
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h" />
     <ClInclude Include="lib\IMU\IMU.h" />
     <ClInclude Include="lib\MyCam\MyCam.h" />
     <ClInclude Include="lib\myMath\myMath.h" />
+    <ClInclude Include="lib\PointCloudLiDAR\LiDAR2.h" />
     <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h" />
     <ClInclude Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.h" />
     <ClInclude Include="lib\Tank\Tank.h" />

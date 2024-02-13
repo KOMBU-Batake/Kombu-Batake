@@ -9,7 +9,6 @@
 #include <unordered_set>
 
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../../lib/ColorSensor/ColorSensor.h"

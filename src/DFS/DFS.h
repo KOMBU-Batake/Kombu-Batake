@@ -15,7 +15,6 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/ToF/ToF.h"
 #include "../../lib/Tank/Tank.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../Map/Map.h"
 #include "../../lib/MyCam/MyCam.h"
@@ -29,7 +28,6 @@ extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
 extern ToFSensor leftToF, rightToF;
 extern Tank tank;
-extern LiDAR lidar;
 extern Map mapper;
 extern PointCloudLiDAR pcLiDAR;
 extern Receiver* receiver;
