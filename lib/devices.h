@@ -23,6 +23,7 @@
 #include "../src/Map/Map.h"
 #include "../src/DFS/DFS.h"
 #include "../lib/MyCam/MyCam.h"
+#include "../lib/PointCloudLiDAR/LiDAR2.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -75,6 +76,7 @@ Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 Map mapper;
 PointCloudLiDAR pcLiDAR;
 MyCam myCam;
+LiDAR2 lidar2;
 //MyMath myMath;
 
 void enableDevices() {

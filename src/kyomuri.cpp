@@ -1,14 +1,5 @@
-// File:          kyomuri.cpp
-// Date:
-// Description:   For WRS
-// Author:        koki0517
-// Modifications:
-
 #include <iostream>
 #include "../lib/devices.h"
-
-using namespace webots;
-using namespace std;
 
 int main(int argc, char **argv) {
   enableDevices();
@@ -16,7 +7,14 @@ int main(int argc, char **argv) {
   cout << "start" << endl;
 
   // [‚³—Dæ’Tõ
-  DFS();
+  //DFS();
+  lidar2.update(gps.expectedPos);
+  NcmPoints points = lidar2.getNcmPoints(LiDAR_degree::FRONT, 10);
+  cout << "left count : " << points.model_left.size() << " right count : " << points.model_right.size() << endl;
+  points.model_left.insert(points.model_left.end(), points.model_right.begin(), points.model_right.end());
+  for(auto p : points.model_left) {
+		cout << p << endl;
+	}
 
   cout << "end" << endl;
 
