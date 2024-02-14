@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   cout << "left count : " << points.model_left.size() << " right count : " << points.model_right.size() << endl;
   points.model_left.insert(points.model_left.end(), points.model_right.begin(), points.model_right.end());
   for(auto p : points.model_left) {
-		cout << p << endl;
+		cout << p.x << " " << p.z << endl;
 	}
 
   cout << "end" << endl;

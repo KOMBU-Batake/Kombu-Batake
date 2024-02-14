@@ -2,12 +2,12 @@
 #include "PointCloudLiDAR.h"
 
 // ^‚ñ’†‚Íleft‚Ì––”ö‚É‚ ‚é
-struct NcmPoints {
-  vector<float> model_left;
-  vector<float> model_right;
-	int count_left;
-	int count_right;
-};
+typedef struct {
+  vector<XZcoordinate> model_left;
+  vector<XZcoordinate> model_right;
+  int count_left;
+  int count_right;
+} NcmPoints;
 
 // •‰‚ÌˆâY‚ğŒp³‚·‚é‚æ
 class LiDAR2 :
@@ -18,5 +18,5 @@ public:
   NcmPoints getNcmPoints(const LiDAR_degree& direction, uint16_t range);
 
   LiDAR2() = default;
-};
 
+};

@@ -7,14 +7,14 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, uint16_t range) {
 	int16_t half_range = range / 2;
 
 	if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
-		ncmP.model_left = { abs(pointCloud[center].x) };
+		ncmP.model_left = { pointCloud[center] };
 		float centralZ = pointCloud[center].z;
 		// ‰E•ûŒü
 		ncmP.count_right = 0;
 		while (1) {
 			ncmP.count_right++;
 			if (abs(pointCloud[center + ncmP.count_right].z - centralZ) <= half_range) {
-				ncmP.model_right.push_back(abs(pointCloud[center + ncmP.count_right].x));
+				ncmP.model_right.push_back(pointCloud[center + ncmP.count_right]);
 			}
 			else {
 				ncmP.count_right--;
@@ -26,7 +26,7 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, uint16_t range) {
 		while (1) {
 			ncmP.count_left++;
 			if (abs(centralZ - pointCloud[center - ncmP.count_left].z) <= half_range) {
-				ncmP.model_left.push_back(abs(pointCloud[center - ncmP.count_left].x));
+				ncmP.model_left.push_back(pointCloud[center - ncmP.count_left]);
 				rotate(ncmP.model_left.rbegin(), ncmP.model_left.rbegin() + 1, ncmP.model_left.rend());
 			}
 			else {
@@ -37,14 +37,14 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, uint16_t range) {
 	}
 	else
 	{
-		ncmP.model_left = { abs(pointCloud[center].z) };
+		ncmP.model_left = { pointCloud[center] };
 		float centralX = pointCloud[center].x;
 		// ‰E•ûŒü
 		ncmP.count_right = 0;
 		while (1) {
 			ncmP.count_right++;
 			if (abs(pointCloud[center + ncmP.count_right].x - centralX) <= half_range) {
-				ncmP.model_right.push_back(abs(pointCloud[center + ncmP.count_right].z));
+				ncmP.model_right.push_back(pointCloud[center + ncmP.count_right]);
 			}
 			else {
 				ncmP.count_right--;
@@ -57,7 +57,7 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, uint16_t range) {
 		while (1) {
 			ncmP.count_left++;
 			if (abs(centralX - pointCloud[center - ncmP.count_left].x) <= half_range) {
-				ncmP.model_left.push_back(abs(pointCloud[center - ncmP.count_left].z));
+				ncmP.model_left.push_back(pointCloud[center - ncmP.count_left]);
 				rotate(ncmP.model_left.rbegin(), ncmP.model_left.rbegin() + 1, ncmP.model_left.rend());
 			}
 			else {
