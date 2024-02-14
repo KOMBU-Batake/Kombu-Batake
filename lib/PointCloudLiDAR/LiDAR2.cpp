@@ -68,3 +68,79 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, uint16_t range) {
 	}
 	return ncmP;
 }
+
+WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
+{
+	// 中央10cmのデータを取得
+	NcmPoints pointsSet = getNcmPoints(direction, 10);
+
+	MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
+	
+	return WallSet();
+}
+
+MAXandMIN LiDAR2::getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction)
+{
+	// 都合のいいように座標を回転
+	switch (direction) {
+		case LiDAR_degree::BACK:
+			transform(pointsSet.model_left.begin(), pointsSet.model_left.end(), pointsSet.model_left.begin(),
+				[](XZcoordinate element) { 
+					element.z *= -1;
+					element.x *= -1;
+					return element; 
+				});
+			transform(pointsSet.model_right.begin(), pointsSet.model_right.end(), pointsSet.model_right.begin(),
+				[](XZcoordinate element) { 
+					element.z *= -1; 
+					element.x *= -1;
+					return element; 
+				});
+			break;
+		case LiDAR_degree::LEFT:
+			transform(pointsSet.model_left.begin(), pointsSet.model_left.end(), pointsSet.model_left.begin(),
+				[](XZcoordinate element, float tmp) { 
+					tmp = element.x;
+					element.x = -1 * element.z;
+					element.z = tmp;
+					return element; 
+				});
+			transform(pointsSet.model_right.begin(), pointsSet.model_right.end(), pointsSet.model_right.begin(),
+				[](XZcoordinate element, float tmp) {
+					tmp = element.x;
+					element.x = -1 * element.z;
+					element.z = tmp;
+					return element; 
+				});
+			break;
+		case LiDAR_degree::RIGHT:
+			transform(pointsSet.model_left.begin(), pointsSet.model_left.end(), pointsSet.model_left.begin(),
+				[](XZcoordinate element, float tmp) {
+					tmp = element.x;
+					element.x =element.z;
+					element.z = -1 * tmp;
+					return element;
+				});
+			transform(pointsSet.model_right.begin(), pointsSet.model_right.end(), pointsSet.model_right.begin(),
+				[](XZcoordinate element, float tmp) {
+					tmp = element.x;
+					element.x = element.z;
+					element.z = -1 * tmp;
+					return element;
+				});
+			break;
+		default:
+			break;
+	}
+
+	// 最大値と最小値を取得
+	XZcoordinate maxLeft = *max_element(pointsSet.model_left.begin(), pointsSet.model_left.end(),
+		[](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
+	XZcoordinate minLeft = *min_element(pointsSet.model_left.begin(), pointsSet.model_left.end(),
+		[](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
+	XZcoordinate maxRight = *max_element(pointsSet.model_right.begin(), pointsSet.model_right.end(),
+		[](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
+	XZcoordinate minRight = *min_element(pointsSet.model_right.begin(), pointsSet.model_right.end(),
+		[](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
+	return MAXandMIN{ maxLeft.z, minLeft.z, maxRight.z, minRight.z };
+}

@@ -9,6 +9,13 @@ typedef struct {
   int count_right;
 } NcmPoints;
 
+struct MAXandMIN {
+  float leftMax;
+  float leftMin;
+  float rightMax;
+  float rightMin;
+};
+
 // 負の遺産を継承するよ
 class LiDAR2 :
     public PointCloudLiDAR
@@ -17,6 +24,8 @@ public:
   // 指定された方角を中心としたN(cm)のデータを返す
   NcmPoints getNcmPoints(const LiDAR_degree& direction, uint16_t range);
 
-  LiDAR2() = default;
-
+  WallSet getWallType(const LiDAR_degree& direction);
+private:
+  // 最大値と最小値を取得する
+  MAXandMIN getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction);
 };

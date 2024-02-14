@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
   for(auto p : points.model_left) {
 		cout << p.x << " " << p.z << endl;
 	}
+  lidar2.getWallType(LiDAR_degree::FRONT);
 
   cout << "end" << endl;
 
