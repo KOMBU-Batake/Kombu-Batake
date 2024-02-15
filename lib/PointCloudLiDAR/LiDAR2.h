@@ -22,10 +22,17 @@ class LiDAR2 :
 {
 public:
   // 指定された方角を中心としたN(cm)のデータを返す
-  NcmPoints getNcmPoints(const LiDAR_degree& direction, uint16_t range);
+  NcmPoints getNcmPoints(const LiDAR_degree& direction, float range);
 
   WallSet getWallType(const LiDAR_degree& direction);
 private:
   // 最大値と最小値を取得する
   MAXandMIN getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction);
+  void rotateToFront(NcmPoints& pointsSet, LiDAR_degree direction);
+
+  void printLeftRight(const NcmPoints& pointsSet);
+  
+  XZcoordinate readPoint(int16_t num) {
+    return pointCloud[num%512];
+  }
 };

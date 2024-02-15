@@ -89,11 +89,6 @@ enum class LiDAR_degree {
 	FRONT,
 	BACK,
 
-	LEFT_HALF,
-	RIGHT_HALF,
-	FRONT_HALF,
-	BACK_HALF,
-
 	FRONT_RIGHT,
 	FRONT_LEFT,
 };
@@ -132,12 +127,6 @@ public:
 	WallSet wallSet = { WallType::typeNo, WallType::center_n, WallType::typeNo };
 private:
 	static int16_t counter;
-	//map<TagMinDistance, float> minDistanceMap = {
-	//	{TagMinDistance::Nine, (float)8},
-	//	{TagMinDistance::Fifteen, (float)14},
-	//	{TagMinDistance::TwentyOne, (float)20},
-	//	{TagMinDistance::Nine_and_Fifteen, (float)9}
-	//};
 };
 
 class PointCloudLiDAR {
