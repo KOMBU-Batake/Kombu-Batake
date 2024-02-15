@@ -109,9 +109,6 @@
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp">
       <Filter>lib\ColorSensor</Filter>
     </ClCompile>
-    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp">
-      <Filter>lib\easyLiDAR</Filter>
-    </ClCompile>
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
       <Filter>lib\GlobalPositioningSystem</Filter>
     </ClCompile>
@@ -138,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.cpp">
       <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\PointCloudLiDAR\LiDAR2.cpp">
+      <Filter>lib\PointCloudLiDAR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -203,9 +203,6 @@
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
       <Filter>lib\ColorSensor</Filter>
     </ClInclude>
-    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h">
-      <Filter>lib\easyLiDAR</Filter>
-    </ClInclude>
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
       <Filter>lib\GlobalPositioningSystem</Filter>
     </ClInclude>
@@ -229,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.h">
       <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\PointCloudLiDAR\LiDAR2.h">
+      <Filter>lib\PointCloudLiDAR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

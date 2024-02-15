@@ -1,6 +1,13 @@
 #pragma once
 #include "PointCloudLiDAR.h"
 
+struct MAXandMIN {
+  float leftMax;
+  float leftMin;
+  float rightMax;
+  float rightMin;
+};
+
 // ^‚ñ’†‚Íleft‚Ì––”ö‚É‚ ‚é
 typedef struct {
   vector<XZcoordinate> model_left;
@@ -8,13 +15,6 @@ typedef struct {
   int count_left;
   int count_right;
 } NcmPoints;
-
-struct MAXandMIN {
-  float leftMax;
-  float leftMin;
-  float rightMax;
-  float rightMin;
-};
 
 // •‰‚ÌˆâY‚ğŒp³‚·‚é‚æ
 class LiDAR2 :
@@ -33,9 +33,7 @@ private:
   void printLeftRight(const NcmPoints& pointsSet);
   
   XZcoordinate readPoint(int16_t num) {
-    if (num < 0) {
-			num += 512;
-		}
+    if (num < 0) num += 512;
     return pointCloud[num%512];
   }
 };
