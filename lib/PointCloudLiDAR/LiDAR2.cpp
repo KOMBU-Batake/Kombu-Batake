@@ -44,8 +44,8 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
   std::cout << "center: " << center << endl;
     
   // ’†‰›10cm‚Ìƒf[ƒ^‚ðŽæ“¾
-    NcmPoints ncmP;
-    float half_range = range / 2;
+  NcmPoints ncmP;
+  float half_range = range / 2;
 
     if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
         ncmP.model_left = { pointCloud[center] };
@@ -54,8 +54,8 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
         ncmP.count_right = 0;
         while (1) {
             ncmP.count_right++;
-            if (abs(pointCloud[center + ncmP.count_right].z - centralZ) <= half_range) {
-                ncmP.model_right.push_back(pointCloud[center + ncmP.count_right]);
+            if (abs(readPoint(center + ncmP.count_right).z - centralZ) <= half_range) {
+                ncmP.model_right.push_back(readPoint(center + ncmP.count_right));
             }
             else {
                 ncmP.count_right--;
@@ -66,8 +66,8 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
         ncmP.count_left = 0;
         while (1) {
             ncmP.count_left++;
-            if (abs(centralZ - pointCloud[center - ncmP.count_left].z) <= half_range) {
-                ncmP.model_left.push_back(pointCloud[center - ncmP.count_left]);
+            if (abs(centralZ - readPoint(center - ncmP.count_left).z) <= half_range) {
+                ncmP.model_left.push_back(readPoint(center - ncmP.count_left));
                 std::rotate(ncmP.model_left.rbegin(), ncmP.model_left.rbegin() + 1, ncmP.model_left.rend());
             }
             else {
@@ -84,8 +84,8 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
         ncmP.count_right = 0;
         while (1) {
             ncmP.count_right++;
-            if (abs(pointCloud[center + ncmP.count_right].x - centralX) <= half_range) {
-                ncmP.model_right.push_back(pointCloud[center + ncmP.count_right]);
+            if (abs(readPoint(center + ncmP.count_right).x - centralX) <= half_range) {
+                ncmP.model_right.push_back(readPoint(center + ncmP.count_right));
             }
             else {
                 ncmP.count_right--;
@@ -93,12 +93,11 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
             }
         }
         // ¶•ûŒü 
-        if (direction == LiDAR_degree::FRONT) center = 512;
         ncmP.count_left = 0;
         while (1) {
             ncmP.count_left++;
-            if (abs(centralX - pointCloud[center - ncmP.count_left].x) <= half_range) {
-                ncmP.model_left.push_back(pointCloud[center - ncmP.count_left]);
+            if (abs(centralX - readPoint(center - ncmP.count_left).x) <= half_range) {
+                ncmP.model_left.push_back(readPoint(center - ncmP.count_left));
                 std::rotate(ncmP.model_left.rbegin(), ncmP.model_left.rbegin() + 1, ncmP.model_left.rend());
             }
             else {

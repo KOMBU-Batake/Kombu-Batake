@@ -33,6 +33,9 @@ private:
   void printLeftRight(const NcmPoints& pointsSet);
   
   XZcoordinate readPoint(int16_t num) {
+    if (num < 0) {
+			num += 512;
+		}
     return pointCloud[num%512];
   }
 };
