@@ -176,6 +176,41 @@ void LiDAR2::rotateToFront(NcmPoints& pointsSet, LiDAR_degree direction) {
   }
 }
 
+vector<XZcoordinate> LiDAR2::getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range)
+{
+  vector<XZcoordinate> points;
+  if (direction == LiDAR_degree::FRONT) {
+    for (auto& point : pointCloud) {
+      if (point.x > center.x - range / 2 && point.x < center.x + range / 2 && point.z > center.z) {
+				points.push_back(point);
+      }
+    }
+  }
+  else if (direction == LiDAR_degree::BACK) {
+    for (auto& point : pointCloud) {
+      if (point.x > center.x - range / 2 && point.x < center.x + range / 2 && point.z < center.z) {
+        points.push_back(point);
+      }
+    }
+  }
+  else if (direction == LiDAR_degree::LEFT) {
+    for (auto& point : pointCloud) {
+      if (point.z > center.z - range / 2 && point.z < center.z + range / 2 && point.x < center.x) {
+				points.push_back(point);
+			}
+    }
+  }
+  else if (direction == LiDAR_degree::RIGHT) {
+    for (auto& point : pointCloud) {
+      if (point.z > center.z - range / 2 && point.z < center.z + range / 2 && point.x > center.x) {
+        points.push_back(point);
+      }
+    }
+  }
+
+  return points;
+}
+
 MAXandMIN LiDAR2::getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction)
 {
     // Å‘å’l‚ÆÅ¬’l‚ğæ“¾

@@ -57,6 +57,8 @@ private:
   // “s‡‚æ‚­À•W‚ğ‰ñ“]‚³‚¹‚é
   void rotateToFront(NcmPoints& pointsSet, LiDAR_degree direction);
 
+  vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
+
   void printLeftRight(const NcmPoints& pointsSet);
   
   XZcoordinate readPoint(int16_t num) {
