@@ -42,6 +42,7 @@ enum class canGo {
 	VISITED,
 };
 
+// 情報を知らせるニュースじゃなくてN(orth), E(ast), W(est), S(outh)の略だよ。まぁニュースも一緒だけど
 enum class NEWS {
 	NORTH,
 	EAST,
@@ -51,24 +52,24 @@ enum class NEWS {
 	NO,
 };
 
-typedef struct{
+struct PotentialDirectionsOfTravel {
 	canGo front;
 	canGo back;
 	canGo left;
 	canGo right;
-} PotentialDirectionsOfTravel;
+};
 
-typedef struct {
+struct NEWSset {
 	canGo north;
 	canGo east;
 	canGo south;
 	canGo west;
-} NEWSset;
+};
 
-typedef struct {
+struct DESelement {
 	MapAddress target;
 	NEWSset direction;
-} DESelement;
+};
 
 void DFS();
 

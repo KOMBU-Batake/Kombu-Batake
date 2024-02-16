@@ -1,3 +1,8 @@
+/* 
+ * ここはメインな感じのプログラム
+ * 実質的なメインプログラムはDFS.cpp
+ */
+
 #include <iostream>
 #include "../lib/devices.h"
 

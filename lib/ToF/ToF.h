@@ -7,7 +7,7 @@
 using namespace webots;
 using namespace std;
 
-/* 圧 倒 的 欠 陥 品 */
+/* 圧 倒 的 欠 陥 セ ン サ 二 度 と 使 う か */
 class ToFSensor
 {
 public:

@@ -159,9 +159,6 @@
     <Filter Include="lib\ColorSensor">
       <UniqueIdentifier>{f3be9f98-2434-4fde-b08b-bbef1cbc6c83}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\easyLiDAR">
-      <UniqueIdentifier>{93076581-ffa9-415e-9fb3-d5158cb244ab}</UniqueIdentifier>
-    </Filter>
     <Filter Include="lib\GlobalPositioningSystem">
       <UniqueIdentifier>{8c734cff-a168-401e-9959-d7352caf77ff}</UniqueIdentifier>
     </Filter>

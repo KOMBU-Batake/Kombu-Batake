@@ -9,12 +9,31 @@ struct MAXandMIN {
 };
 
 // ê^ÇÒíÜÇÕleftÇÃññîˆÇ…Ç†ÇÈ
-typedef struct {
+struct NcmPoints {
   vector<XZcoordinate> model_left;
   vector<XZcoordinate> model_right;
   int count_left;
   int count_right;
-} NcmPoints;
+};
+
+struct StraightLine {
+  StraightLine(XZcoordinate p1, XZcoordinate p2) {
+    x_max = max(p1.x, p2.x);
+    x_min = min(p1.x, p2.x);
+    z_max = max(p1.z, p2.z);
+    z_min = min(p1.z, p2.z);
+    a = (p2.z - p1.z) / (p2.x - p1.x);
+    b = p1.z - a * p1.x;
+  }
+  float a;
+  float b;
+  float x_max;
+  float x_min;
+  float z_max;
+  float z_min;
+
+  StraightLine() = default;
+};
 
 // ïâÇÃà‚éYÇåpè≥Ç∑ÇÈÇÊ
 class LiDAR2 :
@@ -25,9 +44,17 @@ public:
   NcmPoints getNcmPoints(const LiDAR_degree& direction, float range);
 
   WallSet getWallType(const LiDAR_degree& direction);
+
+  void update(GPSPosition goalPos) {
+    PointCloudLiDAR::update(goalPos);
+    for (int i = 0; i < 512; i++) {
+			lines[i] = StraightLine(readPoint(i), readPoint(i+1));
+		}
+  }
 private:
   // ç≈ëÂílÇ∆ç≈è¨ílÇéÊìæÇ∑ÇÈ
   MAXandMIN getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction);
+  // ìsçáÇÊÇ≠ç¿ïWÇâÒì]Ç≥ÇπÇÈ
   void rotateToFront(NcmPoints& pointsSet, LiDAR_degree direction);
 
   void printLeftRight(const NcmPoints& pointsSet);
@@ -36,4 +63,6 @@ private:
     if (num < 0) num += 512;
     return pointCloud[num%512];
   }
+
+  vector<StraightLine> lines = vector<StraightLine>(512);
 };
