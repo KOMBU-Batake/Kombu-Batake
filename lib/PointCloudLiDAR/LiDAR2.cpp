@@ -197,18 +197,18 @@ vector<XZcoordinate> LiDAR2::getNcmPoints(XZcoordinate center, const LiDAR_degre
 }
 
 static int8_t conditionFRONTandBACK(StraightLine line, float centerX, float half_range) {
-  if (line.x_min > centerX - half_range && line.x_max < centerX + half_range) return 1;
-  if (line.x_min < centerX - half_range && line.x_max > centerX - half_range && line.x_max < centerX + half_range) return 2;
-  if (line.x_min > centerX - half_range && line.x_min < centerX + half_range && line.x_max > centerX + half_range) return 3;
-  if (line.x_min < centerX - half_range && line.x_max > centerX + half_range) return 4;
+  if (line.x_min >= centerX - half_range && line.x_max <= centerX + half_range) return 1;
+  if (line.x_min <= centerX - half_range && line.x_max >= centerX - half_range && line.x_max <= centerX + half_range) return 2;
+  if (line.x_min >= centerX - half_range && line.x_min <= centerX + half_range && line.x_max >= centerX + half_range) return 3;
+  if (line.x_min <= centerX - half_range && line.x_max >= centerX + half_range) return 4;
   return 0;
 }
 
 static int8_t conditionLEFTandRIGHT(StraightLine line, float centerZ, float half_range) {
-  if (line.z_min > centerZ - half_range && line.z_max < centerZ + half_range) return 1;
-  if (line.z_min < centerZ - half_range && line.z_max > centerZ - half_range && line.z_max < centerZ + half_range) return 2;
-  if (line.z_min > centerZ - half_range && line.z_min < centerZ + half_range && line.z_max > centerZ + half_range) return 3;
-  if (line.z_min < centerZ - half_range && line.z_max > centerZ + half_range) return 4;
+  if (line.z_min >= centerZ - half_range && line.z_max <= centerZ + half_range) return 1;
+  if (line.z_min <= centerZ - half_range && line.z_max >= centerZ - half_range && line.z_max <= centerZ + half_range) return 2;
+  if (line.z_min >= centerZ - half_range && line.z_min <= centerZ + half_range && line.z_max >= centerZ + half_range) return 3;
+  if (line.z_min <= centerZ - half_range && line.z_max >= centerZ + half_range) return 4;
   return 0;
 }
 
@@ -216,27 +216,69 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
   vector<StraightLine> returnlines;
   float half_range = range / 2;
   float centerX = 0, centerZ = 0;
+  int index = 0;
+  int8_t condition = 0;
   switch (direction) {
     case LiDAR_degree::FRONT:
     case LiDAR_degree::BACK:
       centerX = center.x;
       for (auto& line : lines) {
-        if (conditionFRONTandBACK(line, centerX, half_range) &&
-           (direction == LiDAR_degree::FRONT && line.z_max > center.z ||
-            direction == LiDAR_degree::BACK && line.z_min < center.z)) {
-          returnlines.push_back(line);
+        condition = conditionFRONTandBACK(line, centerX, half_range);
+        cout << "num: " << index << ", " <<  "cond: " << (int)condition << ", " << line.x_min << " " << line.x_max << " " << line.z_min << " " << line.z_max;
+        if (condition &&
+           (direction == LiDAR_degree::FRONT && line.z_max >= center.z ||
+            direction == LiDAR_degree::BACK && line.z_min <= center.z)) {
+          cout << " push";
+          if (condition == 1) returnlines.push_back(line);
+          else if (condition == 2) {
+            StraightLine tmp = line;
+            line.renewRangebyXmin(center.x-half_range);
+            returnlines.push_back(tmp);
+          }
+          else if (condition == 3) {
+						StraightLine tmp = line;
+						line.renewRangebyXmax(center.x+half_range);
+						returnlines.push_back(tmp);
+          }
+          else if (condition == 4) {
+						StraightLine tmp = line;
+						line.renewRangebyXmin(center.x-half_range);
+						line.renewRangebyXmax(center.x+half_range);
+						returnlines.push_back(tmp);
+					}
         }
+        index++;
+        cout << endl;
       }
       break;
     case LiDAR_degree::LEFT:
     case LiDAR_degree::RIGHT:
       centerZ = center.z;
       for (auto& line : lines) {
-        if (conditionLEFTandRIGHT(line, centerZ, half_range) &&
+        condition = conditionLEFTandRIGHT(line, centerZ, half_range);
+        if (condition &&
            (direction == LiDAR_degree::LEFT && line.x_min < center.x ||
             direction == LiDAR_degree::RIGHT && line.x_max > center.x)) {
-          returnlines.push_back(line);
+          if (condition == 1) returnlines.push_back(line);
+          else if (condition == 2) {
+						StraightLine tmp = line;
+						line.renewRangebyZmin(center.z-half_range);
+						returnlines.push_back(tmp);
+					}
+          else if (condition == 3) {
+						StraightLine tmp = line;
+						line.renewRangebyZmax(center.z+half_range);
+						returnlines.push_back(tmp);
+					}
+          else if (condition == 4) {
+						StraightLine tmp = line;
+						line.renewRangebyZmin(center.z-half_range);
+						line.renewRangebyZmax(center.z+half_range);
+						returnlines.push_back(tmp);
+					}
+          cout << index << ", " << (int)condition;
         }
+        index++;
       }
       break;
   }

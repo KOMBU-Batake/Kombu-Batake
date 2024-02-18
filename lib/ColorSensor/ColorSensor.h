@@ -20,8 +20,9 @@ enum class TileState {
 	AREA2to3 = 7,
 	AREA3to4 = 8,
 	AREA1to4 = 9,
-	UNKNOWN, // = "-
+	UNKNOWN, // = "-"
 	visited, // LiDAR‚ÌƒNƒ‰ƒX‚Å‚ÍŽg‚í‚È‚¢
+	partly_visited,
 };
 
 typedef struct

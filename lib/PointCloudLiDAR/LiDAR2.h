@@ -12,8 +12,8 @@ struct MAXandMIN {
 struct NcmPoints {
   vector<XZcoordinate> model_left;
   vector<XZcoordinate> model_right;
-  int count_left;
-  int count_right;
+  int count_left = 0;
+  int count_right = 0;
 };
 
 struct StraightLine {
@@ -23,6 +23,50 @@ struct StraightLine {
   float x_min;
   float z_max;
   float z_min;
+
+  void renewRangebyXmax(float new_x_max) {
+    if (a > 0) {
+      x_max = new_x_max;
+      z_max = a * x_max + b;
+    }
+    else {
+      x_max = new_x_max;
+      z_min = a * x_max + b;
+    }
+  }
+
+  void renewRangebyXmin(float new_x_min) {
+    if (a > 0) {
+			x_min = new_x_min;
+			z_min = a * x_min + b;
+		}
+    else {
+			x_min = new_x_min;
+			z_max = a * x_min + b;
+		}
+	}
+
+  void renewRangebyZmax(float new_z_max) {
+    if (a > 0) {
+      z_max = new_z_max;
+      x_max = (z_max - b) / a;
+    }
+    else {
+      z_max = new_z_max;
+      x_min = (z_max - b) / a;
+    }
+  }
+
+  void renewRangebyZmin(float new_z_min) {
+    if (a > 0) {
+			z_min = new_z_min;
+			x_min = (z_min - b) / a;
+		}
+    else {
+			z_min = new_z_min;
+			x_max = (z_min - b) / a;
+		}
+	}
 
   StraightLine(XZcoordinate p1, XZcoordinate p2) {
     x_max = std::max(p1.x, p2.x);
@@ -83,6 +127,8 @@ public:
 			lines[i] = StraightLine(readPoint(i), readPoint(i+1));
 		}
   }
+  vector<StraightLine> getNcmLines(XZcoordinate center, const LiDAR_degree& direction, float range);
+
 private:
   // Žw’è‚µ‚½•ûŒü‚É‚ ‚é“_
   int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
@@ -92,8 +138,6 @@ private:
   void rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction);
 
   vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
-
-  vector<StraightLine> getNcmLines(XZcoordinate center, const LiDAR_degree& direction, float range);
 
   void printLeftRight(const NcmPoints& pointsSet);
   
