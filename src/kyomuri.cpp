@@ -16,11 +16,7 @@ int main(int argc, char **argv) {
   cout << robot->getTime() << endl;
   lidar2.update(gps.expectedPos);
 
-  lidar2.getNcmLines({ 0,0 }, LiDAR_degree::FRONT, 10);
-  cout << "-----------------------------------" << endl;
-  lidar2.getNcmLines({ 0,6 }, LiDAR_degree::FRONT, 10);
-  cout << "-----------------------------------" << endl;
-  lidar2.getNcmLines({ 0,12 }, LiDAR_degree::FRONT, 10);
+  lidar2.getWallType(LiDAR_degree::FRONT);
 
   robot->step(timeStep);
   cout << robot->getTime() << endl;

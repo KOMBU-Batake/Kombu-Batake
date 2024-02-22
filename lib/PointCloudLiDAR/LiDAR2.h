@@ -1,5 +1,6 @@
 #pragma once
 #include "PointCloudLiDAR.h"
+#include <corecrt_math_defines.h>
 
 struct MAXandMIN {
   float leftMax;
@@ -14,6 +15,7 @@ struct NcmPoints {
   vector<XZcoordinate> model_right;
   int count_left = 0;
   int count_right = 0;
+  int centerNum = 0;
 };
 
 struct StraightLine {
@@ -24,50 +26,6 @@ struct StraightLine {
   float z_max;
   float z_min;
 
-  void renewRangebyXmax(float new_x_max) {
-    if (a > 0) {
-      x_max = new_x_max;
-      z_max = a * x_max + b;
-    }
-    else {
-      x_max = new_x_max;
-      z_min = a * x_max + b;
-    }
-  }
-
-  void renewRangebyXmin(float new_x_min) {
-    if (a > 0) {
-			x_min = new_x_min;
-			z_min = a * x_min + b;
-		}
-    else {
-			x_min = new_x_min;
-			z_max = a * x_min + b;
-		}
-	}
-
-  void renewRangebyZmax(float new_z_max) {
-    if (a > 0) {
-      z_max = new_z_max;
-      x_max = (z_max - b) / a;
-    }
-    else {
-      z_max = new_z_max;
-      x_min = (z_max - b) / a;
-    }
-  }
-
-  void renewRangebyZmin(float new_z_min) {
-    if (a > 0) {
-			z_min = new_z_min;
-			x_min = (z_min - b) / a;
-		}
-    else {
-			z_min = new_z_min;
-			x_max = (z_min - b) / a;
-		}
-	}
-
   StraightLine(XZcoordinate p1, XZcoordinate p2) {
     x_max = std::max(p1.x, p2.x);
     x_min = std::min(p1.x, p2.x);
@@ -77,32 +35,12 @@ struct StraightLine {
     b = p1.z - a * p1.x;
   }
 
-  bool hasIntersection(const StraightLine& other) const {
-    if (a == other.a) {
-      if (b == other.b) return true;
-			return false;
-		}
-    if ((other.a * x_max + other.b < z_max && other.a * x_min + other.b > z_min) ||
-      (a * other.x_max + b < other.z_max && a * other.x_min + b > other.z_min)) {
-      return true;
-    }
-    return false;
-  }
-
-  XZcoordinate getIntersectionPoint(const StraightLine& other) const {
-    if (!hasIntersection(other)) {
-      // 交差しない場合は (NaN, NaN) を返す
-      return { std::nanf(""), std::nanf("") };
-    }
-    if (*this == other) {
-      return { numeric_limits<float>::infinity(), numeric_limits<float>::infinity() };
-    }
-
-    // 交点を計算
-    float x_intersection = (other.b - b) / (a - other.a);
-    float z_intersection = a * x_intersection + b;
-    return { x_intersection, z_intersection };
-  }
+  void renewRangebyXmax(float new_x_max);
+  void renewRangebyXmin(float new_x_min);
+  void renewRangebyZmax(float new_z_max);
+  void renewRangebyZmin(float new_z_min);
+  bool hasIntersection(const StraightLine& other) const;
+  XZcoordinate getIntersectionPoint(const StraightLine& other) const;
 
   bool operator==(const StraightLine& other) const {
     return a == other.a && b == other.b;
@@ -129,6 +67,15 @@ public:
   }
   vector<StraightLine> getNcmLines(XZcoordinate center, const LiDAR_degree& direction, float range);
 
+  void test() {
+    XZcoordinate p1 = { 1.0f, 2.0f };
+    XZcoordinate p2 = { 3.0f, 4.0f };
+    XZcoordinate p3 = { 5.0f, 6.0f };
+
+    float angleABC = calculateAngle(p1, p2, p3);
+    std::cout << "angle: " << angleABC << " do" << std::endl;
+  }
+
 private:
   // 指定した方向にある点
   int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
@@ -136,14 +83,43 @@ private:
   MAXandMIN getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction);
   // 都合よく座標を回転させる
   void rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction);
+  // ベクトルトレーサー法で特徴点を探す
+  vector<int> VectorTracer(NcmPoints& pointSet);
 
   vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
+
+  WallType identifyLeft(vector<XZcoordinate>& leftPoints, const int& leftPointsCount);
+  WallType identifyRight(vector<XZcoordinate>& rightPoints, const int& rightPointsCount);
+  WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset);
 
   void printLeftRight(const NcmPoints& pointsSet);
   
   XZcoordinate readPoint(int16_t num) {
     if (num < 0) num += 512;
     return pointCloud[num%512];
+  }
+
+  float calculateAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZcoordinate& p3) {
+    XZcoordinate ab, ac;
+    ab.x = p1.x - p2.x;
+    ab.z = p1.z - p2.z;
+    ac.x = p3.x - p2.x;
+    ac.z = p3.z - p2.z;
+
+    float dotProductABAC = ab.x * ac.x + ab.z * ac.z;
+    float lenAB = vectorLength(ab);
+    float lenAC = vectorLength(ac);
+
+    // cos(θ)を計算
+    float cosTheta = dotProductABAC / (lenAB * lenAC);
+    if (cosTheta < -1.0F) cosTheta = -1.0F;
+    if (cosTheta > 1.0F) cosTheta = 1.0F;
+
+    return (float)acos(cosTheta) * 180.0F / 3.1415926535F; // θをラジアンから度に変換
+  }
+
+  float vectorLength(const XZcoordinate& v) {
+    return sqrt(v.x * v.x + v.z * v.z);
   }
 
   vector<StraightLine> lines = vector<StraightLine>(512);

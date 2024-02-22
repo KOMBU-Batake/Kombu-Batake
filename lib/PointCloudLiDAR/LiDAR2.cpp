@@ -1,12 +1,11 @@
 #include "LiDAR2.h"
 
 NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
-
-  int center = getCenterNum(direction);
-  std::cout << "center: " << center << endl;
-    
   // 中央10cmのデータを取得
   NcmPoints ncmP;
+  int center = getCenterNum(direction);
+  std::cout << "center: " << center << endl;
+  ncmP.centerNum = center;
   float half_range = range / 2;
 
     if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
@@ -111,20 +110,88 @@ int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
   default:
     break;
   }
+  return center;
 }
 
 WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
 {
   WallSet wallSet = {WallType::typeNo, WallType::center_n, WallType::typeNo};
     // 中央10cmのデータを取得
-    NcmPoints pointsSet = getNcmPoints(direction, 10);
+    NcmPoints pointsSet = getNcmPoints(direction, 12);
+    printLeftRight(pointsSet);
+    cout << "-------------------" << endl;
     rotateToFront(pointsSet.model_left, direction);
     rotateToFront(pointsSet.model_right, direction);
     MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
+    vector<int> featurePoints = VectorTracer(pointsSet);
 
-    if (max_min.leftMax > 18.0F && max_min.rightMax > 18.0F) return wallSet;
-    if (max_min.leftMin < 6.0F && max_min.rightMin < 6.0F) return { WallType::type10, WallType::center_n, WallType::type10 };
-    return WallSet();
+    if (max_min.leftMax > 18.0F && max_min.rightMax > 18.0F) return wallSet; // 壁が一切ない
+    if (max_min.leftMin < 6.0F && max_min.rightMin < 6.0F) return { WallType::type10, WallType::center_n, WallType::type10 }; // 完全にふさがれている
+
+    wallSet.left = identifyLeft(pointsSet.model_left, pointsSet.count_left);
+    wallSet.right = identifyRight(pointsSet.model_right, pointsSet.count_right);
+    wallSet.center = identifyCenter(pointsSet, wallSet);
+
+    return wallSet;
+}
+
+WallType LiDAR2::identifyLeft(vector<XZcoordinate>& leftPoints, const int& leftPointsCount)
+{
+  return WallType();
+}
+
+WallType LiDAR2::identifyRight(vector<XZcoordinate>& rightPoints, const int& rightPointsCount)
+{
+  return WallType();
+}
+
+WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset)
+{
+  return WallType::center_n;
+}
+
+static float getAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZcoordinate& p3) {
+  XZcoordinate ab, ac;
+  ab.x = p1.x - p2.x;
+  ab.z = p1.z - p2.z;
+  ac.x = p3.x - p2.x;
+  ac.z = p3.z - p2.z;
+  XZcoordinate marged = ab + ac;
+  return (float)(atan2(marged.z, marged.x) * 180 / M_PI);
+}
+
+vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
+{
+	vector<vector<int>> featurePointsNum;
+  vector<vector<float>> featurePointsTheta;
+  float theta = 0, abstheta = 0;
+  XZcoordinate p1, p2, p3;
+  int start = pointSet.centerNum - pointSet.count_left;
+  int last_updateed_i = 0;
+  float last_angle = 0;
+  for (int i = start; i <= pointSet.centerNum + pointSet.count_right; i++) {
+    p1 = (readPoint(i - 1) + readPoint(i - 2)) / 2;
+    p2 = readPoint(i);
+    p3 = (readPoint(i + 1) + readPoint(i + 2)) / 2;
+    theta = calculateAngle(p1, p2, p3);
+    abstheta = abs(theta);
+    if (abstheta <= 360 && abstheta > 240 || abstheta >= 0 && abstheta < 120) {
+      if (i == last_updateed_i + 1 && abs(last_angle - getAngle(p1, p2, p3)) < 45) {
+        featurePointsNum[featurePointsNum.size()-1].push_back(i - start);
+        featurePointsTheta[featurePointsTheta.size()-1].push_back(theta);
+      }
+      else {
+				featurePointsNum.push_back({i - start});
+        featurePointsTheta.push_back({ theta });
+			}
+      
+      cout << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+      last_updateed_i = i;
+      last_angle = getAngle(p1, p2, p3);
+    }
+	}
+  cout << "-------------------" << endl;
+	return vector<int>();
 }
 
 void LiDAR2::rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction) {
@@ -196,7 +263,7 @@ vector<XZcoordinate> LiDAR2::getNcmPoints(XZcoordinate center, const LiDAR_degre
   return points;
 }
 
-static int8_t conditionFRONTandBACK(StraightLine line, float centerX, float half_range) {
+static int8_t conditionFRONTandBACK(StraightLine line, float centerX, float half_range){
   if (line.x_min >= centerX - half_range && line.x_max <= centerX + half_range) return 1;
   if (line.x_min <= centerX - half_range && line.x_max >= centerX - half_range && line.x_max <= centerX + half_range) return 2;
   if (line.x_min >= centerX - half_range && line.x_min <= centerX + half_range && line.x_max >= centerX + half_range) return 3;
@@ -308,4 +375,81 @@ void LiDAR2::printLeftRight(const NcmPoints& pointsSet) {
   for (auto& point : pointsSet.model_right) {
     std::cout << point.x << " " << point.z << endl;
   }
+}
+
+void StraightLine::renewRangebyXmax(float new_x_max)
+{
+  if (a > 0) {
+    x_max = new_x_max;
+    z_max = a * x_max + b;
+  }
+  else {
+    x_max = new_x_max;
+    z_min = a * x_max + b;
+  }
+}
+
+void StraightLine::renewRangebyXmin(float new_x_min)
+{
+  if (a > 0) {
+    x_min = new_x_min;
+    z_min = a * x_min + b;
+  }
+  else {
+    x_min = new_x_min;
+    z_max = a * x_min + b;
+  }
+}
+
+void StraightLine::renewRangebyZmax(float new_z_max)
+{
+  if (a > 0) {
+    z_max = new_z_max;
+    x_max = (z_max - b) / a;
+  }
+  else {
+    z_max = new_z_max;
+    x_min = (z_max - b) / a;
+  }
+}
+
+void StraightLine::renewRangebyZmin(float new_z_min)
+{
+  if (a > 0) {
+    z_min = new_z_min;
+    x_min = (z_min - b) / a;
+  }
+  else {
+    z_min = new_z_min;
+    x_max = (z_min - b) / a;
+  }
+}
+
+bool StraightLine::hasIntersection(const StraightLine& other) const
+{
+  if (a == other.a) {
+    if (b == other.b) return true;
+    return false;
+  }
+  if ((other.a * x_max + other.b < z_max && other.a * x_min + other.b > z_min) ||
+    (a * other.x_max + b < other.z_max && a * other.x_min + b > other.z_min)) {
+    return true;
+  }
+  return false;
+}
+
+XZcoordinate StraightLine::getIntersectionPoint(const StraightLine& other) const
+{
+  if (!hasIntersection(other)) {
+    // 交差しない場合は (NaN, NaN) を返す
+    return { std::nanf(""), std::nanf("") };
+  }
+  if (*this == other) {
+    return { numeric_limits<float>::infinity(), numeric_limits<float>::infinity() };
+  }
+
+  // 交点を計算
+  float x_intersection = (other.b - b) / (a - other.a);
+  float z_intersection = a * x_intersection + b;
+  return { x_intersection, z_intersection };
 }

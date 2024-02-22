@@ -25,6 +25,14 @@ extern int timeStep;
 struct XZcoordinate {
 	float x;
 	float z;
+
+	XZcoordinate operator+(const XZcoordinate& other) const {
+		return {x + other.x, z + other.z};
+	}
+
+	XZcoordinate operator/(const float& other) const {
+		return {x / other, z / other};
+	}
 };
 
 struct RoadAccess {
