@@ -11,6 +11,8 @@ int main(int argc, char **argv) {
 
   cout << "start" << endl;
 
+  cout << "start" << endl;
+
   // [‚³—Dæ’Tõ
   //DFS();
   cout << robot->getTime() << endl;

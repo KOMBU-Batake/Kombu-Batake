@@ -176,16 +176,18 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
     theta = calculateAngle(p1, p2, p3);
     abstheta = abs(theta);
     if (abstheta <= 360 && abstheta > 240 || abstheta >= 0 && abstheta < 120) {
-      if (i == last_updateed_i + 1 && abs(last_angle - getAngle(p1, p2, p3)) < 45) {
+      if (i == last_updateed_i + 1 && (abs(last_angle - getAngle(p1, p2, p3)) < 45 || abs(last_angle - getAngle(p1, p2, p3)) > 315)) {
         featurePointsNum[featurePointsNum.size()-1].push_back(i - start);
         featurePointsTheta[featurePointsTheta.size()-1].push_back(theta);
+        cout << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
       }
       else {
 				featurePointsNum.push_back({i - start});
         featurePointsTheta.push_back({ theta });
+        cout << "~~~~~~~~~" << endl;
+        cout << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
 			}
       
-      cout << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
       last_updateed_i = i;
       last_angle = getAngle(p1, p2, p3);
     }
