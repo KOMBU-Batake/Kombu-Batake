@@ -125,9 +125,6 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
     vector<int> featurePoints = VectorTracer(pointsSet);
 
-    //if (max_min.leftMax > 18.0F && max_min.rightMax > 18.0F) return wallSet; // 壁が一切ない
-    //if (max_min.leftMin < 6.0F && max_min.rightMin < 6.0F) return { WallType::type10, WallType::center_n, WallType::type10 }; // 完全にふさがれている
-
     wallSet.left = identifyLeft(pointsSet, featurePoints);
     wallSet.right = identifyRight(pointsSet, featurePoints);
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
@@ -146,11 +143,8 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
       cout << "LL reject: " << num << endl;
 		}
 	}
-  if (start < 2) {
-    cout << "LL fix" << endl;
-    start = 2;
-  }
   cout << "LL start is: " << start << endl;
+  start += 2;
 
   // 右側の壁をカット
   XZrange rangeToCut2 = { 0.1f, -2, 18, 0 };
@@ -162,10 +156,7 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
       break;
 		}
 	}
-  if (end == pointSet.count_left) {
-		cout << "LR fix" << endl;
-		end = pointSet.count_left - 2;
-	}
+  end -= 2;
 
   return WallType();
 }
@@ -174,32 +165,27 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 {
   // 右側の壁をカット
   XZrange rangeToCut = { 4, 6.1f, 18, 0 };
-  int start = pointSet.count_left + pointSet.count_right;
+  int end = pointSet.count_left + pointSet.count_right;
   for (auto& num : featurePoints) {
     if (rangeToCut.isIncluding(pointSet.read(num))) {
-			start = num;
-			cout << "RR start is: " << num << endl;
+			end = num;
+			cout << "RR end is: " << num << endl;
 			break;
 		}
 	}
-  if (start == pointSet.count_left + pointSet.count_right) {
-    start = pointSet.count_left + pointSet.count_right - 2;
-    cout << "RR fix" << endl;
-  }
+  end -= 2;
+
   // 左側の壁をカット
   XZrange rangeToCut2 = { 2, -0.1f, 18, 0 };
-  int end = pointSet.count_left + 1;
+  int start = pointSet.count_left + 1;
   for (auto& num : featurePoints) {
     if (rangeToCut2.isIncluding(pointSet.read(num))) {
-			end = num;
+			start = num;
 			cout << "RL reject: " << num << endl; 
 		}
   }
-  if (end == pointSet.count_left + 1) {
-		end = pointSet.count_left - 2;
-		cout << "RL fix" << endl;
-	}
-  cout << "RL end is: " << end << endl;
+  cout << "RL start is: " << start << endl;
+  start += 2;
   return WallType();
 }
 
