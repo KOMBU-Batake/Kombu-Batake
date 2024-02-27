@@ -16,6 +16,13 @@ struct NcmPoints {
   int count_left = 0;
   int count_right = 0;
   int centerNum = 0;
+
+  XZcoordinate read(int num) {
+    if (num > count_left) {
+      return model_right[num-count_left];
+    }
+    else return model_left[num];
+  }
 };
 
 struct StraightLine {
@@ -77,6 +84,34 @@ public:
   }
 
 private:
+  struct XZrange {
+    XZrange(const float xmax, const float xmin, const float zmax, const float zmin) {
+      x_max = xmax;
+      x_min = xmin;
+      z_max = zmax;
+      z_min = zmin;
+      if (x_min > x_max) {
+        x_min = xmax;
+        x_max = xmin;
+      }
+      if (z_min > z_max) {
+        z_min = zmax;
+        z_max = zmin;
+      }
+    }
+
+    bool isIncluding(XZcoordinate p){
+      return (p.x <= x_max && p.x >= x_min && p.z <= z_max && p.z >= z_min);
+    }
+
+    float x_max;
+    float x_min;
+    float z_max;
+    float z_min;
+
+    XZrange() = default;
+  };
+
   // 指定した方向にある点
   int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
   // 最大値と最小値を取得する
@@ -88,9 +123,9 @@ private:
 
   vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
 
-  WallType identifyLeft(vector<XZcoordinate>& leftPoints, const int& leftPointsCount);
-  WallType identifyRight(vector<XZcoordinate>& rightPoints, const int& rightPointsCount);
-  WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset);
+  WallType identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints);
+  WallType identifyRight(NcmPoints& pointSet, vector<int>& featurePoints);
+  WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints);
 
   void printLeftRight(const NcmPoints& pointsSet);
   

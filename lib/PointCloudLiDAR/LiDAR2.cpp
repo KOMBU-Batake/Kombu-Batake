@@ -125,27 +125,85 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
     vector<int> featurePoints = VectorTracer(pointsSet);
 
-    if (max_min.leftMax > 18.0F && max_min.rightMax > 18.0F) return wallSet; // 壁が一切ない
-    if (max_min.leftMin < 6.0F && max_min.rightMin < 6.0F) return { WallType::type10, WallType::center_n, WallType::type10 }; // 完全にふさがれている
+    //if (max_min.leftMax > 18.0F && max_min.rightMax > 18.0F) return wallSet; // 壁が一切ない
+    //if (max_min.leftMin < 6.0F && max_min.rightMin < 6.0F) return { WallType::type10, WallType::center_n, WallType::type10 }; // 完全にふさがれている
 
-    wallSet.left = identifyLeft(pointsSet.model_left, pointsSet.count_left);
-    wallSet.right = identifyRight(pointsSet.model_right, pointsSet.count_right);
-    wallSet.center = identifyCenter(pointsSet, wallSet);
+    wallSet.left = identifyLeft(pointsSet, featurePoints);
+    wallSet.right = identifyRight(pointsSet, featurePoints);
+    wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
 
     return wallSet;
 }
 
-WallType LiDAR2::identifyLeft(vector<XZcoordinate>& leftPoints, const int& leftPointsCount)
+WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
 {
+  // 左側の壁をカット
+  XZrange rangeToCut = {-4,-6.1f,18,0};
+  int start = 0;
+  for (auto& num: featurePoints) {
+    if (rangeToCut.isIncluding(pointSet.read(num))) {
+			start = num;
+      cout << "LL reject: " << num << endl;
+		}
+	}
+  if (start < 2) {
+    cout << "LL fix" << endl;
+    start = 2;
+  }
+  cout << "LL start is: " << start << endl;
+
+  // 右側の壁をカット
+  XZrange rangeToCut2 = { 0.1f, -2, 18, 0 };
+  int end = pointSet.count_left;
+  for (auto& num : featurePoints) {
+    if (rangeToCut2.isIncluding(pointSet.read(num))) {
+			end = num;
+			cout << "LR end is: " << num << endl;
+      break;
+		}
+	}
+  if (end == pointSet.count_left) {
+		cout << "LR fix" << endl;
+		end = pointSet.count_left - 2;
+	}
+
   return WallType();
 }
 
-WallType LiDAR2::identifyRight(vector<XZcoordinate>& rightPoints, const int& rightPointsCount)
+WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 {
+  // 右側の壁をカット
+  XZrange rangeToCut = { 4, 6.1f, 18, 0 };
+  int start = pointSet.count_left + pointSet.count_right;
+  for (auto& num : featurePoints) {
+    if (rangeToCut.isIncluding(pointSet.read(num))) {
+			start = num;
+			cout << "RR start is: " << num << endl;
+			break;
+		}
+	}
+  if (start == pointSet.count_left + pointSet.count_right) {
+    start = pointSet.count_left + pointSet.count_right - 2;
+    cout << "RR fix" << endl;
+  }
+  // 左側の壁をカット
+  XZrange rangeToCut2 = { 2, -0.1f, 18, 0 };
+  int end = pointSet.count_left + 1;
+  for (auto& num : featurePoints) {
+    if (rangeToCut2.isIncluding(pointSet.read(num))) {
+			end = num;
+			cout << "RL reject: " << num << endl; 
+		}
+  }
+  if (end == pointSet.count_left + 1) {
+		end = pointSet.count_left - 2;
+		cout << "RL fix" << endl;
+	}
+  cout << "RL end is: " << end << endl;
   return WallType();
 }
 
-WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset)
+WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints)
 {
   return WallType::center_n;
 }
@@ -184,8 +242,7 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
       else {
 				featurePointsNum.push_back({i - start});
         featurePointsTheta.push_back({ theta });
-        cout << "~~~~~~~~~" << endl;
-        cout << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+        cout << "~~~~~~~~~" << endl << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
 			}
       
       last_updateed_i = i;
@@ -193,7 +250,16 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
     }
 	}
   cout << "-------------------" << endl;
-	return vector<int>();
+  vector<int> returnNum;
+  for (size_t i = 0, size = featurePointsNum.size(); i < size; i++) {
+    int minDistance = (int)std::distance(featurePointsTheta[i].begin(), min_element(featurePointsTheta[i].begin(), featurePointsTheta[i].end()));
+    returnNum.push_back(featurePointsNum[i][minDistance]);
+	}
+  for (auto& num : returnNum) {
+		cout << num+start << " " << num << endl;
+	} 
+  cout << "-------------------" << endl;
+	return returnNum;
 }
 
 void LiDAR2::rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction) {
