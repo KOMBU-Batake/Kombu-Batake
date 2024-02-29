@@ -8,6 +8,35 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
   ncmP.centerNum = center;
   float half_range = range / 2;
 
+  if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
+    float centralZ = pointCloud[center].z;
+    // ¶•ûŒü
+    int leftStart = center;
+    for (int i = center; i > center - 80; i--) {
+      if (abs(readPoint(i).z - centralZ) <= half_range) leftStart = i;
+    }
+    // ‰E•ûŒü
+    int rightEnd = center + 1;
+    for (int i = center; i < center + 80; i++) {
+      if (abs(readPoint(i).z - centralZ) <= half_range) rightEnd = i;
+    }
+    cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
+  }
+  else { // FTONT or BACK
+    float centralX = pointCloud[center].x;
+    // ¶•ûŒü
+    int leftStart = center;
+    for (int i = center; i > center - 80; i--) {
+      if (abs(readPoint(i).x - centralX) <= half_range) leftStart = i;
+    }
+    // ‰E•ûŒü
+    int rightEnd = center + 1;
+    for (int i = center + 1; i < center + 80; i++) {
+      if (abs(readPoint(i).x - centralX) <= half_range) rightEnd = i;
+    }
+    cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
+  }
+
     if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
         ncmP.model_left = { pointCloud[center] };
         float centralZ = pointCloud[center].z;
@@ -37,7 +66,7 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
             }
         }
     }
-    else
+    else // FRONT or BACK
     {
         ncmP.model_left = { pointCloud[center] };
         float centralX = pointCloud[center].x;
@@ -173,9 +202,9 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
   for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZ += it->z;
   // 2æ‚Ì•½‹Ï
   float sumZpow2 = 0.0f;
-  for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZpow2 += pow(it->z,2);
+  for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZpow2 += (float)pow(it->z,2);
   // •ªŽU
-  float variance = sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2);
+  float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
   cout << "variance: " << variance << endl;
 
   if (variance < 0.1f) { // ‚Ü‚Á‚·‚®‚È•Ç
@@ -228,16 +257,16 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
   for (auto it = pointSet.model_right.begin() + start; it != pointSet.model_right.begin() + end + 1; ++it) sumZ += it->z;
   // 2æ‚Ì•½‹Ï
   float sumZpow2 = 0.0f;
-  for (auto it = pointSet.model_right.begin() + start; it != pointSet.model_right.begin() + end + 1; ++it) sumZpow2 += pow(it->z, 2);
+  for (auto it = pointSet.model_right.begin() + start; it != pointSet.model_right.begin() + end + 1; ++it) sumZpow2 += (float)pow(it->z, 2);
   // •ªŽU
-  float variance = sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2);
+  float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
   cout << "variance: " << variance << endl;
 
   if (variance < 0.1f) { // ‚Ü‚Á‚·‚®‚È•Ç
-  		if (maxRight > 15) return WallType::type0;
-  		else if (maxRight > 10) return WallType::type5;
-  		else return WallType::type10;
-  	}
+  	if (maxRight > 15) return WallType::type0;
+  	else if (maxRight > 10) return WallType::type5;
+  	else return WallType::type10;
+  }
 
   return WallType();
 }
@@ -248,7 +277,7 @@ WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vec
 }
 
 static float getAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZcoordinate& p3) {
-  XZcoordinate ab, ac;
+  XZcoordinate ab = {0,0}, ac = { 0,0 };
   ab.x = p1.x - p2.x;
   ab.z = p1.z - p2.z;
   ac.x = p3.x - p2.x;
