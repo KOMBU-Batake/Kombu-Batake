@@ -13,12 +13,12 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
     // ¶•ûŒü
     int leftStart = center;
     for (int i = center; i > center - 80; i--) {
-      if (abs(readPoint(i).z - centralZ) <= half_range) leftStart = i;
+      if (abs(readPoint(i).z - centralZ) <= half_range && abs(readPoint(i).x) > 5) leftStart = i;
     }
     // ‰E•ûŒü
     int rightEnd = center + 1;
     for (int i = center; i < center + 80; i++) {
-      if (abs(readPoint(i).z - centralZ) <= half_range) rightEnd = i;
+      if (abs(readPoint(i).z - centralZ) <= half_range && abs(readPoint(i).x) > 5) rightEnd = i;
     }
     cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
   }
@@ -27,12 +27,12 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
     // ¶•ûŒü
     int leftStart = center;
     for (int i = center; i > center - 80; i--) {
-      if (abs(readPoint(i).x - centralX) <= half_range) leftStart = i;
+      if (abs(readPoint(i).x - centralX) <= half_range && abs(readPoint(i).z) > 5) leftStart = i;
     }
     // ‰E•ûŒü
     int rightEnd = center + 1;
     for (int i = center + 1; i < center + 80; i++) {
-      if (abs(readPoint(i).x - centralX) <= half_range) rightEnd = i;
+      if (abs(readPoint(i).x - centralX) <= half_range && abs(readPoint(i).z) > 5) rightEnd = i;
     }
     cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
   }
@@ -154,11 +154,15 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     //MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
     vector<int> featurePoints = VectorTracer(pointsSet);
 
+    cout << "-------------------" << endl;
+    printLeftRight(pointsSet);
+    cout << "-------------------" << endl;
+
     wallSet.left = identifyLeft(pointsSet, featurePoints);
     cout << "left: " << (int)wallSet.left << endl;
-    wallSet.right = identifyRight(pointsSet, featurePoints);
-    cout << "right: " << (int)wallSet.right << endl;
-    wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
+    //wallSet.right = identifyRight(pointsSet, featurePoints);
+    //cout << "right: " << (int)wallSet.right << endl;
+    //wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
 
     return wallSet;
 }
@@ -197,21 +201,21 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
 
   cout << "max: " << maxLeft << " min: " << minLeft << endl;
 
-  // ZŽ²•ûŒü‚Ì•½‹Ï
-  float sumZ = 0.0f;
-  for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZ += it->z;
-  // 2æ‚Ì•½‹Ï
-  float sumZpow2 = 0.0f;
-  for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZpow2 += (float)pow(it->z,2);
-  // •ªŽU
-  float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
-  cout << "variance: " << variance << endl;
+  //// ZŽ²•ûŒü‚Ì•½‹Ï
+  //float sumZ = 0.0f;
+  //for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZ += it->z;
+  //// 2æ‚Ì•½‹Ï
+  //float sumZpow2 = 0.0f;
+  //for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZpow2 += (float)pow(it->z,2);
+  //// •ªŽU
+  //float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
+  //cout << "variance: " << variance << endl;
 
-  if (variance < 0.1f) { // ‚Ü‚Á‚·‚®‚È•Ç
-    if (maxLeft > 15) return WallType::type0;
-    else if (maxLeft > 10) return WallType::type5;
-    else return WallType::type10;
-  }
+  //if (variance < 0.1f) { // ‚Ü‚Á‚·‚®‚È•Ç
+  //  if (maxLeft > 15) return WallType::type0;
+  //  else if (maxLeft > 10) return WallType::type5;
+  //  else return WallType::type10;
+  //}
 
   return WallType();
 }
@@ -347,7 +351,7 @@ void LiDAR2::rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction)
     transform(points.begin(), points.end(), points.begin(),
       [](XZcoordinate element) {
         float tmp = element.x;
-        element.x = -1 * element.z;
+        element.x = element.z;
         element.z = -1 * tmp;
         return element;
       });
@@ -356,7 +360,7 @@ void LiDAR2::rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction)
     transform(points.begin(), points.end(), points.begin(),
       [](XZcoordinate element) {
         float tmp = element.x;
-        element.x = element.z;
+        element.x = -1 * element.z;
         element.z = tmp;
         return element;
       });
