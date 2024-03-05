@@ -157,5 +157,38 @@ private:
     return sqrt(v.x * v.x + v.z * v.z);
   }
 
+  float Variance(vector<XZcoordinate>::iterator startIt, vector<XZcoordinate>::iterator endIt, int start, int end){
+    // Z軸方向の平均
+    float sumZ = 0.0f;
+    for (auto it = startIt; it != endIt + 1; ++it) sumZ += it->z;
+    // 2乗の平均
+    float sumZpow2 = 0.0f;
+    for (auto it = startIt; it != endIt + 1; ++it) sumZpow2 += (float)pow(it->z,2);
+    // 分散
+    float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
+    std::cout << "variance: " << variance << endl;
+    return variance;
+  }
+
+  WallType identifyCurve(vector<XZcoordinate>::iterator startIt, vector<XZcoordinate>::iterator endIt) {
+    // 曲線
+    if (startIt->z > endIt->z) // 第一象限 or 第三象限
+    {
+      float leftDiff = (startIt->z - (startIt + 2)->z) / (startIt->x - (startIt + 2)->x); // 左端の微分
+      float rightDiff = (endIt->z - (endIt - 2)->z) / (endIt->x - (endIt - 2)->x); // 右端の微分
+      std::cout << "first or third, " << leftDiff << " " << rightDiff << endl;
+      if (leftDiff > rightDiff) return WallType::type1;
+      else return WallType::type3;
+    }
+    else // 第二象限 or 第四象限
+    {
+      float leftDiff = ((startIt + 2)->z - startIt->z) / ((startIt + 2)->x - startIt->x); // 左端の微分
+      float rightDiff = ((endIt - 2)->z - endIt->z) / ((endIt - 2)->x - endIt->x); // 右端の微分
+      std::cout << "second or fourth, " << leftDiff << " " << rightDiff << endl;
+      if (leftDiff > rightDiff) return WallType::type4; // 第二象限
+      else return WallType::type2; // 第四象限
+    }
+  }
+
   vector<StraightLine> lines = vector<StraightLine>(512);
 };

@@ -15,12 +15,22 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
     for (int i = center; i > center - 80; i--) {
       if (abs(readPoint(i).z - centralZ) <= half_range && abs(readPoint(i).x) > 5) leftStart = i;
     }
+    ncmP.count_left = center - leftStart;
+    ncmP.model_left.reserve(ncmP.count_left);
+    for (int i = leftStart; i <= center; i++) {
+			ncmP.model_left.push_back(readPoint(i));
+		}
     // 右方向
     int rightEnd = center + 1;
     for (int i = center; i < center + 80; i++) {
       if (abs(readPoint(i).z - centralZ) <= half_range && abs(readPoint(i).x) > 5) rightEnd = i;
     }
-    cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
+    ncmP.count_right = rightEnd - center;
+    ncmP.model_right.reserve(ncmP.count_right);
+    for (int i = center + 1; i <= rightEnd; i++) {
+			ncmP.model_right.push_back(readPoint(i));
+		}
+    std::cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
   }
   else { // FTONT or BACK
     float centralX = pointCloud[center].x;
@@ -29,74 +39,24 @@ NcmPoints LiDAR2::getNcmPoints(const LiDAR_degree& direction, float range) {
     for (int i = center; i > center - 80; i--) {
       if (abs(readPoint(i).x - centralX) <= half_range && abs(readPoint(i).z) > 5) leftStart = i;
     }
+    ncmP.count_left = center - leftStart;
+    ncmP.model_left.reserve(ncmP.count_left);
+    for (int i = leftStart; i <= center; i++) {
+      ncmP.model_left.push_back(readPoint(i));
+    }
     // 右方向
     int rightEnd = center + 1;
     for (int i = center + 1; i < center + 80; i++) {
       if (abs(readPoint(i).x - centralX) <= half_range && abs(readPoint(i).z) > 5) rightEnd = i;
     }
-    cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
+    ncmP.count_right = rightEnd - center;
+    ncmP.model_right.reserve(ncmP.count_right);
+    for (int i = center + 1; i <= rightEnd; i++) {
+			ncmP.model_right.push_back(readPoint(i));
+		}
+    std::cout << "leftStart: " << leftStart << " rightEnd: " << rightEnd << endl;
   }
-
-    if (direction == LiDAR_degree::LEFT || direction == LiDAR_degree::RIGHT) {
-        ncmP.model_left = { pointCloud[center] };
-        float centralZ = pointCloud[center].z;
-        // 右方向
-        ncmP.count_right = 0;
-        while (1) {
-            ncmP.count_right++;
-            if (abs(readPoint(center + ncmP.count_right).z - centralZ) <= half_range) {
-                ncmP.model_right.push_back(readPoint(center + ncmP.count_right));
-            }
-            else {
-                ncmP.count_right--;
-                break;
-            }
-        }
-        // 左方向 
-        ncmP.count_left = 0;
-        while (1) {
-            ncmP.count_left++;
-            if (abs(centralZ - readPoint(center - ncmP.count_left).z) <= half_range) {
-                ncmP.model_left.push_back(readPoint(center - ncmP.count_left));
-                std::rotate(ncmP.model_left.rbegin(), ncmP.model_left.rbegin() + 1, ncmP.model_left.rend());
-            }
-            else {
-                ncmP.count_left--;
-                break;
-            }
-        }
-    }
-    else // FRONT or BACK
-    {
-        ncmP.model_left = { pointCloud[center] };
-        float centralX = pointCloud[center].x;
-        // 右方向
-        ncmP.count_right = 0;
-        while (1) {
-            ncmP.count_right++;
-            if (abs(readPoint(center + ncmP.count_right).x - centralX) <= half_range) {
-                ncmP.model_right.push_back(readPoint(center + ncmP.count_right));
-            }
-            else {
-                ncmP.count_right--;
-                break;
-            }
-        }
-        // 左方向 
-        ncmP.count_left = 0;
-        while (1) {
-            ncmP.count_left++;
-            if (abs(centralX - readPoint(center - ncmP.count_left).x) <= half_range) {
-                ncmP.model_left.push_back(readPoint(center - ncmP.count_left));
-                std::rotate(ncmP.model_left.rbegin(), ncmP.model_left.rbegin() + 1, ncmP.model_left.rend());
-            }
-            else {
-                ncmP.count_left--;
-                break;
-            }
-        }
-    }
-    return ncmP;
+  return ncmP;
 }
 
 int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
@@ -147,37 +107,41 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
   WallSet wallSet = {WallType::typeNo, WallType::center_n, WallType::typeNo};
     // 中央10cmのデータを取得
     NcmPoints pointsSet = getNcmPoints(direction, 12);
-    printLeftRight(pointsSet);
-    cout << "-------------------" << endl;
     rotateToFront(pointsSet.model_left, direction);
     rotateToFront(pointsSet.model_right, direction);
     //MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
     vector<int> featurePoints = VectorTracer(pointsSet);
 
-    cout << "-------------------" << endl;
+    std::cout << "-------------------" << endl;
     printLeftRight(pointsSet);
-    cout << "-------------------" << endl;
+    std::cout << "-------------------" << endl;
 
     wallSet.left = identifyLeft(pointsSet, featurePoints);
-    cout << "left: " << (int)wallSet.left << endl;
-    //wallSet.right = identifyRight(pointsSet, featurePoints);
-    //cout << "right: " << (int)wallSet.right << endl;
-    //wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
+    std::cout << "left: " << (int)wallSet.left << endl;
+    wallSet.right = identifyRight(pointsSet, featurePoints);
+    std::cout << "right: " << (int)wallSet.right << endl;
+    wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
 
     return wallSet;
 }
 
 WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
 {
+  // 範囲外をカット
+  int start = 0;
+  for (int i = 0; i < pointSet.model_left.size(); i++) {
+    if (pointSet.model_left[i].x < -6) {
+			start = i+1;
+		}
+	}
   // 左側の壁をカット
   XZrange rangeToCut = {-4,-6.1f,18,0};
-  int start = 0;
   for (auto& num: featurePoints) {
-    if (rangeToCut.isIncluding(pointSet.read(num))) {
+    if (rangeToCut.isIncluding(pointSet.read(num)) && num > start) {
 			start = num;
 		}
 	}
-  cout << "LL start is: " << start << endl;
+  std::cout << "LL start is: " << start << endl;
   start += 2;
 
   // 右側の壁をカット
@@ -186,52 +150,56 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
   for (auto& num : featurePoints) {
     if (rangeToCut2.isIncluding(pointSet.read(num))) {
 			end = num;
-			cout << "LR end is: " << num << endl;
       break;
 		}
 	}
+  std::cout << "LR end is: " << end << endl;
   end -= 2;
 
   // Z軸方向の最大値と最小値を取得
-  float maxLeft = max_element(pointSet.model_left.begin()+start, pointSet.model_left.begin()+end,
-    [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
-  float minLeft = min_element(pointSet.model_left.begin()+start, pointSet.model_left.begin() + end,
-    [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
+  auto startIt = pointSet.model_left.begin() + start;
+  auto endIt = pointSet.model_left.begin() + end;
+  float maxLeft = max_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
+  float minLeft = min_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
   if (maxLeft > 18) return WallType::typeNo; // 壁がないと判断
+  // cout << "max: " << maxLeft << " min: " << minLeft << endl;
 
-  cout << "max: " << maxLeft << " min: " << minLeft << endl;
+  float variance = Variance(startIt, endIt, start, end);
 
-  //// Z軸方向の平均
-  //float sumZ = 0.0f;
-  //for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZ += it->z;
-  //// 2乗の平均
-  //float sumZpow2 = 0.0f;
-  //for (auto it = pointSet.model_left.begin() + start; it != pointSet.model_left.begin() + end + 1; ++it) sumZpow2 += (float)pow(it->z,2);
-  //// 分散
-  //float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
-  //cout << "variance: " << variance << endl;
+  if (variance < 0.1f) { // まっすぐな壁
+    if (maxLeft > 15) return WallType::type0;
+    else if (maxLeft > 10) return WallType::type5;
+    else return WallType::type10;
+  }
 
-  //if (variance < 0.1f) { // まっすぐな壁
-  //  if (maxLeft > 15) return WallType::type0;
-  //  else if (maxLeft > 10) return WallType::type5;
-  //  else return WallType::type10;
-  //}
-
-  return WallType();
+  // 曲線
+  return identifyCurve(startIt, endIt);
 }
 
 WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 {
+  // 範囲外をカット
+  int end_tmp = pointSet.count_left + 1;
+  for (size_t i = 0; i < pointSet.model_right.size(); i++) {
+    if (pointSet.model_right[i].x > 6) {
+      cout << "RR cut" << endl;
+			break;
+    }
+    else {
+			end_tmp++;
+    }
+	}
   // 右側の壁をカット
   XZrange rangeToCut = { 4, 6.1f, 18, 0 };
-  int end = pointSet.count_left + pointSet.count_right;
+  int end = pointSet.count_left + pointSet.count_right + 1;
   for (auto& num : featurePoints) {
     if (rangeToCut.isIncluding(pointSet.read(num))) {
 			end = num;
-			cout << "RR end is: " << num << endl;
+      std::cout << "RR end is: " << num << endl;
 			break;
 		}
 	}
+  if (end > end_tmp) end = end_tmp;
   end -= 2;
   end -= pointSet.count_left;
 
@@ -243,28 +211,19 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 			start = num;
 		}
   }
-  cout << "RL start is: " << start << endl;
+  std::cout << "RL start is: " << start << endl;
   start += 2;
   start -= pointSet.count_left;
 
   // Z軸方向の最大値と最小値を取得
-  float maxRight = max_element(pointSet.model_right.begin() + start, pointSet.model_right.begin() + end,
-    [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
-  float minRight = min_element(pointSet.model_right.begin() + start, pointSet.model_right.begin() + end,
-    [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
+  auto startIt = pointSet.model_right.begin() + start;
+  auto endIt = pointSet.model_right.begin() + end;
+  float maxRight = max_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
+  float minRight = min_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
   if (maxRight > 18) return WallType::typeNo; // 壁がないと判断
+  // cout << "max: " << maxRight << " min: " << minRight << endl;
 
-  cout << "max: " << maxRight << " min: " << minRight << endl;
-
-  // Z軸方向の平均
-  float sumZ = 0.0f;
-  for (auto it = pointSet.model_right.begin() + start; it != pointSet.model_right.begin() + end + 1; ++it) sumZ += it->z;
-  // 2乗の平均
-  float sumZpow2 = 0.0f;
-  for (auto it = pointSet.model_right.begin() + start; it != pointSet.model_right.begin() + end + 1; ++it) sumZpow2 += (float)pow(it->z, 2);
-  // 分散
-  float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
-  cout << "variance: " << variance << endl;
+  float variance= Variance(startIt, endIt, start, end);
 
   if (variance < 0.1f) { // まっすぐな壁
   	if (maxRight > 15) return WallType::type0;
@@ -272,7 +231,8 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
   	else return WallType::type10;
   }
 
-  return WallType();
+  // 曲線
+  return identifyCurve(startIt, endIt);
 }
 
 WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints)
@@ -328,11 +288,11 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
     returnNum.push_back(featurePointsNum[i][minDistance]);
 	}
 
-  cout << "feature points -------------------" << endl;
+  std::cout << "feature points -------------------" << endl;
   for (auto& num : returnNum) {
-		cout << num+start << " " << num << endl;
+    std::cout << num+start << " " << num << endl;
 	} 
-  cout << "-------------------" << endl;
+  std::cout << "-------------------" << endl;
 	return returnNum;
 }
 
@@ -433,11 +393,11 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
       centerX = center.x;
       for (auto& line : lines) {
         condition = conditionFRONTandBACK(line, centerX, half_range);
-        cout << "num: " << index << ", " <<  "cond: " << (int)condition << ", " << line.x_min << " " << line.x_max << " " << line.z_min << " " << line.z_max;
+        std::cout << "num: " << index << ", " <<  "cond: " << (int)condition << ", " << line.x_min << " " << line.x_max << " " << line.z_min << " " << line.z_max;
         if (condition &&
            (direction == LiDAR_degree::FRONT && line.z_max >= center.z ||
             direction == LiDAR_degree::BACK && line.z_min <= center.z)) {
-          cout << " push";
+          std::cout << " push";
           if (condition == 1) returnlines.push_back(line);
           else if (condition == 2) {
             StraightLine tmp = line;
@@ -457,7 +417,7 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
 					}
         }
         index++;
-        cout << endl;
+        std::cout << endl;
       }
       break;
     case LiDAR_degree::LEFT:
@@ -485,7 +445,7 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
 						line.renewRangebyZmax(center.z+half_range);
 						returnlines.push_back(tmp);
 					}
-          cout << index << ", " << (int)condition;
+          std::cout << index << ", " << (int)condition;
         }
         index++;
       }

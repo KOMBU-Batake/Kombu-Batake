@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   cout << robot->getTime() << endl;
   lidar2.update(gps.expectedPos);
 
-  lidar2.getWallType(LiDAR_degree::RIGHT);
+  lidar2.getWallType(LiDAR_degree::FRONT);
 
   robot->step(timeStep);
   cout << robot->getTime() << endl;
