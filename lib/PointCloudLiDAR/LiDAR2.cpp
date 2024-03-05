@@ -109,16 +109,19 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     NcmPoints pointsSet = getNcmPoints(direction, 12);
     rotateToFront(pointsSet.model_left, direction);
     rotateToFront(pointsSet.model_right, direction);
-    //MAXandMIN max_min = getMAX_MIN(pointsSet, direction);
+    bool isLeftEmpty = pointsSet.isLeftEmpty();
+    bool isRightEmpty = pointsSet.isRightEmpty();
+    if (! isLeftEmpty) cout << "left is not empty" << endl;
+    if (! isRightEmpty) cout << "right is not empty" << endl;
     vector<int> featurePoints = VectorTracer(pointsSet);
 
     std::cout << "-------------------" << endl;
     printLeftRight(pointsSet);
     std::cout << "-------------------" << endl;
 
-    wallSet.left = identifyLeft(pointsSet, featurePoints);
+    if (! isLeftEmpty) wallSet.left = identifyLeft(pointsSet, featurePoints);
     std::cout << "left: " << (int)wallSet.left << endl;
-    wallSet.right = identifyRight(pointsSet, featurePoints);
+    if (! isRightEmpty) wallSet.right = identifyRight(pointsSet, featurePoints);
     std::cout << "right: " << (int)wallSet.right << endl;
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
 
@@ -195,11 +198,11 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
   for (auto& num : featurePoints) {
     if (rangeToCut.isIncluding(pointSet.read(num))) {
 			end = num;
-      std::cout << "RR end is: " << num << endl;
 			break;
 		}
 	}
   if (end > end_tmp) end = end_tmp;
+  std::cout << "RR end is: " << end << endl;
   end -= 2;
   end -= pointSet.count_left;
 
@@ -452,20 +455,6 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
       break;
   }
   return lines;
-}
-
-MAXandMIN LiDAR2::getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction)
-{
-    // ç≈ëÂílÇ∆ç≈è¨ílÇéÊìæ
-    XZcoordinate maxLeft = *max_element(pointsSet.model_left.begin(), pointsSet.model_left.end(),
-        [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
-    XZcoordinate minLeft = *min_element(pointsSet.model_left.begin(), pointsSet.model_left.end(),
-        [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
-    XZcoordinate maxRight = *max_element(pointsSet.model_right.begin(), pointsSet.model_right.end(),
-        [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
-    XZcoordinate minRight = *min_element(pointsSet.model_right.begin(), pointsSet.model_right.end(),
-        [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; });
-    return MAXandMIN{ maxLeft.z, minLeft.z, maxRight.z, minRight.z };
 }
 
 void LiDAR2::printLeftRight(const NcmPoints& pointsSet) {

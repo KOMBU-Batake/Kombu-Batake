@@ -2,13 +2,6 @@
 #include "PointCloudLiDAR.h"
 #include <corecrt_math_defines.h>
 
-struct MAXandMIN {
-  float leftMax;
-  float leftMin;
-  float rightMax;
-  float rightMin;
-};
-
 // 真ん中はleftの末尾にある
 struct NcmPoints {
   vector<XZcoordinate> model_left;
@@ -23,6 +16,16 @@ struct NcmPoints {
     }
     else return model_left[num];
   }
+
+  bool isLeftEmpty() {
+    auto closest = min_element(model_left.begin(), model_left.end(), [](XZcoordinate s1, XZcoordinate s2) { return (abs(s1.x + 3) < abs(s2.x + 3)); });
+    return closest->z > 18;
+	}
+
+  bool isRightEmpty() {
+    auto closest = min_element(model_right.begin(), model_right.end(), [](XZcoordinate s1, XZcoordinate s2) { return (abs(s1.x - 3) < abs(s2.x - 3)); });
+    return closest->z > 18;
+	}
 };
 
 struct StraightLine {
@@ -114,8 +117,6 @@ private:
 
   // 指定した方向にある点
   int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
-  // 最大値と最小値を取得する
-  MAXandMIN getMAX_MIN(NcmPoints& pointsSet, LiDAR_degree direction);
   // 都合よく座標を回転させる
   void rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction);
   // ベクトルトレーサー法で特徴点を探す
