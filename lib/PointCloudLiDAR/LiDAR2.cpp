@@ -106,7 +106,7 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
 {
   WallSet wallSet = {WallType::typeNo, WallType::center_n, WallType::typeNo};
     // 中央10cmのデータを取得
-    NcmPoints pointsSet = getNcmPoints(direction, 12);
+    NcmPoints pointsSet = getNcmPoints(direction, 13);
     rotateToFront(pointsSet.model_left, direction);
     rotateToFront(pointsSet.model_right, direction);
     bool isLeftEmpty = pointsSet.isLeftEmpty();
@@ -182,7 +182,7 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
 WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 {
   // 範囲外をカット
-  int end_tmp = pointSet.count_left + 1;
+  int end_tmp = pointSet.count_left;
   for (size_t i = 0; i < pointSet.model_right.size(); i++) {
     if (pointSet.model_right[i].x > 6) {
       cout << "RR cut" << endl;
@@ -255,6 +255,7 @@ static float getAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZco
 
 vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
 {
+  std::cout << "-------------------" << endl;
 	vector<vector<int>> featurePointsNum;
   vector<vector<float>> featurePointsTheta;
   float theta = 0, abstheta = 0;
@@ -272,17 +273,20 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
       if (i == last_updateed_i + 1 && (abs(last_angle - getAngle(p1, p2, p3)) < 45 || abs(last_angle - getAngle(p1, p2, p3)) > 315)) {
         featurePointsNum[featurePointsNum.size()-1].push_back(i - start);
         featurePointsTheta[featurePointsTheta.size()-1].push_back(theta);
-        //cout << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+        cout << "* " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
       }
       else {
 				featurePointsNum.push_back({i - start});
         featurePointsTheta.push_back({ theta });
-        //cout << "~~~~~~~~~" << endl << i << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+        cout << "~~~~~~~~~" << endl << "* " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
 			}
       
       last_updateed_i = i;
       last_angle = getAngle(p1, p2, p3);
     }
+    else {
+			cout << "n " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+		}
 	}
 
   vector<int> returnNum;
@@ -295,7 +299,6 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
   for (auto& num : returnNum) {
     std::cout << num+start << " " << num << endl;
 	} 
-  std::cout << "-------------------" << endl;
 	return returnNum;
 }
 
