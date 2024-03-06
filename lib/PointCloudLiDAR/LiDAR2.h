@@ -120,7 +120,7 @@ private:
   // 都合よく座標を回転させる
   void rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction);
   // ベクトルトレーサー法で特徴点を探す
-  vector<int> VectorTracer(NcmPoints& pointSet);
+  vector<int> VectorTracer(NcmPoints& pointSet, bool display = false);
 
   vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
 
@@ -167,7 +167,7 @@ private:
     for (auto it = startIt; it != endIt + 1; ++it) sumZpow2 += (float)pow(it->z,2);
     // 分散
     float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
-    std::cout << "variance: " << variance << endl;
+    //std::cout << "variance: " << variance << endl;
     return variance;
   }
 
@@ -175,18 +175,18 @@ private:
     // 曲線
     if (startIt->z > endIt->z) // 第一象限 or 第三象限
     {
-      float leftDiff = (startIt->z - (startIt + 2)->z) / (startIt->x - (startIt + 2)->x); // 左端の微分
-      float rightDiff = (endIt->z - (endIt - 2)->z) / (endIt->x - (endIt - 2)->x); // 右端の微分
+      float leftDiff = (startIt->z - (startIt + 4)->z) / (startIt->x - (startIt + 4)->x); // 左端の微分
+      float rightDiff = (endIt->z - (endIt - 4)->z) / (endIt->x - (endIt - 4)->x); // 右端の微分
       std::cout << "first or third, " << leftDiff << " " << rightDiff << endl;
-      if (leftDiff > rightDiff) return WallType::type1;
+      if (abs(leftDiff) < abs(rightDiff)) return WallType::type1;
       else return WallType::type3;
     }
     else // 第二象限 or 第四象限
     {
-      float leftDiff = ((startIt + 2)->z - startIt->z) / ((startIt + 2)->x - startIt->x); // 左端の微分
-      float rightDiff = ((endIt - 2)->z - endIt->z) / ((endIt - 2)->x - endIt->x); // 右端の微分
+      float leftDiff = ((startIt + 4)->z - startIt->z) / ((startIt + 4)->x - startIt->x); // 左端の微分
+      float rightDiff = ((endIt - 4)->z - endIt->z) / ((endIt - 4)->x - endIt->x); // 右端の微分
       std::cout << "second or fourth, " << leftDiff << " " << rightDiff << endl;
-      if (leftDiff > rightDiff) return WallType::type4; // 第二象限
+      if (abs(leftDiff) > abs(rightDiff)) return WallType::type4; // 第二象限
       else return WallType::type2; // 第四象限
     }
   }

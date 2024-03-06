@@ -113,16 +113,16 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     bool isRightEmpty = pointsSet.isRightEmpty();
     vector<int> featurePoints = VectorTracer(pointsSet);
 
-    std::cout << "-------------------" << endl;
-    printLeftRight(pointsSet);
-    std::cout << "-------------------" << endl;
+    //std::cout << "-------------------" << endl;
+    //printLeftRight(pointsSet);
+    //std::cout << "-------------------" << endl;
 
     if (! isLeftEmpty) wallSet.left = identifyLeft(pointsSet, featurePoints);
-    std::cout << "left: " << (int)wallSet.left << endl;
+    std::cout << "* left: " << (int)wallSet.left << endl;
     if (! isRightEmpty) wallSet.right = identifyRight(pointsSet, featurePoints);
-    std::cout << "right: " << (int)wallSet.right << endl;
+    std::cout << "* right: " << (int)wallSet.right << endl;
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
-    cout << "center: " << (int)wallSet.center << endl;
+    cout << "* center: " << (int)wallSet.center << endl;
 
     return wallSet;
 }
@@ -143,7 +143,7 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
 			start = num;
 		}
 	}
-  std::cout << "LL start is: " << start << endl;
+  std::cout << "L start is: " << start;
   start += 2;
 
   // 右側の壁をカット
@@ -155,7 +155,7 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
       break;
 		}
 	}
-  std::cout << "LR end is: " << end << endl;
+  std::cout << ", L end is: " << end << endl;
   end -= 2;
 
   // Z軸方向の最大値と最小値を取得
@@ -184,7 +184,7 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
   int end_tmp = pointSet.count_left;
   for (size_t i = 0; i < pointSet.model_right.size(); i++) {
     if (pointSet.model_right[i].x > 6) {
-      cout << "RR cut" << endl;
+      //cout << "RR cut" << endl;
 			break;
     }
     else {
@@ -201,7 +201,7 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 		}
 	}
   if (end > end_tmp) end = end_tmp;
-  std::cout << "RR end is: " << end << endl;
+  std::cout << "R end is: " << end;
   end -= 2;
   end -= pointSet.count_left;
 
@@ -213,7 +213,7 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 			start = num;
 		}
   }
-  std::cout << "RL start is: " << start << endl;
+  std::cout << ", R start is: " << start << endl;
   start += 2;
   start -= pointSet.count_left;
 
@@ -244,7 +244,7 @@ WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vec
   unordered_set<uint8_t> left_front = {5u,7u,9u};
   unordered_set<uint8_t> right_front = {5u,6u,8u};
   float centerZ = pointSet.model_left[pointSet.count_left].z;
-  cout << "centerZ: " << centerZ << endl;
+  //cout << "centerZ: " << centerZ << endl;
   
   // 中央奥
   if (left_back.count((uint8_t)wallset.left) && right_back.count((uint8_t)wallset.right)) { 
@@ -276,7 +276,7 @@ static float getAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZco
   return (float)(atan2(marged.z, marged.x) * 180 / M_PI);
 }
 
-vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
+vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet, bool display)
 {
   //std::cout << "-------------------" << endl;
 	vector<vector<int>> featurePointsNum;
@@ -318,10 +318,12 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
     returnNum.push_back(featurePointsNum[i][minDistance]);
 	}
 
-  std::cout << "feature points -------------------" << endl;
-  for (auto& num : returnNum) {
-    std::cout << num+start << " " << num << endl;
-	} 
+  if (display) {
+    std::cout << "feature points -------------------" << endl;
+    for (auto& num : returnNum) {
+      std::cout << num + start << " " << num << endl;
+    }
+  }
 	return returnNum;
 }
 
