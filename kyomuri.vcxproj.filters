@@ -233,4 +233,9 @@
       <Filter>Docs</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Docs\壁マップ.png">
+      <Filter>Docs</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

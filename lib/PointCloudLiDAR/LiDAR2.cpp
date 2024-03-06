@@ -111,8 +111,6 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     rotateToFront(pointsSet.model_right, direction);
     bool isLeftEmpty = pointsSet.isLeftEmpty();
     bool isRightEmpty = pointsSet.isRightEmpty();
-    if (! isLeftEmpty) cout << "left is not empty" << endl;
-    if (! isRightEmpty) cout << "right is not empty" << endl;
     vector<int> featurePoints = VectorTracer(pointsSet);
 
     std::cout << "-------------------" << endl;
@@ -124,6 +122,7 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     if (! isRightEmpty) wallSet.right = identifyRight(pointsSet, featurePoints);
     std::cout << "right: " << (int)wallSet.right << endl;
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
+    cout << "center: " << (int)wallSet.center << endl;
 
     return wallSet;
 }
@@ -163,7 +162,7 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
   auto startIt = pointSet.model_left.begin() + start;
   auto endIt = pointSet.model_left.begin() + end;
   float maxLeft = max_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
-  float minLeft = min_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
+  //float minLeft = min_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
   if (maxLeft > 18) return WallType::typeNo; // •Ç‚ª‚È‚¢‚Æ”»’f
   // cout << "max: " << maxLeft << " min: " << minLeft << endl;
 
@@ -222,7 +221,7 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
   auto startIt = pointSet.model_right.begin() + start;
   auto endIt = pointSet.model_right.begin() + end;
   float maxRight = max_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
-  float minRight = min_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
+  //float minRight = min_element(startIt, endIt, [](XZcoordinate a, XZcoordinate b) { return a.z < b.z; })->z;
   if (maxRight > 18) return WallType::typeNo; // •Ç‚ª‚È‚¢‚Æ”»’f
   // cout << "max: " << maxRight << " min: " << minRight << endl;
 
@@ -240,6 +239,30 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 
 WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints)
 {
+  unordered_set<uint8_t> left_back = {11u,0u,2u,4u};
+  unordered_set<uint8_t> right_back = {11u,0u,1u,3u};
+  unordered_set<uint8_t> left_front = {5u,7u,9u};
+  unordered_set<uint8_t> right_front = {5u,6u,8u};
+  float centerZ = pointSet.model_left[pointSet.count_left].z;
+  cout << "centerZ: " << centerZ << endl;
+  
+  // ’†‰›‰œ
+  if (left_back.count((uint8_t)wallset.left) && right_back.count((uint8_t)wallset.right)) { 
+    if (centerZ >= 5.1f && centerZ <= 6.6f) return WallType::center_s;
+    else if (centerZ >= 11.1f && centerZ <= 12.9f) return WallType::center_o;
+    else return WallType::center_n;
+	}
+  
+  // ’†‰›Žè‘O
+  bool c_left_front = left_front.count((uint8_t)wallset.left);
+  bool c_right_front = right_front.count((uint8_t)wallset.right);
+  if ((c_left_front && c_right_front) ||
+      (c_left_front && (uint8_t)wallset.right < 5) ||
+      (c_right_front && (uint8_t)wallset.left < 5)) {
+    if (centerZ >= 5.1f && centerZ <= 6.9f) return WallType::center_s;
+    else return WallType::center_n;
+  }
+
   return WallType::center_n;
 }
 
@@ -255,13 +278,13 @@ static float getAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZco
 
 vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
 {
-  std::cout << "-------------------" << endl;
+  //std::cout << "-------------------" << endl;
 	vector<vector<int>> featurePointsNum;
   vector<vector<float>> featurePointsTheta;
   float theta = 0, abstheta = 0;
   XZcoordinate p1, p2, p3;
   int start = pointSet.centerNum - pointSet.count_left;
-  int last_updateed_i = 0;
+  int last_updated_i = 0;
   float last_angle = 0;
   for (int i = start; i <= pointSet.centerNum + pointSet.count_right; i++) {
     p1 = (readPoint(i - 1) + readPoint(i - 2)) / 2;
@@ -269,24 +292,24 @@ vector<int> LiDAR2::VectorTracer(NcmPoints& pointSet)
     p3 = (readPoint(i + 1) + readPoint(i + 2)) / 2;
     theta = calculateAngle(p1, p2, p3);
     abstheta = abs(theta);
-    if (abstheta <= 360 && abstheta > 240 || abstheta >= 0 && abstheta < 120) {
-      if (i == last_updateed_i + 1 && (abs(last_angle - getAngle(p1, p2, p3)) < 45 || abs(last_angle - getAngle(p1, p2, p3)) > 315)) {
+    if (abstheta <= 360 && abstheta > 225 || abstheta >= 0 && abstheta < 135) {
+      if (i == last_updated_i + 1 && (abs(last_angle - getAngle(p1, p2, p3)) < 45 || abs(last_angle - getAngle(p1, p2, p3)) > 315)) {
         featurePointsNum[featurePointsNum.size()-1].push_back(i - start);
         featurePointsTheta[featurePointsTheta.size()-1].push_back(theta);
-        cout << "* " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+        //cout << "* " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
       }
       else {
 				featurePointsNum.push_back({i - start});
         featurePointsTheta.push_back({ theta });
-        cout << "~~~~~~~~~" << endl << "* " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+        //cout << "~~~~~~~~~" << endl << "* " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
 			}
       
-      last_updateed_i = i;
+      last_updated_i = i;
       last_angle = getAngle(p1, p2, p3);
     }
-    else {
-			cout << "n " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
-		}
+  //  else {
+		//	cout << "n " << i - start << " " << theta << " " << getAngle(p1, p2, p3) << endl;
+		//}
 	}
 
   vector<int> returnNum;
