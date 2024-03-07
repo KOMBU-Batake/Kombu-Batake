@@ -175,6 +175,8 @@ private:
     // 曲線
     if (startIt->z > endIt->z) // 第一象限 or 第三象限
     {
+      if ((startIt->x - (startIt + 4)->x) == 0) return WallType::type3;
+      else if ((endIt->x - (endIt - 4)->x) == 0) return WallType::type1;
       float leftDiff = (startIt->z - (startIt + 4)->z) / (startIt->x - (startIt + 4)->x); // 左端の微分
       float rightDiff = (endIt->z - (endIt - 4)->z) / (endIt->x - (endIt - 4)->x); // 右端の微分
       std::cout << "first or third, " << leftDiff << " " << rightDiff << endl;

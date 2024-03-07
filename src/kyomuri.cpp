@@ -15,14 +15,22 @@ int main(int argc, char **argv) {
   //DFS();
   cout << robot->getTime() << endl;
 
-  tank.setDireciton(90, 3);
-
-  for (int i = 0; i < 20; i++) {
+  try
+  {
+    tank.setDireciton(90, 3);
+    for (int i = 0; i < 20; i++) {
+      lidar2.update(gps.expectedPos);
+      lidar2.getWallType(LiDAR_degree::FRONT);
+      tank.gpsTrace(gps.moveTiles(1, 0), 4);
+    }
     lidar2.update(gps.expectedPos);
-    lidar2.getWallType(LiDAR_degree::LEFT);
-    tank.gpsTrace(gps.moveTiles(1, 0), 4);
-    cout << "-----------------------------" << endl;
+    lidar2.getWallType(LiDAR_degree::FRONT);
   }
+  catch (...)
+  {
+    cout << "catch exception" << endl;
+  }
+
 
   cout << robot->getTime() << endl;
 
