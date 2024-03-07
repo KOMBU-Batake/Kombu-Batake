@@ -10,6 +10,9 @@ struct NcmPoints {
   int count_right = 0;
   int centerNum = 0;
 
+  float leftClosest = 0.0f;
+  float rightClosest = 0.0f;
+
   XZcoordinate read(int num) {
     if (num > count_left) {
       return model_right[num-count_left];
@@ -19,11 +22,13 @@ struct NcmPoints {
 
   bool isLeftEmpty() {
     auto closest = min_element(model_left.begin(), model_left.end(), [](XZcoordinate s1, XZcoordinate s2) { return (abs(s1.x + 3) < abs(s2.x + 3)); });
+    leftClosest = closest->z;
     return closest->z > 18;
 	}
 
   bool isRightEmpty() {
     auto closest = min_element(model_right.begin(), model_right.end(), [](XZcoordinate s1, XZcoordinate s2) { return (abs(s1.x - 3) < abs(s2.x - 3)); });
+    rightClosest = closest->z;
     return closest->z > 18;
 	}
 };
@@ -171,27 +176,39 @@ private:
     return variance;
   }
 
-  WallType identifyCurve(vector<XZcoordinate>::iterator startIt, vector<XZcoordinate>::iterator endIt) {
+  WallType identifyCurve(vector<XZcoordinate>::iterator startIt, vector<XZcoordinate>::iterator endIt, float center_cm) {
+    WallType returnWallType;
     // 曲線
     if (startIt->z > endIt->z) // 第一象限 or 第三象限
     {
-      if ((startIt->x - (startIt + 4)->x) == 0) return WallType::type3;
-      else if ((endIt->x - (endIt - 4)->x) == 0) return WallType::type1;
+      if ((startIt->x - (startIt + 4)->x) == 0) returnWallType = WallType::type3;
+      else if ((endIt->x - (endIt - 4)->x) == 0) returnWallType = WallType::type1;
       float leftDiff = (startIt->z - (startIt + 4)->z) / (startIt->x - (startIt + 4)->x); // 左端の微分
       float rightDiff = (endIt->z - (endIt - 4)->z) / (endIt->x - (endIt - 4)->x); // 右端の微分
       std::cout << "first or third, " << leftDiff << " " << rightDiff << endl;
-      if (abs(leftDiff) < abs(rightDiff)) return WallType::type1;
-      else return WallType::type3;
+      if (abs(leftDiff) < abs(rightDiff)) returnWallType = WallType::type1;
+      else returnWallType = WallType::type3;
     }
     else // 第二象限 or 第四象限
     {
       float leftDiff = ((startIt + 4)->z - startIt->z) / ((startIt + 4)->x - startIt->x); // 左端の微分
       float rightDiff = ((endIt - 4)->z - endIt->z) / ((endIt - 4)->x - endIt->x); // 右端の微分
       std::cout << "second or fourth, " << leftDiff << " " << rightDiff << endl;
-      if (abs(leftDiff) > abs(rightDiff)) return WallType::type4; // 第二象限
-      else return WallType::type2; // 第四象限
+      if (abs(leftDiff) > abs(rightDiff)) returnWallType = WallType::type4; // 第二象限
+      else returnWallType = WallType::type2; // 第四象限
     }
+
+    cout << "center_cm: " << center_cm << endl;
+    if (center_cm < 12) return changeCurvePos[returnWallType];
+    return returnWallType;
   }
+
+  std::map<WallType, WallType> changeCurvePos = std::map<WallType, WallType>{
+    {WallType::type1, WallType::type6},
+    {WallType::type2, WallType::type7},
+    {WallType::type3, WallType::type8},
+    {WallType::type4, WallType::type9},
+  };
 
   vector<StraightLine> lines = vector<StraightLine>(512);
 };

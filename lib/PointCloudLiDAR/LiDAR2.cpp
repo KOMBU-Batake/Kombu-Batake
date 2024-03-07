@@ -175,7 +175,7 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
   }
 
   // ã»ê¸
-  return identifyCurve(startIt, endIt);
+  return identifyCurve(startIt, endIt, pointSet.leftClosest);
 }
 
 WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
@@ -234,7 +234,7 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
   }
 
   // ã»ê¸
-  return identifyCurve(startIt, endIt);
+  return identifyCurve(startIt, endIt, pointSet.rightClosest);
 }
 
 WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints)
