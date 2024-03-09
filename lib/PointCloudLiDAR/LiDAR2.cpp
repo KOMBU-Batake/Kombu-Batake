@@ -74,6 +74,7 @@ int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
       });
     if (abs(closest->x) > abs(closest2->x))  center = (int)std::distance(pointCloud.begin(), closest2);
     else center = (int)std::distance(pointCloud.begin(), closest);
+    frontCenterNum = center;
     break;
   case LiDAR_degree::BACK:
     closest = min_element(pointCloud.begin() + 128, pointCloud.begin() + 384, [](XZcoordinate s1, XZcoordinate s2) {
@@ -81,6 +82,7 @@ int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
       });
 
     center = (int)std::distance(pointCloud.begin(), closest);
+    backCenterNum = center;
     break;
   case LiDAR_degree::LEFT:
     closest = min_element(pointCloud.begin() + 256, pointCloud.end(), [](XZcoordinate s1, XZcoordinate s2) {
@@ -88,6 +90,7 @@ int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
       });
 
     center = (int)std::distance(pointCloud.begin(), closest);
+    leftCenterNum = center;
     break;
   case LiDAR_degree::RIGHT:
     closest = min_element(pointCloud.begin(), pointCloud.begin() + 256, [](XZcoordinate s1, XZcoordinate s2) {
@@ -95,6 +98,7 @@ int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
       });
 
     center = (int)std::distance(pointCloud.begin(), closest);
+    rightCenterNum = center;
     break;
   default:
     break;
@@ -111,7 +115,7 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     rotateToFront(pointsSet.model_right, direction);
     bool isLeftEmpty = pointsSet.isLeftEmpty();
     bool isRightEmpty = pointsSet.isRightEmpty();
-    vector<int> featurePoints = VectorTracer(pointsSet);
+    vector<int> featurePoints = VectorTracer(pointsSet, true);
 
     //std::cout << "-------------------" << endl;
     //printLeftRight(pointsSet);
@@ -483,6 +487,50 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
       break;
   }
   return lines;
+}
+
+cornerSet LiDAR2::identifyCorner()
+{
+  return {
+    isClear(LiDAR_degree::FRONT_LEFT),
+    isClear(LiDAR_degree::BACK_LEFT),
+    isClear(LiDAR_degree::FRONT_RIGHT),
+    isClear(LiDAR_degree::BACK_RIGHT)
+  };
+}
+
+bool LiDAR2::isClear(const LiDAR_degree& direction) {
+  XZcoordinate center = {0,0};
+  int start = 0, end = 0;
+  switch (direction) {
+    case LiDAR_degree::FRONT_LEFT:
+			center = { -6, 6 };
+      start = leftCenterNum;
+      end = frontCenterNum;
+      if (start > end) end += 512;
+			break;
+    case LiDAR_degree::FRONT_RIGHT:
+      center = { 6, 6 };
+      start = frontCenterNum;
+			end = rightCenterNum;
+      if (start > end) start -= 512;
+      break;
+    case LiDAR_degree::BACK_LEFT:
+      center = { -6, -6 };
+      start = backCenterNum;
+      end = leftCenterNum;
+      break;
+    case LiDAR_degree::BACK_RIGHT:
+      center = { 6, -6 };
+      start = rightCenterNum;
+			end = backCenterNum;
+			break;
+  }
+  for (int i = start; i <= end; i++) {
+    XZcoordinate p = readPoint(i);
+    if (pow(p.x - center.x, 2) + pow(p.z - center.z, 2) < 49) return false;
+  }
+  return true;
 }
 
 void LiDAR2::printLeftRight(const NcmPoints& pointsSet) {

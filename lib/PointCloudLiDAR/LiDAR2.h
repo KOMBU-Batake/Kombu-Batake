@@ -64,6 +64,13 @@ struct StraightLine {
   StraightLine() = default;
 };
 
+struct cornerSet {
+  bool front_left = false;
+  bool back_left = false;
+  bool front_right = false;
+  bool back_right = false;
+};
+
 // 負の遺産を継承するよ
 class LiDAR2 :
     public PointCloudLiDAR
@@ -76,9 +83,9 @@ public:
 
   void update(GPSPosition goalPos) {
     PointCloudLiDAR::update(goalPos);
-    for (int i = 0; i < 512; i++) {
-			lines[i] = StraightLine(readPoint(i), readPoint(i+1));
-		}
+  //  for (int i = 0; i < 512; i++) {
+		//	lines[i] = StraightLine(readPoint(i), readPoint(i+1));
+		//}
   }
   vector<StraightLine> getNcmLines(XZcoordinate center, const LiDAR_degree& direction, float range);
 
@@ -90,6 +97,8 @@ public:
     float angleABC = calculateAngle(p1, p2, p3);
     std::cout << "angle: " << angleABC << " do" << std::endl;
   }
+
+  cornerSet identifyCorner();
 
 private:
   struct XZrange {
@@ -132,6 +141,10 @@ private:
   WallType identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyRight(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints);
+
+  // getWallTypeを全方向呼び出してから使用する
+  
+  bool isClear(const LiDAR_degree& direction);
 
   void printLeftRight(const NcmPoints& pointsSet);
   
@@ -211,4 +224,8 @@ private:
   };
 
   vector<StraightLine> lines = vector<StraightLine>(512);
+  int frontCenterNum = 0;
+  int backCenterNum = 0;
+  int leftCenterNum = 0;
+  int rightCenterNum = 0;
 };

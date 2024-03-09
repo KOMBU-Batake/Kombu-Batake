@@ -91,6 +91,8 @@ enum class LiDAR_degree {
 
 	FRONT_RIGHT,
 	FRONT_LEFT,
+	BACK_RIGHT,
+	BACK_LEFT,
 };
 
 enum class WallState { // これから尋常じゃないレベルで増える予定は未定
