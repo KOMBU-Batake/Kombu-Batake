@@ -433,6 +433,36 @@ void Map::paintTile(vector<vector<string>>& tile, const WallSet& wallset) {
 	if (tile[4][1] == "-") tile[4][1] = "0";
 	if (tile[4][2] == "-") tile[4][2] = "0";
 	if (tile[4][3] == "-") tile[4][3] = "0";
+
+	// ‹ó”’‚¤‚ß
+	// 0,1—ñ
+	if (tile[0][1] == "1") {
+		tile[2][1] = "0";
+		tile[4][1] = "0";
+	}
+	// 0,2—ñ
+	if (tile[0][2] == "1") {
+		tile[1][2] = "0";
+		tile[2][2] = "0";
+		tile[3][2] = "0";
+		tile[4][2] = "0";
+	}
+	else if (tile[1][2] == "1") {
+		tile[2][2] = "0";
+		tile[3][2] = "0";
+		tile[4][2] = "0";
+	}
+	else if (tile[2][2] == "1") {
+		tile[3][2] = "0";
+		tile[4][2] = "0";
+	}
+
+	// 0,3—ñ
+	if (tile[0][3] == "1") {
+		tile[2][3] = "0";
+		tile[4][3] = "0";
+	}
+
 }
 
 void Map::drawTile(vector<vector<string>>& tile, MapAddress add_L){
