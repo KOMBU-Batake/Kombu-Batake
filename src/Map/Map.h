@@ -282,7 +282,7 @@ private: // ********************************************************************
 		return convertAtoR(convertListPointtoA(addr_list));
 	}
 
-	// ’†S‚ª‘¶İ‚·‚é‚©
+	// ’†S‚ª‘¶İ‚·‚é‚© ‚Â‚Ü‚èè‘O‚Ü‚Å‚µ‚©”»’è‚Å‚«‚È‚¢
 	bool existTile_R(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (addr_L.x < 0) {

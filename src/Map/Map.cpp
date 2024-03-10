@@ -121,7 +121,20 @@ void Map::markNorthWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z - 2][add_L.x + 1] = "1";
 		map_A[add_L.z - 2][add_L.x + 2] = "1";
 	}
-	else {
+	else if (wallset == WallSet{ WallType::typeNo, WallType::center_n, WallType::typeNo }) {
+		if (!existTile_R2({ addr_R.x,addr_R.z - 2 })) addNorth(1);
+		add_L = convertRtoListPoint(addr_R);
+		map_A[add_L.z - 2][add_L.x - 1] = "0";
+		map_A[add_L.z - 2][add_L.x    ] = "0";
+		map_A[add_L.z - 2][add_L.x + 1] = "0";
+		map_A[add_L.z - 3][add_L.x    ] = "0";
+		map_A[add_L.z - 4][add_L.x    ] = "0";
+		map_A[add_L.z - 5][add_L.x    ] = "0";
+		map_A[add_L.z - 4][add_L.x + 1] = "0";
+		map_A[add_L.z - 4][add_L.x - 1] = "0";
+	}
+	else
+	{
 		if (!existTile_R({ addr_R.x,addr_R.z - 2 })) addNorth(1);
 		vector<vector<string>> wall = {
 				{"-", "-", "-", "-", "-"},
@@ -162,7 +175,20 @@ void Map::markSouthWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z + 2][add_L.x + 1] = "1";
 		map_A[add_L.z + 2][add_L.x + 2] = "1";
 	}
-	else {
+	else if (wallset == WallSet{ WallType::typeNo, WallType::center_n, WallType::typeNo }) {
+		if (!existTile_R2({ addr_R.x,addr_R.z + 2 })) addSouth(1);
+		add_L = convertRtoListPoint(addr_R);
+		map_A[add_L.z + 2][add_L.x - 1] = "0";
+		map_A[add_L.z + 2][add_L.x    ] = "0";
+		map_A[add_L.z + 2][add_L.x + 1] = "0";
+		map_A[add_L.z + 3][add_L.x    ] = "0";
+		map_A[add_L.z + 4][add_L.x    ] = "0";
+		map_A[add_L.z + 5][add_L.x    ] = "0";
+		map_A[add_L.z + 4][add_L.x + 1] = "0";
+		map_A[add_L.z + 4][add_L.x - 1] = "0";
+	}
+	else 
+	{
 		if (!existTile_R({ addr_R.x,addr_R.z + 2 })) addSouth(1);
 		vector<vector<string>> wall = {
 			{"-", "-", "-", "-", "-"},
@@ -199,11 +225,24 @@ void Map::markWestWall(MapAddress addr_R, WallSet wallset) {
 	if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && wallset.right == WallType::type10) {
 		map_A[add_L.z - 2][add_L.x - 2] = "1";
 		map_A[add_L.z - 1][add_L.x - 2] = "1";
-		map_A[add_L.z][add_L.x - 2] = "1";
+		map_A[add_L.z    ][add_L.x - 2] = "1";
 		map_A[add_L.z + 1][add_L.x - 2] = "1";
 		map_A[add_L.z + 2][add_L.x - 2] = "1";
 	}
-	else {
+	else if (wallset == WallSet{ WallType::typeNo, WallType::center_n, WallType::typeNo }) {
+		if (!existTile_R2({ addr_R.x - 2,addr_R.z })) addWest(1);
+		add_L = convertRtoListPoint(addr_R);
+		map_A[add_L.z - 1][add_L.x - 2] = "0";
+		map_A[add_L.z    ][add_L.x - 2] = "0";
+		map_A[add_L.z + 1][add_L.x - 2] = "0";
+		map_A[add_L.z		 ][add_L.x - 3] = "0";
+		map_A[add_L.z		 ][add_L.x - 4] = "0";
+		map_A[add_L.z		 ][add_L.x - 5] = "0";
+		map_A[add_L.z - 1][add_L.x - 4] = "0";
+		map_A[add_L.z + 1][add_L.x - 4] = "0";
+	}
+	else 
+	{
 		if (!existTile_R({ addr_R.x - 2,addr_R.z })) addWest(1);
 		vector<vector<string>> wall = {
 			{"-", "-", "-", "-", "-"},
@@ -241,9 +280,21 @@ void Map::markEastWall(MapAddress addr_R, WallSet wallset) {
 if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && wallset.right == WallType::type10) {
 		map_A[add_L.z - 2][add_L.x + 2] = "1";
 		map_A[add_L.z - 1][add_L.x + 2] = "1";
-		map_A[add_L.z][add_L.x + 2] = "1";
+		map_A[add_L.z    ][add_L.x + 2] = "1";
 		map_A[add_L.z + 1][add_L.x + 2] = "1";
 		map_A[add_L.z + 2][add_L.x + 2] = "1";
+	}
+	else if (wallset == WallSet{ WallType::typeNo, WallType::center_n, WallType::typeNo }) {
+		if (!existTile_R2({ addr_R.x + 2,addr_R.z })) addEast(1);
+		add_L = convertRtoListPoint(addr_R);
+		map_A[add_L.z - 1][add_L.x + 2] = "0";
+		map_A[add_L.z    ][add_L.x + 2] = "0";
+		map_A[add_L.z + 1][add_L.x + 2] = "0";
+		map_A[add_L.z    ][add_L.x + 3] = "0";
+		map_A[add_L.z    ][add_L.x + 4] = "0";
+		map_A[add_L.z    ][add_L.x + 5] = "0";
+		map_A[add_L.z - 1][add_L.x + 4] = "0";
+		map_A[add_L.z + 1][add_L.x + 4] = "0";
 	}
 	else {
 		if (!existTile_R({ addr_R.x + 2,addr_R.z })) addEast(1);
@@ -433,6 +484,35 @@ void Map::paintTile(vector<vector<string>>& tile, const WallSet& wallset) {
 	if (tile[4][1] == "-") tile[4][1] = "0";
 	if (tile[4][2] == "-") tile[4][2] = "0";
 	if (tile[4][3] == "-") tile[4][3] = "0";
+
+	// ãÛîíÇ§ÇﬂÇ§Çﬂ
+	// 0,1óÒ
+	if (tile[0][1] == "1") {
+		if (tile[2][1] == "-") tile[2][1] = "0";
+		if (tile[4][1] == "-") tile[4][1] = "0";
+	}
+	// 0,2óÒ
+	if (tile[0][2] == "1") {
+		if (tile[1][2] == "-") tile[1][2] = "0";
+		if (tile[2][2] == "-") tile[2][2] = "0";
+		if (tile[3][2] == "-") tile[3][2] = "0";
+		if (tile[4][2] == "-") tile[4][2] = "0";
+	}
+	else if (tile[1][2] == "1") {
+		if (tile[2][2] == "-") tile[2][2] = "0";
+		if (tile[3][2] == "-") tile[3][2] = "0";
+		if (tile[4][2] == "-") tile[4][2] = "0";
+	}
+	else if (tile[2][2] == "1") {
+		if (tile[3][2] == "-") tile[3][2] = "0";
+		if (tile[4][2] == "-") tile[4][2] = "0";
+	}
+
+	// 0,3óÒ
+	if (tile[0][3] == "1") {
+		if (tile[2][3] == "-") tile[2][3] = "0";
+		if (tile[4][3] == "-") tile[4][3] = "0";
+	}
 }
 
 void Map::drawTile(vector<vector<string>>& tile, MapAddress add_L){
@@ -448,10 +528,10 @@ void Map::drawTile(vector<vector<string>>& tile, MapAddress add_L){
 // É^ÉCÉãÇÃå„ÇÎîºï™Ç…ï«Ç™Ç†Ç¡ÇΩÇÁfalseÅAÇ»Ç©Ç¡ÇΩÇÁtrueÇï‘Ç∑
 bool Map::isBackClear(vector<vector<string>>& tile){ 
 	for (const auto& row : tile[0]) {
-		if (row == "1") return false;
+		if (row == "1" || row == "0") return false;
 	}
 	for (const auto& row : tile[1]) {
-		if (row == "1") return false;
+		if (row == "1" || row == "0") return false;
 	}
 	return true;
 }
