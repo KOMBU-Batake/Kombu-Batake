@@ -17,13 +17,13 @@
 #include "../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../lib/ToF/ToF.h"
 #include "../lib/Tank/Tank.h"
-#include "../lib/easyLiDAR/easyLiDAR.h"
 #include "../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../lib/PointCloudLiDAR/RecognizingSpace/RecognizingSpace.h"
 //#include "../lib/myMath/myMath.h"
 #include "../src/Map/Map.h"
 #include "../src/DFS/DFS.h"
 #include "../lib/MyCam/MyCam.h"
+#include "../lib/PointCloudLiDAR/LiDAR2.h"
 
 /* デバイスの設定、以下略をするよ */
 
@@ -73,10 +73,10 @@ GyroZ gyro;
 GlobalPositioningSystem gps;
 ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
-LiDAR lidar;
 Map mapper;
 PointCloudLiDAR pcLiDAR;
 MyCam myCam;
+LiDAR2 lidar2;
 //MyMath myMath;
 
 void enableDevices() {
