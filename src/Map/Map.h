@@ -9,7 +9,6 @@
 #include <unordered_set>
 
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../../lib/ColorSensor/ColorSensor.h"
@@ -100,10 +99,10 @@ public:
 		
 		// 穴の場合は無条件に2を入れる
 		if (tilestate == TileState::HOLE) {
-			if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = "2";
-			if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = "2";
-			if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = "2";
-			if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = "2";
+			ifBarOR0Write(add_L.x - 1, add_L.z - 1, "2");
+			ifBarOR0Write(add_L.x + 1, add_L.z - 1, "2");
+			ifBarOR0Write(add_L.x - 1, add_L.z + 1, "2");
+			ifBarOR0Write(add_L.x + 1, add_L.z + 1, "2");
 
 			// 壁の情報が入るマス
 			ifBarWrite(add_L.x, add_L.z - 1, "0");
@@ -121,36 +120,36 @@ public:
 			){
 			if (!(add_R.x % 2 == 0 && add_R.z % 2 == 0)) tile = TileStateMap[tilestate];
 			if (abs(angle - 90) < 5) {
-				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile; // 下3行要らんかも
-				if (map_A[add_L.z    ][add_L.x + 1] == "-") map_A[add_L.z    ][add_L.x + 1] = "0";
-				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x + 2] == "-") map_A[add_L.z - 1][add_L.x + 2] = "0";
-				if (map_A[add_L.z    ][add_L.x + 2] == "-") map_A[add_L.z    ][add_L.x + 2] = "0";
-				if (map_A[add_L.z + 1][add_L.x + 2] == "-") map_A[add_L.z + 1][add_L.x + 2] = "0";
+				ifBarWrite(add_L.x + 1, add_L.z - 1, tile); // 下3行要らんかも
+				ifBarWrite(add_L.x + 1, add_L.z    , "0");
+				ifBarWrite(add_L.x + 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x + 2, add_L.z - 1, "0");
+				ifBarWrite(add_L.x + 2, add_L.z    , "0");
+				ifBarWrite(add_L.x + 2, add_L.z + 1, "0");
 			}
 			else if (abs(angle - 180) < 5) {
-				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = "0";
-				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z - 2][add_L.x - 1] == "-") map_A[add_L.z - 2][add_L.x - 1] = "0";
-				if (map_A[add_L.z - 2][add_L.x    ] == "-") map_A[add_L.z - 2][add_L.x    ] = "0";
-				if (map_A[add_L.z - 2][add_L.x + 1] == "-") map_A[add_L.z - 2][add_L.x + 1] = "0";
+				ifBarWrite(add_L.x - 1, add_L.z - 1, tile);
+				ifBarWrite(add_L.x    , add_L.z - 1, "0");
+				ifBarWrite(add_L.x + 1, add_L.z - 1, tile);
+				ifBarWrite(add_L.x - 1, add_L.z - 2, "0");
+				ifBarWrite(add_L.x    , add_L.z - 2, "0");
+				ifBarWrite(add_L.x + 1, add_L.z - 2, "0");
 			}
 			else if (abs(angle - 270) < 5) {
-				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z    ][add_L.x - 1] == "-") map_A[add_L.z    ][add_L.x - 1] = "0";
-				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x - 2] == "-") map_A[add_L.z - 1][add_L.x - 2] = "0";
-				if (map_A[add_L.z    ][add_L.x - 2] == "-") map_A[add_L.z    ][add_L.x - 2] = "0";
-				if (map_A[add_L.z + 1][add_L.x - 2] == "-") map_A[add_L.z + 1][add_L.x - 2] = "0";
+				ifBarWrite(add_L.x - 1, add_L.z - 1, tile);
+				ifBarWrite(add_L.x - 1, add_L.z    , "0");
+				ifBarWrite(add_L.x - 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x - 2, add_L.z - 1, "0");
+				ifBarWrite(add_L.x - 2, add_L.z    , "0");
+				ifBarWrite(add_L.x - 2, add_L.z + 1, "0");
 			}
 			else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z + 1][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = "0";
-				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z + 2][add_L.x - 1] == "-") map_A[add_L.z + 2][add_L.x - 1] = "0";
-				if (map_A[add_L.z + 2][add_L.x    ] == "-") map_A[add_L.z + 2][add_L.x    ] = "0";
-				if (map_A[add_L.z + 2][add_L.x + 1] == "-") map_A[add_L.z + 2][add_L.x + 1] = "0";
+				ifBarWrite(add_L.x - 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x    , add_L.z + 1, "0");
+				ifBarWrite(add_L.x + 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x - 1, add_L.z + 2, "0");
+				ifBarWrite(add_L.x    , add_L.z + 2, "0");
+				ifBarWrite(add_L.x + 1, add_L.z + 2, "0");
 			}
 			return;
 		}
@@ -174,10 +173,10 @@ public:
 		tile = TileStateMap[tilestate];
 
 		// タイルの情報が入るマス
-		if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-		if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
-		if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-		if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
+		ifBarOR0Write(add_L.x - 1, add_L.z - 1, tile);
+		ifBarOR0Write(add_L.x + 1, add_L.z - 1, tile);
+		ifBarOR0Write(add_L.x - 1, add_L.z + 1, tile);
+		ifBarOR0Write(add_L.x + 1, add_L.z + 1, tile);
 
 		// 壁の情報が入るマス
 		ifBarWrite(add_L.x, add_L.z -1, "0");
@@ -320,6 +319,12 @@ private: // ********************************************************************
 
 	void ifBarWrite(int x, int z, string part) {
 		if (map_A[z][x] == "-") {
+			map_A[z][x] = part;
+		}
+	}
+
+	void ifBarOR0Write(int x, int z, string part) {
+		if (map_A[z][x] == "-" || map_A[z][x] == "0") {
 			map_A[z][x] = part;
 		}
 	}

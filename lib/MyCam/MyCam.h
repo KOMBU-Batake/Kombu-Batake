@@ -6,8 +6,7 @@
 #include <webots/Receiver.hpp>
 #include <webots/Emitter.hpp>
 #include <cstring>
-//#include "../PointCloudLiDAR/PointCloudLiDAR.h"
-#include "../easyLiDAR/easyLiDAR.h"
+#include "../PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../GlobalPositioningSystem/GlobalPositioningSystem.h"
 
 using namespace webots;
@@ -20,7 +19,6 @@ extern Receiver* receiver;
 extern Emitter* emitter;
 extern Camera* leftCam;
 extern Camera* rightCam;
-extern LiDAR lidar;
 extern GlobalPositioningSystem gps;
 
 extern int timeStep;

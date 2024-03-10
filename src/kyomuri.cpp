@@ -1,23 +1,41 @@
-// File:          kyomuri.cpp
-// Date:
-// Description:   For WRS
-// Author:        koki0517
-// Modifications:
+/* 
+ * ‚±‚±‚ÍƒƒCƒ“‚ÈŠ´‚¶‚ÌƒvƒƒOƒ‰ƒ€
+ * À¿“I‚ÈƒƒCƒ“ƒvƒƒOƒ‰ƒ€‚ÍDFS.cpp
+ */
 
 #include <iostream>
 #include "../lib/devices.h"
-
-using namespace webots;
-using namespace std;
 
 int main(int argc, char **argv) {
   enableDevices();
 
   cout << "start" << endl;
+  cout << robot->getTime() << endl;
 
-  // [‚³—Dæ’Tõ
-  DFS();
+  try
+  {
+    // [‚³—Dæ’Tõ
+    //DFS();
+    lidar2.update(gps.expectedPos);
+    lidar2.getWallType(LiDAR_degree::FRONT);
+    lidar2.getWallType(LiDAR_degree::RIGHT);
+    lidar2.getWallType(LiDAR_degree::LEFT);
+    lidar2.getWallType(LiDAR_degree::BACK);
+    cornerSet corner = lidar2.identifyCorner();
+    if (corner.front_left) cout << "front_left" << endl;
+    if (corner.front_right) cout << "front_right" << endl;
+    if (corner.back_left) cout << "back_left" << endl;
+    if (corner.back_right) cout << "back_right" << endl;
+  }
+  catch (...)
+  {
+    cout << "catch exception" << endl;
+    //mapper.replaceLineTo0();
+    //mapper.printMap();
+    //sendMap(mapper.map_A);
+  }
 
+  cout << robot->getTime() << endl;
   cout << "end" << endl;
 
   delete robot;
