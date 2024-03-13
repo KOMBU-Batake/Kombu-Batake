@@ -45,6 +45,9 @@ enum class WallType :uint8_t{
 	center_n, // 14
 
 	gomi, // 15
+
+	type16, // 16
+	type17, // 17
 };
 
 typedef struct WallSet WallSet;

@@ -481,9 +481,9 @@ void Map::paintTile(vector<vector<string>>& tile, const WallSet& wallset) {
 		tile[4][4] = "1";
 		break;
 	}
-	if (tile[4][1] == "-") tile[4][1] = "0";
-	if (tile[4][2] == "-") tile[4][2] = "0";
-	if (tile[4][3] == "-") tile[4][3] = "0";
+	if (tile[4][1] == "-" && wallset.left != WallType::type16) tile[4][1] = "0";
+	if (tile[4][2] == "-" && wallset.left != WallType::type16 && wallset.right != WallType::type16) tile[4][2] = "0";
+	if (tile[4][3] == "-" && wallset.right != WallType::type16) tile[4][3] = "0";
 
 	// ‹ó”’‚¤‚ß‚¤‚ß
 	// 0,1—ñ

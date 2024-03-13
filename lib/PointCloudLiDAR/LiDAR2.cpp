@@ -106,6 +106,30 @@ int LiDAR2::getCenterNum(LiDAR_degree direction, XZcoordinate centralPos) {
   return center;
 }
 
+vector<int> LiDAR2::getNcmNumbers(const LiDAR_degree& direction, float range) {
+  // íÜâõ10cmÇÃÉfÅ[É^ÇéÊìæ
+  int center = getCenterNum(direction);
+  float half_range = range / 2;
+  int start = center - 100;
+  int end = center + 100;
+  vector<int> ncmNumbers;
+  if (direction == LiDAR_degree::FRONT || direction == LiDAR_degree::BACK) {
+    for (int i = start; i <= end; i++) if (abs(readPoint(i).x) <= half_range) ncmNumbers.push_back(i);
+  }
+  else { // LEFT or RIGHT
+    for (int i = start; i <= end; i++) if (abs(readPoint(i).z) <= half_range) ncmNumbers.push_back(i);
+  }
+  return ncmNumbers;
+}
+
+float LiDAR2::Variance2(vector<XZcoordinate>& hoge,int size) {
+  vector<XZcoordinate>fuga(size);
+  for (size_t i = 0; i < hoge.size(); ++i) {
+    fuga[i].z = hoge[i].x * hoge[i].x + hoge[i].z * hoge[i].z;
+  }
+  return Variance(fuga.begin(), fuga.end(), 1, size);
+}
+
 WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
 {
   WallSet wallSet = {WallType::typeNo, WallType::center_n, WallType::typeNo};
@@ -115,15 +139,26 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     rotateToFront(pointsSet.model_right, direction);
     bool isLeftEmpty = pointsSet.isLeftEmpty();
     bool isRightEmpty = pointsSet.isRightEmpty();
-    vector<int> featurePoints = VectorTracer(pointsSet, true);
+    if (pointsSet.leftClosest < 6) {
+      float var = Variance2(pointsSet.model_left, (int)pointsSet.model_left.size());
+      if (var < 1) wallSet.left = WallType::type16;
+      cout << "variance: " << var << endl;
+    }
+    if (pointsSet.rightClosest < 6) {
+			float var = Variance2(pointsSet.model_right, (int)pointsSet.model_right.size());
+      if (var < 1) wallSet.right = WallType::type17;
+      cout << "variance: " << var << endl;
+		}
+    vector<int> featurePoints;
+    if (wallSet.left != WallType::type16 && wallSet.right != WallType::type17) featurePoints = VectorTracer(pointsSet, true); featurePoints = VectorTracer(pointsSet, true);
 
-    //std::cout << "-------------------" << endl;
-    //printLeftRight(pointsSet);
-    //std::cout << "-------------------" << endl;
+    std::cout << "-------------------" << endl;
+    printLeftRight(pointsSet);
+    std::cout << "-------------------" << endl;
 
-    if (! isLeftEmpty) wallSet.left = identifyLeft(pointsSet, featurePoints);
+    if (! (isLeftEmpty || wallSet.left == WallType::type16)) wallSet.left = identifyLeft(pointsSet, featurePoints);
     std::cout << "* left: " << (int)wallSet.left << endl;
-    if (! isRightEmpty) wallSet.right = identifyRight(pointsSet, featurePoints);
+    if (! (isRightEmpty || wallSet.right == WallType::type17)) wallSet.right = identifyRight(pointsSet, featurePoints);
     std::cout << "* right: " << (int)wallSet.right << endl;
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
     cout << "* center: " << (int)wallSet.center << endl;
@@ -243,6 +278,7 @@ WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 
 WallType LiDAR2::identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints)
 {
+  if (wallset.left == WallType::type16 || wallset.right == WallType::type17) return WallType::center_n;
   unordered_set<uint8_t> left_back = {11u,0u,2u,4u};
   unordered_set<uint8_t> right_back = {11u,0u,1u,3u};
   unordered_set<uint8_t> left_front = {5u,7u,9u};

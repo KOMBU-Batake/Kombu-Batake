@@ -173,4 +173,7 @@ private:
 		{Colors::RED, TileState::AREA3to4},
 		{Colors::SWAMP, TileState::SWAMP},
 	};
+
+	double VerticalViewingAngle = atan(5/(sqrt(89)*cos(1/2))); // ‚’¼‹–ìŠp
+	double HorizontalViewingAngle = atan(8 / (sqrt(89) * cos(1 / 2))); // …•½‹–ìŠp
 };

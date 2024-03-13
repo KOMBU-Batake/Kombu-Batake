@@ -48,11 +48,11 @@ PositionSensor* rightEncoder = rightMotor->getPositionSensor();
 Lidar* centralLidar = robot->getLidar("lidar");
 
 /* でぃすたんすせんさぁ */
-DistanceSensor* leftToFSensor = robot->getDistanceSensor("leftToF");
-DistanceSensor* rightToFSensor = robot->getDistanceSensor("rightToF");
+//DistanceSensor* leftToFSensor = robot->getDistanceSensor("leftToF");
+//DistanceSensor* rightToFSensor = robot->getDistanceSensor("rightToF");
 
 /* からぁせんさぁ */
-Camera* colorCam = robot->getCamera("ColorSensor");
+Camera* colorCam = robot->getCamera("frontCamera");
 
 /* きゃめら */
 Camera* leftCam = robot->getCamera("leftCamera");
@@ -71,7 +71,7 @@ int16_t pcModelBox::counter = -1;
 ColorSensor colorsensor(colorCam);
 GyroZ gyro;
 GlobalPositioningSystem gps;
-ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
+//ToFSensor leftToF(leftToFSensor), rightToF(rightToFSensor);
 Tank tank(leftMotor, rightMotor, leftEncoder, rightEncoder);
 Map mapper;
 PointCloudLiDAR pcLiDAR;
@@ -83,8 +83,8 @@ void enableDevices() {
 	leftEncoder->enable(timeStep);
 	rightEncoder->enable(timeStep);
 	centralLidar->enable(timeStep);
-	leftToFSensor->enable(timeStep);
-	rightToFSensor->enable(timeStep);
+	//leftToFSensor->enable(timeStep);
+	//rightToFSensor->enable(timeStep);
 	colorCam->enable(timeStep);
 	leftCam->enable(timeStep);
 	rightCam->enable(timeStep);
@@ -93,4 +93,28 @@ void enableDevices() {
 	receiver->enable(timeStep);
 	robot->step(timeStep); // delay 16ms
 	gps.recoedStartPosition();
+	
+	colorCam->setFov(1.5f);
+	robot->step(timeStep); // delay 16ms
+	colorCam->saveImage("1.png", 100);
+
+	Mat inputImage(colorCam->getHeight(), colorCam->getWidth(), CV_8UC4, (void*)colorCam->getImage());
+	// 画像の幅を取得
+
+	// 余白の追加
+	copyMakeBorder(inputImage, inputImage,  1, 0, 10, 10, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255, 255));
+
+	// 出力画像を保存
+	cv::imwrite("output_image.png", inputImage); // 例: "output_image.png" を適切なファイル名に置き換えてください
+
+	//読み込んだ画像の四角形の頂点
+	cv::Point2f pts1[] = { cv::Point2f(8, 28), cv::Point2f(75,28), cv::Point2f(56, 0), cv::Point2f(27, 0) };
+	//出力画像に対応する四角形の頂点
+	cv::Point2f pts2[] = { cv::Point2f(27, 28), cv::Point2f(56, 28), cv::Point2f(56, 0), cv::Point2f(27, 0) };
+	//射影変形行列を代入
+	cv::Mat pmat = cv::getPerspectiveTransform(pts1, pts2);
+	//射影変換第３引数は変換行列
+	cv::warpPerspective(inputImage, inputImage, pmat, inputImage.size(), cv::INTER_LINEAR);
+
+	cv::imwrite("output_image1.png", inputImage); // 例: "output_image.png" を適切なファイル名に置き換えてください
 }

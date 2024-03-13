@@ -135,8 +135,11 @@ private:
   void rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction);
   // ベクトルトレーサー法で特徴点を探す
   vector<int> VectorTracer(NcmPoints& pointSet, bool display = false);
+  float Variance2(vector<XZcoordinate>& hoge, int size);
 
   vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
+
+  vector<int> getNcmNumbers(const LiDAR_degree& direction, float range);
 
   WallType identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyRight(NcmPoints& pointSet, vector<int>& featurePoints);

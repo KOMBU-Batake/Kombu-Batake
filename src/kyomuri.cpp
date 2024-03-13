@@ -3,7 +3,6 @@
  * À¿“I‚ÈƒƒCƒ“ƒvƒƒOƒ‰ƒ€‚ÍDFS.cpp
  */
 
-#include <iostream>
 #include "../lib/devices.h"
 
 int main(int argc, char **argv) {
@@ -15,9 +14,9 @@ int main(int argc, char **argv) {
   try
   {
     // [‚³—Dæ’Tõ
-    DFS();
-    //lidar2.update(gps.expectedPos);
-    //lidar2.getWallType(LiDAR_degree::FRONT);
+    //DFS();
+    lidar2.update(gps.expectedPos);
+    lidar2.getWallType(LiDAR_degree::FRONT);
     //lidar2.getWallType(LiDAR_degree::RIGHT);
     //lidar2.getWallType(LiDAR_degree::LEFT);
     //lidar2.getWallType(LiDAR_degree::BACK);
