@@ -114,7 +114,9 @@ vector<int> LiDAR2::getNcmNumbers(const LiDAR_degree& direction, float range) {
   int end = center + 100;
   vector<int> ncmNumbers;
   if (direction == LiDAR_degree::FRONT || direction == LiDAR_degree::BACK) {
-    for (int i = start; i <= end; i++) if (abs(readPoint(i).x) <= half_range) ncmNumbers.push_back(i);
+    for (int i = start; i <= end; i++) if (abs(readPoint(i).x) <= half_range) {
+      ncmNumbers.push_back(i);
+    }
   }
   else { // LEFT or RIGHT
     for (int i = start; i <= end; i++) if (abs(readPoint(i).z) <= half_range) ncmNumbers.push_back(i);

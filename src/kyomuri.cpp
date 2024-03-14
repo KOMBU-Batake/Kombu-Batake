@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
     //DFS();
     lidar2.update(gps.expectedPos);
     lidar2.getWallType(LiDAR_degree::FRONT);
+    lidar2.test();
     //lidar2.getWallType(LiDAR_degree::RIGHT);
     //lidar2.getWallType(LiDAR_degree::LEFT);
     //lidar2.getWallType(LiDAR_degree::BACK);

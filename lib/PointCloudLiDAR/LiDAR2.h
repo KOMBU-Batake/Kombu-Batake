@@ -89,16 +89,47 @@ public:
   }
   vector<StraightLine> getNcmLines(XZcoordinate center, const LiDAR_degree& direction, float range);
 
-  void test() {
-    XZcoordinate p1 = { 1.0f, 2.0f };
-    XZcoordinate p2 = { 3.0f, 4.0f };
-    XZcoordinate p3 = { 5.0f, 6.0f };
-
-    float angleABC = calculateAngle(p1, p2, p3);
-    std::cout << "angle: " << angleABC << " do" << std::endl;
+  static int convertLiADRtoImage(const float& z, const vector<float>& z_range_start, const vector<float>& z_range_end) {
+    for (int i = 0; i < 41; i++) {
+      if (z <= z_range_start[i] && z >= z_range_end[i]) return i;
+    }
+    return -1;
   }
 
-  cornerSet identifyCorner();
+  vector<XZcoordinate> getPositionOfImage() {
+    vector<int> numbers = getNcmNumbers(LiDAR_degree::FRONT, 12); // 12cmの範囲での点の番号を取得
+    vector<float> x_range_start(37), z_range_start(41), x_range_end(37), z_range_end(41);
+    for (int i = 0; i < 37; i++) {
+      x_range_start[i] = -6 + (12.0f / 37.0f) * i;
+      x_range_end[i]   = -6 + (12.0f / 37.0f) * (i + 1);
+    }
+    for (int i = 0; i < 41; i++) {
+      z_range_start[i] = 18 - (12.0f / 37.0f) * i;
+      z_range_end[i] = 18 - (12.0f / 37.0f) * (i + 1);
+    }
+
+    // x軸方向
+    vector<int> optimizedNumbers;
+    vector<ImageXZcoordinate> optimizedPoints;
+    int last_num = -1;
+    for (auto& number : numbers) {
+      for (int i = 0; i < 37; i++) {
+        if (readPoint(number).x >= x_range_start[i] && readPoint(number).x <= x_range_end[i] && i != last_num) {
+          int z = convertLiADRtoImage(readPoint(number).z, z_range_start, z_range_end);
+          if (z == -1) continue;
+          optimizedNumbers.push_back( number );
+          optimizedPoints.push_back({ i + 24, z });
+          cout << number << ": " << i + 24 << "," << z << endl;
+          last_num = i;
+          break;
+        }
+      }
+    }
+  }
+
+  void test() {
+    getPositionOfImage();
+  }
 
 private:
   struct XZrange {
@@ -129,6 +160,11 @@ private:
     XZrange() = default;
   };
 
+  struct ImageXZcoordinate {
+    int x;
+    int z;
+	};
+
   // 指定した方向にある点
   int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
   // 都合よく座標を回転させる
@@ -139,14 +175,14 @@ private:
 
   vector<XZcoordinate> getNcmPoints(XZcoordinate center, const LiDAR_degree& direction, float range);
 
-  vector<int> getNcmNumbers(const LiDAR_degree& direction, float range);
-
   WallType identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyRight(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints);
+  cornerSet identifyCorner();
+
+  vector<int> getNcmNumbers(const LiDAR_degree& direction, float range);
 
   // getWallTypeを全方向呼び出してから使用する
-  
   bool isClear(const LiDAR_degree& direction);
 
   void printLeftRight(const NcmPoints& pointsSet);

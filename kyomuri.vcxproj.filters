@@ -118,9 +118,6 @@
     <ClCompile Include="lib\myMath\myMath.cpp">
       <Filter>lib\MyMath</Filter>
     </ClCompile>
-    <ClCompile Include="lib\ToF\ToF.cpp">
-      <Filter>lib\ToF</Filter>
-    </ClCompile>
     <ClCompile Include="lib\Tank\Tank.cpp">
       <Filter>lib\Tank</Filter>
     </ClCompile>
@@ -174,9 +171,6 @@
     <Filter Include="lib\Tank">
       <UniqueIdentifier>{3dfa1bf3-38bc-46df-88e7-6428877f9bce}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\ToF">
-      <UniqueIdentifier>{56c2886d-3969-4c51-8777-77bdc20f15af}</UniqueIdentifier>
-    </Filter>
     <Filter Include="lib\MyCam">
       <UniqueIdentifier>{f5f24d18-46e6-48c2-b900-0fd5f646f936}</UniqueIdentifier>
     </Filter>
@@ -208,9 +202,6 @@
     </ClInclude>
     <ClInclude Include="lib\myMath\myMath.h">
       <Filter>lib\MyMath</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\ToF\ToF.h">
-      <Filter>lib\ToF</Filter>
     </ClInclude>
     <ClInclude Include="lib\Tank\Tank.h">
       <Filter>lib\Tank</Filter>

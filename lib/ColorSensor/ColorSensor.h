@@ -25,28 +25,26 @@ enum class TileState {
 	partly_visited,
 };
 
-typedef struct
-{
+struct ColorRGB {
 	int red;
 	int green;
 	int blue;
-} ColorRGB;
+};
 
-typedef struct
-{
+ struct ColorHSV {
 	float hue;
 	float saturation;
 	float value;
-} ColorHSV;
+};
 
-typedef struct {
+struct ColorRange {
 	int hue; // hueの理想的な値
 	int hue_diff; // hueの許容誤差
 	int saturation; // 以下同文
 	int saturation_diff;
 	int value;
 	int value_diff;
-} ColorRange;
+};
 
 enum class Colors {
 	WHITE,

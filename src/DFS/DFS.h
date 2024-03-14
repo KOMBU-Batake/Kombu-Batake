@@ -13,7 +13,6 @@
 #include "../../lib/ColorSensor/ColorSensor.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "../../lib/ToF/ToF.h"
 #include "../../lib/Tank/Tank.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../Map/Map.h"
@@ -26,7 +25,6 @@ extern Robot* robot;
 extern ColorSensor colorsensor;
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
-extern ToFSensor leftToF, rightToF;
 extern Tank tank;
 extern Map mapper;
 extern PointCloudLiDAR pcLiDAR;
