@@ -10,7 +10,7 @@
 #include <webots/Receiver.hpp>
 #include <webots/Emitter.hpp>
 
-#include "../../lib/ColorSensor/ColorSensor.h"
+#include "../../lib/ColorSensor/ColorSensor2.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/Tank/Tank.h"
@@ -22,7 +22,7 @@ using namespace webots;
 using namespace std;
 
 extern Robot* robot;
-extern ColorSensor colorsensor;
+extern ColorSensor2 colorsensor;
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
 extern Tank tank;

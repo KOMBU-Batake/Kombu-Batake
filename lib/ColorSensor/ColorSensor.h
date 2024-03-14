@@ -1,11 +1,18 @@
 #pragma once
 
+#include <opencv2/opencv.hpp>
 #include <webots/Robot.hpp>
 #include <webots/Camera.hpp>
 #include <iostream>
 #include <algorithm>
 #include <map>
 
+#include "../PointCloudLiDAR/LiDAR2.h"
+
+extern LiDAR2 lidar2;
+extern int timeStep;
+extern Camera* colorCam;
+extern webots::Robot* robot;
 using namespace webots;
 using namespace std;
 
@@ -61,11 +68,9 @@ enum class Colors {
 class ColorSensor
 {
 public:
-	ColorSensor(webots::Camera* camera){ this->colorsen = camera; } // colorCamをexternすればいちいちこんなことしなくてもよくね？
-
 	/* これを実行しないとクラス内のどの関数でも値が更新されないままなので注意 */
 	void update() {
-		const unsigned char* rgb = colorsen->getImage();
+		const unsigned char* rgb = colorCam->getImage();
 		RGB.red = rgb[2];
 		RGB.green = rgb[1];
 		RGB.blue = rgb[0];
@@ -143,8 +148,7 @@ public:
 	}
 
 	ColorRGB RGB = { 0,0,0 };
-private:
-	webots::Camera* colorsen;
+protected:
 	// 落とし穴と普通の床、チェックポイントタイルの定義は別で特別に行ふ
 	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // 許容誤差はとりま5 実験では2未満
 	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };

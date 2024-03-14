@@ -155,6 +155,7 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp" />
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp" />
+    <ClCompile Include="lib\ColorSensor\ColorSensor2.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
     <ClCompile Include="lib\MyCam\MyCam.cpp" />
@@ -169,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />
+    <ClInclude Include="lib\ColorSensor\ColorSensor2.h" />
     <ClInclude Include="lib\devices.h" />
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h" />
     <ClInclude Include="lib\IMU\IMU.h" />

@@ -136,6 +136,9 @@
     <ClCompile Include="lib\PointCloudLiDAR\LiDAR2.cpp">
       <Filter>lib\PointCloudLiDAR</Filter>
     </ClCompile>
+    <ClCompile Include="lib\ColorSensor\ColorSensor2.cpp">
+      <Filter>lib\ColorSensor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -217,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="lib\PointCloudLiDAR\LiDAR2.h">
       <Filter>lib\PointCloudLiDAR</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ColorSensor\ColorSensor2.h">
+      <Filter>lib\ColorSensor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

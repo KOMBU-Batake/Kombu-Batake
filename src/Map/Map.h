@@ -11,7 +11,7 @@
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
-#include "../../lib/ColorSensor/ColorSensor.h"
+#include "../../lib/ColorSensor/ColorSensor2.h"
 
 /* 提出用のマップを作りつつ、DFSにも利用するよ
  * 

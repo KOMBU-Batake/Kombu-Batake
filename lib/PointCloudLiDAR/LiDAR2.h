@@ -71,6 +71,11 @@ struct cornerSet {
   bool back_right = false;
 };
 
+struct ImageXZcoordinate {
+  int x;
+  int z;
+};
+
 // •‰‚ÌˆâY‚ğŒp³‚·‚é‚æ
 class LiDAR2 :
     public PointCloudLiDAR
@@ -96,36 +101,7 @@ public:
     return -1;
   }
 
-  vector<XZcoordinate> getPositionOfImage() {
-    vector<int> numbers = getNcmNumbers(LiDAR_degree::FRONT, 12); // 12cm‚Ì”ÍˆÍ‚Å‚Ì“_‚Ì”Ô†‚ğæ“¾
-    vector<float> x_range_start(37), z_range_start(41), x_range_end(37), z_range_end(41);
-    for (int i = 0; i < 37; i++) {
-      x_range_start[i] = -6 + (12.0f / 37.0f) * i;
-      x_range_end[i]   = -6 + (12.0f / 37.0f) * (i + 1);
-    }
-    for (int i = 0; i < 41; i++) {
-      z_range_start[i] = 18 - (12.0f / 37.0f) * i;
-      z_range_end[i] = 18 - (12.0f / 37.0f) * (i + 1);
-    }
-
-    // x²•ûŒü
-    vector<int> optimizedNumbers;
-    vector<ImageXZcoordinate> optimizedPoints;
-    int last_num = -1;
-    for (auto& number : numbers) {
-      for (int i = 0; i < 37; i++) {
-        if (readPoint(number).x >= x_range_start[i] && readPoint(number).x <= x_range_end[i] && i != last_num) {
-          int z = convertLiADRtoImage(readPoint(number).z, z_range_start, z_range_end);
-          if (z == -1) continue;
-          optimizedNumbers.push_back( number );
-          optimizedPoints.push_back({ i + 24, z });
-          cout << number << ": " << i + 24 << "," << z << endl;
-          last_num = i;
-          break;
-        }
-      }
-    }
-  }
+  vector<ImageXZcoordinate> getPositionOfImage();
 
   void test() {
     getPositionOfImage();
@@ -159,11 +135,6 @@ private:
 
     XZrange() = default;
   };
-
-  struct ImageXZcoordinate {
-    int x;
-    int z;
-	};
 
   // w’è‚µ‚½•ûŒü‚É‚ ‚é“_
   int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });

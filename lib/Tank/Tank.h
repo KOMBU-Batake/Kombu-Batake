@@ -8,7 +8,7 @@
 
 #include "../GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../IMU/IMU.h"
-#include "../ColorSensor/ColorSensor.h"
+#include "../ColorSensor/ColorSensor2.h"
 #include "../MyCam/MyCam.h"
 
 using namespace webots;
@@ -44,7 +44,7 @@ extern Robot* robot;
 extern int timeStep;
 extern GlobalPositioningSystem gps;
 extern GyroZ gyro;
-extern ColorSensor colorsensor;
+extern ColorSensor2 colorsensor;
 extern MyCam myCam;
 
 class Tank {
