@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 
 #include <iostream>
 #include <webots/Robot.hpp>
@@ -27,6 +27,7 @@
 
 using namespace webots;
 using namespace std;
+using namespace cv;
 
 // Robotインスタンスの作成
 Robot* robot = new Robot();
@@ -72,6 +73,15 @@ MyCam myCam;
 LiDAR2 lidar2;
 //MyMath myMath;
 
+void delay(int ms) {
+	float initTime = (float)robot->getTime();	// Store starting time (in seconds)
+	while (robot->step(timeStep) != -1) {
+		if ((robot->getTime() - initTime) * 1000.0 > ms) { // If time elapsed (converted into ms) is greater than value passed in
+			return;
+		}
+	}
+}
+
 void enableDevices() {
 	leftEncoder->enable(timeStep);
 	rightEncoder->enable(timeStep);
@@ -85,6 +95,52 @@ void enableDevices() {
 	robot->step(timeStep); // delay 16ms
 	gps.recoedStartPosition();
 
-	colorsensor.update();
-	colorsensor.obstacle();
+	//Mat inputImage = Mat(leftCam->getHeight(), leftCam->getWidth(), CV_8UC4, (void*)leftCam->getImage());
+	//imwrite("leftCam.png", inputImage);
+	//std::vector<cv::KeyPoint> keypoints_source, keypoints_target;
+	//cv::Ptr<cv::Feature2D> f2d = cv::KAZE::create();
+
+	//Mat targetImage = imread("../../protos/textures/placard-8-corrosive.png", cv::IMREAD_COLOR);
+	//Mat img_gray_source, img_gray_target;
+	//cvtColor(inputImage, img_gray_source, cv::COLOR_BGR2GRAY);
+	//cvtColor(targetImage, img_gray_target, cv::COLOR_BGR2GRAY);
+
+	//cv::Mat canny;
+	//int thresh = 100;
+	//cv::Canny(img_gray_source, canny, thresh, thresh * 2);
+
+	//// cv::findContours は第一引数を破壊的に利用するため imshow 用に別変数を用意しておきます。
+	//cv::Mat canny2 = canny.clone();
+
+	//// cv::Point の配列として、輪郭を計算します。
+	//std::vector<std::vector<cv::Point> > contours;
+	//std::vector<cv::Vec4i> hierarchy;
+	//cv::findContours(canny, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+	//std::cout << contours.size() << std::endl; //=> 36
+	//std::cout << contours[contours.size() - 1][0] << std::endl; //=> [154, 10]
+
+	//cv::Mat drawing = cv::Mat::zeros(canny.size(), CV_8UC3);
+	//cv::RNG rng(12345);
+
+	//for (size_t i = 0; i < contours.size(); i++) {
+	//	cv::Scalar color = cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
+	//	cv::drawContours(drawing, contours, (int)i, color);
+	//}
+	//cv::imshow("drawing", drawing);
+	//imwrite("srawing.png", drawing);
+
+	//delay(1300);
+	////std::cout << "Number of pixels: " << count << std::endl;
+	//char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+
+	//GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+	//int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+	////cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+
+	//memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+	//message[8] = 'P'; // The victim type is harmed
+	//emitter->send(message, sizeof(message));
+	//robot->step(timeStep);
 }
+

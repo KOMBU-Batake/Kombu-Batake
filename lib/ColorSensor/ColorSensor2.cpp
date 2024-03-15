@@ -19,5 +19,7 @@ XZcoordinate ColorSensor2::obstacle()
 	//射影変換第３引数は変換行列
 	cv::warpPerspective(inputImage, inputImage, pmat, inputImage.size(), cv::INTER_NEAREST);
 
+	vector<ImageXZcoordinate> LiDARPitns = lidar2.getPositionOfImage();
+
 	cv::imwrite("output_image1.png", inputImage); // 例: "output_image.png" を適切なファイル名に置き換えてください
 }
