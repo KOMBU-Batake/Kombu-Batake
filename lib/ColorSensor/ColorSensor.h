@@ -36,12 +36,20 @@ struct ColorRGB {
 	int red;
 	int green;
 	int blue;
+
+	bool operator==(const ColorRGB& other) const {
+		return red == other.red && green == other.green && blue == other.blue;
+	}
 };
 
  struct ColorHSV {
 	float hue;
 	float saturation;
 	float value;
+
+	bool operator==(const ColorHSV& other) const {
+		return hue == other.hue && saturation == other.saturation && value == other.value;
+	}
 };
 
 struct ColorRange {
@@ -75,11 +83,11 @@ public:
 		RGB.green = rgb[1];
 		RGB.blue = rgb[0];
 	}
-	uint8_t getRed() { return RGB.red; }
-	uint8_t getGreen() { return RGB.green; }
-	uint8_t getBlue() { return RGB.blue; }
+	uint8_t getRed() const { return RGB.red; }
+	uint8_t getGreen() const { return RGB.green; }
+	uint8_t getBlue() const { return RGB.blue; }
 
-	ColorHSV getHSV() {
+	ColorHSV getHSV() const {
 		ColorHSV hsv = {512.0,0,0};
 		uint8_t max = std::max(RGB.red, std::max(RGB.green, RGB.blue));
 		uint8_t min = std::min(RGB.red, std::min(RGB.green, RGB.blue));
@@ -160,9 +168,7 @@ protected:
 		if (abs(hsv.hue - range.hue) <= range.hue_diff && abs(hsv.saturation - range.saturation) <= range.saturation_diff && abs(hsv.value - range.value) <= range.value_diff) {
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	std::map<Colors, TileState> tileColorMap = {

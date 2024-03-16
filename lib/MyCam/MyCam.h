@@ -163,7 +163,7 @@ public:
 	Mat Leftframe,Rightframe;
 private:
 	void delay(int ms) {
-		float initTime = (float)robot->getTime();	// Store starting time (in seconds)
+		float initTime = (uint8_t)robot->getTime();	// Store starting time (in seconds)
 		while (robot->step(timeStep) != -1) {
 			if ((robot->getTime() - initTime) * 1000.0 > ms) { // If time elapsed (converted into ms) is greater than value passed in
 				return;

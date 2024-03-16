@@ -16,7 +16,24 @@ int main(int argc, char **argv) {
     enableDevices();
 
     // ê[Ç≥óDêÊíTçı
-    DFS();
+    //DFS();
+    tank.gpsTrace(gps.moveTiles(1, 0), 3);
+    tank.setDireciton(180, 3);
+    colorsensor.update();
+    cout << "left Color: " << (int)colorsensor.getLeftColor() << endl;
+    cout << "right Color: " << (int)colorsensor.getRightColor() << endl;
+    
+    colorCam->saveImage("0.png", 100);
+    for (int i = 1; i <= 7; i++) {
+      tank.gpsTrace(gps.moveTiles(0, -2), 3);
+      cout << "--------" << endl;
+      colorsensor.update();
+      cout << "left Color: " << (int)colorsensor.getLeftColor() << endl;
+      cout << "right Color: " << (int)colorsensor.getRightColor() << endl;
+      string filename = to_string(i) + ".png";
+      colorCam->saveImage(filename, 100);
+    }
+
   }
   catch (...)
   {

@@ -104,6 +104,7 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 	if (unit == unit::rad) direction = pd_rad_to_degrees(direction);
 	//cout << "direction: " << direction << endl;
 	double startAngle = gyro.getGyro();
+	if (abs(startAngle - direction) <= 1 || abs(startAngle - direction) >= 355) return;
 	maxspeed = abs(maxspeed);
 	if (maxspeed > maxVelocity) maxspeed = maxVelocity;
 	
@@ -231,10 +232,10 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
 		double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
 		while (1) {
-			if (!checkColor()) {
-				stop(StopMode::HOLD);
-				return false;
-			}
+			//if (!checkColor()) {
+			//	stop(StopMode::HOLD);
+			//	return false;
+			//}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ‚wŽ²•ûŒü‚Ì‚¸‚ê
@@ -276,10 +277,10 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
 		double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
 		while (1) {
-			if (!checkColor()) {
-				stop(StopMode::HOLD);
-				return false;
-			}
+			//if (!checkColor()) {
+			//	stop(StopMode::HOLD);
+			//	return false;
+			//}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ZŽ²•ûŒü‚Ì‚¸‚ê
