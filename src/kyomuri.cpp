@@ -21,10 +21,6 @@ int main(int argc, char **argv) {
     lidar2.update(gps.expectedPos);
     colorsensor.update();
     colorsensor.obstacle();
-    cout << "-------------------" << endl;
-    for (auto& p : lidar2.pointCloud) {
-			cout << p.x << ", " << p.z << endl;
-		}
 
     cout << "end: " << robot->getTime() << endl;
     delete robot;

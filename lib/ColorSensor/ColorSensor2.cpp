@@ -8,6 +8,47 @@ static XZcoordinate convertImageXZtoXZ_end(ImageXZcoordinate& p) {
 	return XZcoordinate{ -6.0f + (12.0f / 37.0f) * (p.x - 23), 18.0f - (12.0f / 37.0f) * (p.z + 1) };
 }
 
+void ColorSensor2::nextTile(obstacleState& state, vector<int>& numbers)
+{
+	// ³–Ê‰¡6cm,c8cm‚ª‹ó‚¢‚Ä‚¢‚é‚©‚Ç‚¤‚©
+	for (auto& num : numbers) {
+		XZcoordinate p = lidar2.readPoint(num);
+		if (abs(p.x) < 3 && p.z < 8) { // 1‚Â‚Å‚à‘ÎÛŠO‚ª‚ ‚ê‚ÎI—¹
+			return; 
+		}
+	}
+
+	// left
+	vector<uchar> leftFloorBrightness(9);
+	for (int i = 23; i <= 25; i++) {
+		for (int j = 25; j <= 27; j++) {
+			Vec4b pixel = inputImage.at<cv::Vec4b>(i, j);
+			leftFloorBrightness[(i - 23) * 3 + (j - 25)] = max(pixel[0], max(pixel[1], pixel[2]));
+		}
+	}
+	if (calculateVariance(leftFloorBrightness) == 0) {
+		if (leftFloorBrightness[0] == 30) {
+			state.leftHoleState = true;
+			cout << "left hole" << endl;
+		}
+	}
+
+	// right
+	vector<uchar> rightFloorBrightness(9);
+	for (int i = 23; i <= 25; i++) {
+		for (int j = 36; j <= 38; j++) {
+			Vec4b pixel = inputImage.at<cv::Vec4b>(i, j);
+			rightFloorBrightness[(i - 23) * 3 + (j - 36)] = max(pixel[0], max(pixel[1], pixel[2]));
+		}
+	}
+	if (calculateVariance(rightFloorBrightness) == 0) {
+		if (rightFloorBrightness[0] == 30) {
+			state.rightHoleState = true;
+			cout << "right hole" << endl;
+		}
+	}
+}
+
 obstacleState ColorSensor2::obstacle()
 {
 	colorCam->saveImage("1.png", 100);
@@ -24,6 +65,10 @@ obstacleState ColorSensor2::obstacle()
 	//Ë‰e•ÏŠ·‘æ‚Rˆø”‚Í•ÏŠ·s—ñ
 	cv::warpPerspective(transformedImage, transformedImage, pmat, transformedImage.size(), cv::INTER_NEAREST);
 
+	cv::imwrite("output_image.png", transformedImage);
+
+	/* áŠQ•¨‚Ì”­Œ© */
+	obstacleState obstacleState;
 	vector<int> numbers = lidar2.getNcmNumbers(LiDAR_degree::FRONT, 12); // 12cm‚Ì”ÍˆÍ‚Å‚Ì“_‚Ì”Ô†‚ğæ“¾
 	vector<ImageXZcoordinate> LiDARPoints = lidar2.getPositionOfImage(numbers);
 	vector<ImageXZcoordinate> ObstaclePoints;
@@ -49,6 +94,11 @@ obstacleState ColorSensor2::obstacle()
 		cout << LiDARPoints[i].z << ", " << LiDARPoints[i].x - 3 << ", saturation: " << convertRGBtoHSV(topPixel).saturation << endl;
 	}
 
+	if (ObstaclePoints.size() == 0) { // áŠQ•¨‚ÌŒó•â‚ª‚È‚¢ê‡‚Í–•E
+		nextTile(obstacleState,numbers);
+		return obstacleState;
+	}
+
 	// ˆÊ’u‚²‚Æ‚É•ª‚¯‚é
 	vector<vector<ImageXZcoordinate>> ObstaclePositions;
 	ObstaclePositions.push_back(vector<ImageXZcoordinate>{ObstaclePoints[0]});
@@ -63,11 +113,10 @@ obstacleState ColorSensor2::obstacle()
 	}
 
 	// ÀÛ‚Ì¢ŠE‚ÌÀ•W‚É•ÏŠ·
-	obstacleState obstacleState;
 	for (auto& Positions : ObstaclePositions) {
 		if (Positions.size() > 2) { // 2“_ˆÈ‰º‚Ìê‡‚Í–³‹
 			obstacleState.obstaclePositionsStart.push_back(convertImageXZtoXZ_start(Positions.begin()));
-			cout << "start Image: "<< Positions.begin()->x << ", " << Positions.begin()->z << endl;
+			cout << "start Image: " << Positions.begin()->x << ", " << Positions.begin()->z << endl;
 			obstacleState.obstaclePositionsEnd.push_back(convertImageXZtoXZ_end(Positions.back()));
 			cout << "end Image: " << Positions.back().x << ", " << Positions.back().z << endl;
 		}
@@ -75,18 +124,16 @@ obstacleState ColorSensor2::obstacle()
 
 	// Å‚à‹ß‚¢“_‚ğ’T‚·
 	for (int i = 0; i < obstacleState.obstaclePositionsStart.size(); i++) {
-		XZcoordinate last_closest = {1000,1000};
+		XZcoordinate last_closest = { 1000,1000 };
 		for (auto pointNum : numbers) {
 			XZcoordinate p = lidar2.readPoint(pointNum);
 			if (p.x >= obstacleState.obstaclePositionsStart[i].x && p.x <= obstacleState.obstaclePositionsEnd[i].x &&
-					p.z < last_closest.z) {
+				p.z < last_closest.z) {
 				last_closest = p;
 			}
 		}
 		obstacleState.closestPoint.push_back(last_closest);
 	}
-
-	cv::imwrite("output_image.png", transformedImage);
 
 	for (auto& start : obstacleState.obstaclePositionsStart) {
 		cout << "start: " << start.x << ", " << start.z << endl;
@@ -98,5 +145,6 @@ obstacleState ColorSensor2::obstacle()
 		cout << "closest: " << closest.x << ", " << closest.z << endl;
 	}
 
+	nextTile(obstacleState,numbers);
 	return obstacleState;
 }

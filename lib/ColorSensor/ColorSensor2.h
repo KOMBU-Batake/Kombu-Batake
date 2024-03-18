@@ -15,7 +15,7 @@ struct obstacleState {
 	bool leftHoleState;
 	bool rightHoleState;
 
-	obstacleState() = default;
+	obstacleState() : leftHoleState(false), rightHoleState(false) {}
 };
 
 class ColorSensor2 :
@@ -75,6 +75,8 @@ public:
 	obstacleState obstacle();
 
 private:
+	void nextTile(obstacleState& state, vector<int>& numbers);
+
 	ColorHSV convertRGBtoHSV(Vec4b pixel) {
 		ColorHSV hsv = { 512.0,0,0 };
 		ColorRGB RGB = { pixel[2], pixel[1], pixel[0] };
@@ -134,7 +136,7 @@ private:
 			squaredDifferencesSum += difference * difference;
 		}
 
-		// •ªŽU
+		// •ªŽU‚ð•Ô‚·
 		return squaredDifferencesSum / data.size();
 	}
 
