@@ -1,5 +1,7 @@
 #pragma once
 
+/* 1ピクセルカラーセンサ用のクラス */
+
 #include <opencv2/opencv.hpp>
 #include <webots/Robot.hpp>
 #include <webots/Camera.hpp>
@@ -157,12 +159,6 @@ public:
 
 	ColorRGB RGB = { 0,0,0 };
 protected:
-	// 落とし穴と普通の床、チェックポイントタイルの定義は別で特別に行ふ
-	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // 許容誤差はとりま5 実験では2未満
-	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };
-	ColorRange swampRange= { 40, 5, 53, 5, 197, 5 };
-	ColorRange greenRange = { 120, 5, 87, 5, 244, 5 };
-	ColorRange redRange = { 0, 5, 77, 5, 248, 5 };
 
 	bool isTheColor(const ColorRange& range, const ColorHSV& hsv) {
 		if (abs(hsv.hue - range.hue) <= range.hue_diff && abs(hsv.saturation - range.saturation) <= range.saturation_diff && abs(hsv.value - range.value) <= range.value_diff) {
@@ -182,6 +178,11 @@ protected:
 		{Colors::SWAMP, TileState::SWAMP},
 	};
 
-	double VerticalViewingAngle = atan(5/(sqrt(89)*cos(1/2))); // 垂直視野角
-	double HorizontalViewingAngle = atan(8 / (sqrt(89) * cos(1 / 2))); // 水平視野角
+private:
+	// 落とし穴と普通の床、チェックポイントタイルの定義は別で特別に行ふ
+	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // 許容誤差はとりま5 実験では2未満
+	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };
+	ColorRange swampRange = { 40, 5, 53, 5, 197, 5 };
+	ColorRange greenRange = { 120, 5, 87, 5, 244, 5 };
+	ColorRange redRange = { 0, 5, 77, 5, 248, 5 };
 };

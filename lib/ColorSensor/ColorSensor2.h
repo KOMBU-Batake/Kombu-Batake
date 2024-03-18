@@ -1,13 +1,20 @@
 #pragma once
+
+/* フルサイズカメラ用のクラス
+ * ColorSensorクラスを継承している 
+ */
+
 #include <numeric>
 #include "ColorSensor.h"
 using namespace cv;
 
-enum class HoleState {
-	NO_HOLE,
-	LEFT_HOLE,
-	RIGHT_HOLE,
-	BOTH_HOLE,
+struct obstacleState {
+	vector<XZcoordinate> obstaclePositionsStart;
+	vector<XZcoordinate> obstaclePositionsEnd;
+	bool leftHoleState;
+	bool rightHoleState;
+
+	obstacleState() = default;
 };
 
 class ColorSensor2 :
@@ -64,7 +71,7 @@ public:
 		return TileState::OTHER;
 	}
 
-	XZcoordinate obstacle();
+	obstacleState obstacle();
 
 private:
 	ColorHSV convertRGBtoHSV(Vec4b pixel) {
@@ -130,7 +137,7 @@ private:
 		return squaredDifferencesSum / data.size();
 	}
 
-	Mat inputImage;
+	Mat inputImage, transformedImage;
 
 	ColorRange blueRange = { 240, 5, 80, 5, 232, 5 };
 	ColorRange purpleRange = { 266, 5, 75, 5, 185, 5 };

@@ -6,34 +6,24 @@
 #include "../lib/devices.h"
 
 int main(int argc, char **argv) {
-
-  cout << "start" << endl;
-  cout << robot->getTime() << endl;
-
   try
   {
     // ƒfƒoƒCƒX‚Ì—LŒø‰»
     enableDevices();
 
+    cout << "start: " << robot->getTime() << endl;
+
     // [‚³—Dæ’Tõ
     //DFS();
-    tank.gpsTrace(gps.moveTiles(1, 0), 3);
-    tank.setDireciton(180, 3);
-    colorsensor.update();
-    cout << "left Color: " << (int)colorsensor.getLeftColor() << endl;
-    cout << "right Color: " << (int)colorsensor.getRightColor() << endl;
-    
-    colorCam->saveImage("0.png", 100);
-    for (int i = 1; i <= 7; i++) {
-      tank.gpsTrace(gps.moveTiles(0, -2), 3);
-      cout << "--------" << endl;
-      colorsensor.update();
-      cout << "left Color: " << (int)colorsensor.getLeftColor() << endl;
-      cout << "right Color: " << (int)colorsensor.getRightColor() << endl;
-      string filename = to_string(i) + ".png";
-      colorCam->saveImage(filename, 100);
-    }
 
+    tank.setDireciton(180, 3);
+    colorCam->saveImage("1.png", 100);
+    lidar2.update(gps.expectedPos);
+    colorsensor.update();
+    colorsensor.obstacle();
+
+    cout << "end: " << robot->getTime() << endl;
+    delete robot;
   }
   catch (...)
   {
@@ -43,9 +33,5 @@ int main(int argc, char **argv) {
     //sendMap(mapper.map_A);
   }
 
-  cout << robot->getTime() << endl;
-  cout << "end" << endl;
-
-  delete robot;
   return 0; // ‚Î‚¢‚Î‚¢`
 }
