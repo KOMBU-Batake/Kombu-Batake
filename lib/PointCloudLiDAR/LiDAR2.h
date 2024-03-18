@@ -101,10 +101,15 @@ public:
     return -1;
   }
 
-  vector<ImageXZcoordinate> getPositionOfImage();
+  vector<ImageXZcoordinate> getPositionOfImage(vector<int>& numbers);
+  vector<int> getNcmNumbers(const LiDAR_degree& direction, float range);
+
+  XZcoordinate readPoint(int16_t num) {
+    if (num < 0) num += 512;
+    return pointCloud[num % 512];
+  }
 
   void test() {
-    getPositionOfImage();
   }
 
 private:
@@ -151,17 +156,10 @@ private:
   WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints);
   cornerSet identifyCorner();
 
-  vector<int> getNcmNumbers(const LiDAR_degree& direction, float range);
-
   // getWallTypeを全方向呼び出してから使用する
   bool isClear(const LiDAR_degree& direction);
 
   void printLeftRight(const NcmPoints& pointsSet);
-  
-  XZcoordinate readPoint(int16_t num) {
-    if (num < 0) num += 512;
-    return pointCloud[num%512];
-  }
 
   float calculateAngle(const XZcoordinate& p1, const XZcoordinate& p2, const XZcoordinate& p3) {
     XZcoordinate ab, ac;

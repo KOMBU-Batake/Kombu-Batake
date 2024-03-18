@@ -11,6 +11,7 @@ using namespace cv;
 struct obstacleState {
 	vector<XZcoordinate> obstaclePositionsStart;
 	vector<XZcoordinate> obstaclePositionsEnd;
+	vector<XZcoordinate> closestPoint;
 	bool leftHoleState;
 	bool rightHoleState;
 

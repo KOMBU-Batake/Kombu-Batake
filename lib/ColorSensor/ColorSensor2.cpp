@@ -4,8 +4,8 @@ static XZcoordinate convertImageXZtoXZ_start(vector<ImageXZcoordinate>::iterator
 	return XZcoordinate{ -6.0f + (12.0f / 37.0f) * (float)(p->x - 24), 18.0f - (12.0f / 37.0f) * p->z };
 }
 
-static XZcoordinate convertImageXZtoXZ_end(vector<ImageXZcoordinate>::iterator p) {
-	return XZcoordinate{ -6.0f + (12.0f / 37.0f) * (p->x - 23), 18.0f - (12.0f / 37.0f) * (p->z + 1) };
+static XZcoordinate convertImageXZtoXZ_end(ImageXZcoordinate& p) {
+	return XZcoordinate{ -6.0f + (12.0f / 37.0f) * (p.x - 23), 18.0f - (12.0f / 37.0f) * (p.z + 1) };
 }
 
 obstacleState ColorSensor2::obstacle()
@@ -24,7 +24,8 @@ obstacleState ColorSensor2::obstacle()
 	//Ë‰e•ÏŠ·‘æ‚Rˆø”‚Í•ÏŠ·s—ñ
 	cv::warpPerspective(transformedImage, transformedImage, pmat, transformedImage.size(), cv::INTER_NEAREST);
 
-	vector<ImageXZcoordinate> LiDARPoints = lidar2.getPositionOfImage();
+	vector<int> numbers = lidar2.getNcmNumbers(LiDAR_degree::FRONT, 12); // 12cm‚Ì”ÍˆÍ‚Å‚Ì“_‚Ì”Ô†‚ğæ“¾
+	vector<ImageXZcoordinate> LiDARPoints = lidar2.getPositionOfImage(numbers);
 	vector<ImageXZcoordinate> ObstaclePoints;
 	int last_updated_num = -10;
 	for (int i = 0; i < LiDARPoints.size(); i++) {
@@ -57,16 +58,32 @@ obstacleState ColorSensor2::obstacle()
 		}
 		else {
 			ObstaclePositions.push_back(vector<ImageXZcoordinate>{ObstaclePoints[i]});
+			cout << "new" << endl;
 		}
 	}
 
 	// ÀÛ‚Ì¢ŠE‚ÌÀ•W‚É•ÏŠ·
 	obstacleState obstacleState;
 	for (auto& Positions : ObstaclePositions) {
-		if (Positions.size() > 2) {
+		if (Positions.size() > 2) { // 2“_ˆÈ‰º‚Ìê‡‚Í–³‹
 			obstacleState.obstaclePositionsStart.push_back(convertImageXZtoXZ_start(Positions.begin()));
-			obstacleState.obstaclePositionsEnd.push_back(convertImageXZtoXZ_end(Positions.end()));
+			cout << "start Image: "<< Positions.begin()->x << ", " << Positions.begin()->z << endl;
+			obstacleState.obstaclePositionsEnd.push_back(convertImageXZtoXZ_end(Positions.back()));
+			cout << "end Image: " << Positions.back().x << ", " << Positions.back().z << endl;
 		}
+	}
+
+	// Å‚à‹ß‚¢“_‚ğ’T‚·
+	for (int i = 0; i < obstacleState.obstaclePositionsStart.size(); i++) {
+		XZcoordinate last_closest = {1000,1000};
+		for (auto pointNum : numbers) {
+			XZcoordinate p = lidar2.readPoint(pointNum);
+			if (p.x >= obstacleState.obstaclePositionsStart[i].x && p.x <= obstacleState.obstaclePositionsEnd[i].x &&
+					p.z < last_closest.z) {
+				last_closest = p;
+			}
+		}
+		obstacleState.closestPoint.push_back(last_closest);
 	}
 
 	cv::imwrite("output_image.png", transformedImage);
@@ -76,6 +93,9 @@ obstacleState ColorSensor2::obstacle()
 	}
 	for (auto& end : obstacleState.obstaclePositionsEnd) {
 		cout << "end: " << end.x << ", " << end.z << endl;
+	}
+	for (auto& closest : obstacleState.closestPoint) {
+		cout << "closest: " << closest.x << ", " << closest.z << endl;
 	}
 
 	return obstacleState;

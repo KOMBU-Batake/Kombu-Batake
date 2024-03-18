@@ -527,8 +527,7 @@ vector<StraightLine> LiDAR2::getNcmLines(XZcoordinate center, const LiDAR_degree
   return lines;
 }
 
-vector<ImageXZcoordinate> LiDAR2::getPositionOfImage() {
-  vector<int> numbers = getNcmNumbers(LiDAR_degree::FRONT, 12); // 12cm‚Ì”ÍˆÍ‚Å‚Ì“_‚Ì”Ô†‚ğæ“¾
+vector<ImageXZcoordinate> LiDAR2::getPositionOfImage(vector<int>& numbers) {
   vector<float> x_range_start(37), z_range_start(41), x_range_end(37), z_range_end(41);
   for (int i = 0; i < 37; i++) {
     x_range_start[i] = -6 + (12.0f / 37.0f) * i;
