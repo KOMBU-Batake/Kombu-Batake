@@ -128,32 +128,32 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 
 void MapperS::markAroundStatus(const aroundStatus& status, const double& angle)
 {
-	MapAddress currentTile_L = convertAtoListPoint(currentTile_A);
+	MapAddress currentTile_L = convertAtoListPoint(startTile_A);
 	vector<bool> around4 = { status.front, status.left, status.back, status.right };
 	if (abs(angle - 90) < 5) {
-		rotate(around4.rbegin(), around4.rbegin() + 1, around4.rend());
-		map_S[currentTile_L.z-1][currentTile_L.x+1] = status.front_left;
-		map_S[currentTile_L.z+1][currentTile_L.x+1] = status.front_right;
+		rotate(around4.begin(), around4.begin() + 1, around4.end());
+		map_S[currentTile_L.z - 1][currentTile_L.x + 1] = status.front_left;
+		map_S[currentTile_L.z + 1][currentTile_L.x + 1] = status.front_right;
 	}
 	else if (abs(angle - 180) < 5) {
 		// ‚»‚Ì‚Ü‚Ü
-		map_S[currentTile_L.z-1][currentTile_L.x-1] = status.front_left;
-		map_S[currentTile_L.z-1][currentTile_L.x+1] = status.front_right;
+		map_S[currentTile_L.z - 1][currentTile_L.x - 1] = status.front_left;
+		map_S[currentTile_L.z - 1][currentTile_L.x + 1] = status.front_right;
 	}
 	else if (abs(angle - 270) < 5) {
-		rotate(around4.begin(), around4.begin() + 1, around4.end());
-		map_S[currentTile_L.z+1][currentTile_L.x-1] = status.front_left;
-		map_S[currentTile_L.z-1][currentTile_L.x-1] = status.front_right;
+		rotate(around4.rbegin(), around4.rbegin() + 1, around4.rend());
+		map_S[currentTile_L.z + 1][currentTile_L.x - 1] = status.front_left;
+		map_S[currentTile_L.z - 1][currentTile_L.x - 1] = status.front_right;
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		rotate(around4.rbegin(), around4.rbegin() + 2, around4.rend());
-		map_S[currentTile_L.z+1][currentTile_L.x+1] = status.front_left;
-		map_S[currentTile_L.z+1][currentTile_L.x-1] = status.front_right;
+		rotate(around4.begin(), around4.begin() + 2, around4.end());
+		map_S[currentTile_L.z + 1][currentTile_L.x + 1] = status.front_left;
+		map_S[currentTile_L.z + 1][currentTile_L.x - 1] = status.front_right;
 	}
-	map_S[currentTile_L.z-1][currentTile_L.x] = around4[0];
-	map_S[currentTile_L.z][currentTile_L.x+1] = around4[1];
-	map_S[currentTile_L.z+1][currentTile_L.x] = around4[2];
-	map_S[currentTile_L.z][currentTile_L.x-1] = around4[3];
+	map_S[currentTile_L.z - 1][currentTile_L.x] = around4[0];
+	map_S[currentTile_L.z][currentTile_L.x + 1] = around4[3];
+	map_S[currentTile_L.z + 1][currentTile_L.x] = around4[2];
+	map_S[currentTile_L.z][currentTile_L.x - 1] = around4[1];
 }
 
 /* ’TõŒó•â’T‚µ‚ÆA”Žš‚Ì‘‚«ž‚Ý
