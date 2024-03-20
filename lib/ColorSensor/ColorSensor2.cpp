@@ -41,11 +41,9 @@ void ColorSensor2::nextTile(obstacleState& state, vector<int>& numbers)
 			rightFloorBrightness[(i - 23) * 3 + (j - 36)] = max(pixel[0], max(pixel[1], pixel[2]));
 		}
 	}
-	if (calculateVariance(rightFloorBrightness) == 0) {
-		if (rightFloorBrightness[0] == 30) {
-			state.rightHoleState = true;
-			cout << "right hole" << endl;
-		}
+	if (calculateVariance(rightFloorBrightness) == 0 && rightFloorBrightness[0] == 30) {
+		state.rightHoleState = true;
+		cout << "right hole" << endl;
 	}
 }
 
@@ -91,7 +89,7 @@ obstacleState ColorSensor2::obstacle()
 		}
 		if (diff_count > 3) continue; // 変化する回数が多い場合はチェックポイントタイル
 		ObstaclePoints.push_back(LiDARPoints[i]);
-		cout << LiDARPoints[i].z << ", " << LiDARPoints[i].x - 3 << ", saturation: " << convertRGBtoHSV(topPixel).saturation << endl;
+		//cout << LiDARPoints[i].z << ", " << LiDARPoints[i].x - 3 << ", saturation: " << convertRGBtoHSV(topPixel).saturation << endl;
 	}
 
 	if (ObstaclePoints.size() == 0) { // 障害物の候補がない場合は抹殺
@@ -108,7 +106,6 @@ obstacleState ColorSensor2::obstacle()
 		}
 		else {
 			ObstaclePositions.push_back(vector<ImageXZcoordinate>{ObstaclePoints[i]});
-			cout << "new" << endl;
 		}
 	}
 
@@ -116,9 +113,9 @@ obstacleState ColorSensor2::obstacle()
 	for (auto& Positions : ObstaclePositions) {
 		if (Positions.size() > 2) { // 2点以下の場合は無視
 			obstacleState.obstaclePositionsStart.push_back(convertImageXZtoXZ_start(Positions.begin()));
-			cout << "start Image: " << Positions.begin()->x << ", " << Positions.begin()->z << endl;
+			//cout << "start Image: " << Positions.begin()->x << ", " << Positions.begin()->z << endl;
 			obstacleState.obstaclePositionsEnd.push_back(convertImageXZtoXZ_end(Positions.back()));
-			cout << "end Image: " << Positions.back().x << ", " << Positions.back().z << endl;
+			//cout << "end Image: " << Positions.back().x << ", " << Positions.back().z << endl;
 		}
 	}
 

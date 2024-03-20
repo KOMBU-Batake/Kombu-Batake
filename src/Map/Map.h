@@ -12,8 +12,9 @@
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../../lib/ColorSensor/ColorSensor2.h"
+#include "MapForSearch.h"
 
-/* 提出用のマップを作りつつ、DFSにも利用するよ
+/* 提出用のマップを作るよ
  * 
  * 座標の変数名の末尾に_AがついているものはABSOLUTEつまり絶対座標を
  * _RがついているものはRELATIVEつまり相対座標を表すよ
@@ -22,6 +23,7 @@
  * なので絶対座標は負の値を取りえないが、相対座標は負の値を取ることがある
  * 
  * リスト内でのx,zは基本的に絶対的な値だけを使う
+ * MapForSearch.hで探索用のマップ?を作る
  */
 
 using namespace webots;
@@ -29,19 +31,11 @@ using namespace std;
 
 extern Robot* robot;
 extern GlobalPositioningSystem gps;
+extern MapperS mapperS;
 
 extern int timeStep;
 
 typedef struct MapAddress MapAddress;
-
-struct MapAddress {
-	int x;
-	int z;
-
-	bool operator==(const MapAddress& other) const {
-		return x == other.x && z == other.z;
-	}
-};
 
 enum class VictimState {
 	H, // 重度の被災者

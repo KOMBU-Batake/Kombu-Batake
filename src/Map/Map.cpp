@@ -5,6 +5,7 @@ void Map::updatePostion(int dx_R, int dz_R) {
 	currentTile_R.z += dz_R;
 	currentTile_A.x += dx_R;
 	currentTile_A.z += dz_R;
+	mapperS.updatePostion(dx_R, dz_R);
 	// マップ範囲外の場合は拡張
 	if (currentTile_R.x < left_top_R.x) {
 		addWest(left_top_R.x - currentTile_R.x);
@@ -29,6 +30,7 @@ void Map::addNorth(const int i) { // 上に追加
 	startTile_A.z += 2;
 	currentTile_A.z += 2;
 	left_top_R.z -= 2;
+	mapperS.addNorth(i);
 }
 
 void Map::addSouth(const int i) { // 下に追加
@@ -36,6 +38,7 @@ void Map::addSouth(const int i) { // 下に追加
 	//cout << "map_A.size() = " << map_A.size() << endl;
 	map_A.resize(map_A.size() + 4 * i, vector<string>(map_A[0].size(), "-"));
 	right_bottom_R.z += 2;
+	mapperS.addSouth(i);
 }
 
 void Map::addWest(const int j) { // 左に追加
@@ -50,6 +53,7 @@ void Map::addWest(const int j) { // 左に追加
 	startTile_A.x += 2;
 	currentTile_A.x += 2;
 	left_top_R.x -= 2;
+	mapperS.addWest(j);
 }
 
 void Map::addEast(const int j) { // 右に追加
@@ -58,6 +62,7 @@ void Map::addEast(const int j) { // 右に追加
 		map_A[i].resize(map_A[i].size() + 4 * j, "-");
 	}
 	right_bottom_R.x += 2;
+	mapperS.addEast(j);
 }
 
 void Map::printMap() {

@@ -549,7 +549,7 @@ vector<ImageXZcoordinate> LiDAR2::getPositionOfImage(vector<int>& numbers) {
         if (z == -1) continue;
         optimizedNumbers.push_back(number);
         optimizedPoints.push_back({ i + 24, z });
-        cout << number << ": " << i + 24 << "," << z << endl;
+        //cout << number << ": " << i + 24 << "," << z << endl;
         last_num = i;
         break;
       }

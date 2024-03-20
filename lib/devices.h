@@ -71,7 +71,7 @@ Map mapper;
 PointCloudLiDAR pcLiDAR;
 MyCam myCam;
 LiDAR2 lidar2;
-//MyMath myMath;
+MapperS mapperS;
 
 void delay(int ms) {
 	float initTime = (float)robot->getTime();	// Store starting time (in seconds)

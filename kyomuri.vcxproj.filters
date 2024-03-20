@@ -139,6 +139,9 @@
     <ClCompile Include="lib\ColorSensor\ColorSensor2.cpp">
       <Filter>lib\ColorSensor</Filter>
     </ClCompile>
+    <ClCompile Include="src\Map\MapForSearch.cpp">
+      <Filter>src\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="default">
@@ -223,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="lib\ColorSensor\ColorSensor2.h">
       <Filter>lib\ColorSensor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Map\MapForSearch.h">
+      <Filter>src\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

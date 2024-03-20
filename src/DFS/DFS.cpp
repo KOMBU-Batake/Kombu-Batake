@@ -277,8 +277,7 @@ void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool
 	}
 }
 
-void sendMap(vector<vector<string>>& map)
-{
+void sendMap(vector<vector<string>>& map) { // malloc‚ðŽg‚Á‚Ä‚é‚Ì‚ª—Ç‚­‚È‚¢‚Ë
 	int width = (int)map.size();
 	int height = (int)map[0].size();
 	string flattened = "";
