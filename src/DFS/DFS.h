@@ -63,7 +63,7 @@ struct NEWSset {
 };
 
 struct stackDFS {
-	MapAddress center;
+	MapAddress center = {0,0};
 	vector<MapAddress> Go;
 	vector<MapAddress> PartlyVisited;
 	vector<MapAddress> diagonal;
@@ -74,9 +74,7 @@ void DFS();
 canGo judgeCanGo(const vector<TileState>& tileState, const bool canGo);
 bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& front, const canGo& left, const canGo& right, const canGo& back, const canGo& front_left, const canGo& front_right);
 MapAddress pickSatckDFS(vector<stackDFS>& stack);
-
-// マップデータとLiDARを基に進行方向を決定する エリア1飲みに対応
-NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dontStack);
+void removeFromStackDFS(vector<stackDFS>& stack, const MapAddress& address);
 
 static void HoleIsThere(const double& angle);
 static void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack);

@@ -203,7 +203,7 @@ public:
 				if (!existTile_R({ addr_R.x - 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 3]] }; // “ì¼
 			}
-			else if (direction == LiDAR_degree::FRONT_LEFT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360) ||
+			else if (direction == LiDAR_degree::FRONT_LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
 							 direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 90)) {
 				if (!existTile_R({ addr_R.x + 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 3]] }; // “ì“Œ
@@ -214,28 +214,28 @@ public:
 			}
 		}
 
-		if (direction == LiDAR_degree::FRONT && abs(angle - 180) < 5 ||
-				direction == LiDAR_degree::LEFT && abs(angle - 90) < 5 ||
-				direction == LiDAR_degree::BACK && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360) ||
-				direction == LiDAR_degree::RIGHT && abs(angle - 270) < 5) {
+		if ((direction == LiDAR_degree::FRONT && abs(angle - 180) < 5) ||
+				(direction == LiDAR_degree::LEFT && abs(angle - 90) < 5) ||
+				(direction == LiDAR_degree::BACK && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(direction == LiDAR_degree::RIGHT && abs(angle - 270) < 5)) {
 			if (!existTile_R({ addr_R.x,addr_R.z-2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 			return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x - 1]],TileStateMap2[map_A[addr_L.z - 3][addr_L.x + 1]] }; // –k
 		}
-		else if (direction == LiDAR_degree::FRONT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360) ||
+		else if (direction == LiDAR_degree::FRONT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
 				direction == LiDAR_degree::LEFT && abs(angle - 270) < 5 ||
 				direction == LiDAR_degree::BACK && abs(angle - 180) < 5 ||
 				direction == LiDAR_degree::RIGHT && abs(angle - 90) < 5) {
-			if (!existTile_R({ addr_R.x,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+			if (!existTile_R({ addr_R.x,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };	
 			return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 1]],TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 1]] }; // “ì
 		}
 		else if (direction == LiDAR_degree::FRONT && abs(angle - 90) ||
-				direction == LiDAR_degree::LEFT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360) ||
+				direction == LiDAR_degree::LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
 				direction == LiDAR_degree::BACK && abs(angle - 270) < 5 ||
 				direction == LiDAR_degree::RIGHT && abs(angle - 180) < 5) {
 			if (!existTile_R({ addr_R.x + 2,addr_R.z })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 			return { TileStateMap2[map_A[addr_L.z - 1][addr_L.x + 3]],TileStateMap2[map_A[addr_L.z + 1][addr_L.x + 3]] }; // “Œ
 		}
-		else if (direction == LiDAR_degree::FRONT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360) ||
+		else if (direction == LiDAR_degree::FRONT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
 				direction == LiDAR_degree::LEFT && abs(angle - 180) < 5 ||
 				direction == LiDAR_degree::BACK && abs(angle - 90) ||
 				direction == LiDAR_degree::RIGHT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {

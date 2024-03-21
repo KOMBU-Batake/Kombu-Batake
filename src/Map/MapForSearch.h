@@ -51,6 +51,23 @@ public:
 	vector<MapAddress> getRoute(MapAddress& Goal, const vector<MapAddress>& stack_of_DFS);
 
 	void markAroundStatus(const aroundStatus& status, const double& angle);
+
+	void printMap() {
+		MapAddress addr_List = convertRtoListPoint(currentTile_R);
+// マップの表示
+		for (int i = 0; i < map_S.size(); i++) {
+			for (int j = 0; j < map_S[0].size(); j++) {
+				if (j == addr_List.x && i == addr_List.z) {
+					cout << "R ";
+				}
+				else {
+					cout << map_S[i][j] << " ";
+				}
+			}
+			cout << endl;
+		}
+	
+	}
 private:
 	vector<vector<int>> map_S = vector<vector<int>>(5, vector<int>(5, 0));
 

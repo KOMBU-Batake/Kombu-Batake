@@ -3,12 +3,12 @@
 #include <corecrt_math_defines.h>
 
 enum class canGo {
-  GO,
-  GO_leftO,
-  GO_rightO,
-  NO,
-  VISITED,
-  PARTLY_VISITED,
+  GO, // 0
+  GO_leftO, // 1
+  GO_rightO, // 2
+  NO, // 3
+  VISITED, // 4
+  PARTLY_VISITED, // 5
 };
 
 // ^‚ñ’†‚Íleft‚Ì––”ö‚É‚ ‚é
@@ -24,7 +24,7 @@ struct NcmPoints {
 
   XZcoordinate read(int num) {
     if (num > count_left) {
-      return model_right[num-count_left];
+      return model_right[num-count_left-1];
     }
     else return model_left[num];
   }
@@ -204,13 +204,15 @@ private:
   float Variance(vector<XZcoordinate>::iterator startIt, vector<XZcoordinate>::iterator endIt, int start, int end){
     // ZŽ²•ûŒü‚Ì•½‹Ï
     float sumZ = 0.0f;
-    for (auto it = startIt; it != endIt + 1; ++it) sumZ += it->z;
+    for (auto it = startIt; it != endIt + 1; ++it) {
+      sumZ += it->z;
+    }
     // 2æ‚Ì•½‹Ï
     float sumZpow2 = 0.0f;
     for (auto it = startIt; it != endIt + 1; ++it) sumZpow2 += (float)pow(it->z,2);
     // •ªŽU
     float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
-    //std::cout << "variance: " << variance << endl;
+    std::cout << "variance: " << variance << endl;
     return variance;
   }
 

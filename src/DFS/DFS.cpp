@@ -4,17 +4,29 @@ void DFS() {
 	vector<stackDFS> stack;
 	vector<MapAddress> footprints = {mapper.currentTile_R};
 	int tail = -1;
-	
+	colorsensor.update();
+	obstacleState obstacle = colorsensor.obstacle();
+
 	mapper.printMap();
+	cout << "DFS" << endl;
+	int count_DFS = 0;
 	while (robot->step(timeStep) != -1) {
+		count_DFS++;
+		cout << "count DFS: " << count_DFS << endl;
 		// 角度(方位)を取得
 		double angle = gyro.getGyro();
 
 		// 壁の情報を取得
+		lidar2.update(gps.expectedPos);
 		WallSet front_mp = lidar2.getWallType(LiDAR_degree::FRONT);
 		WallSet back_mp = lidar2.getWallType(LiDAR_degree::BACK);
 		WallSet left_mp = lidar2.getWallType(LiDAR_degree::LEFT);
+		cout << "left reutrn" << endl;
 		WallSet right_mp = lidar2.getWallType(LiDAR_degree::RIGHT);
+		cout << "front: " << (int)front_mp.left << " " << (int)front_mp.center << " " << (int)front_mp.right << " / ";
+		cout << "back: " << (int)back_mp.left << " " << (int)back_mp.center << " " << (int)back_mp.right << " / ";
+		cout << "left: " << (int)left_mp.left << " " << (int)left_mp.center << " " << (int)left_mp.right << " / ";
+		cout << "right: " << (int)right_mp.left << " " << (int)right_mp.center << " " << (int)right_mp.right << endl;
 		// 壁を提出用マップに登録
 		if (abs(angle - 90) < 5) {
 			mapper.markAroundWall(left_mp, right_mp, back_mp, front_mp);
@@ -30,12 +42,23 @@ void DFS() {
 		}
 		mapper.printMap();
 
+		// 側面カメラで落とし穴の確認
+		myCam.update();
+		vector<bool> left_hole = myCam.leftHole();
+		vector<bool> right_hole = myCam.rightHole();
+
 		// 進める方向を探す
 		canGoSet cango_set = lidar2.identifyCanGo();
 		// 斜めの選択肢を吟味
 		if ((int)cango_set.front < 3 || (int)cango_set.left < 3) cango_set.front_left = canGo::NO;
 		if ((int)cango_set.front < 3 || (int)cango_set.right < 3) cango_set.front_right = canGo::NO;
-		// 探索用マップに記録
+
+		// 落とし穴の考慮
+		if (obstacle.leftHoleState || obstacle.rightHoleState) cango_set.front = canGo::NO;
+		if (left_hole[0] || left_hole[1]) cango_set.left = canGo::NO;
+		if (right_hole[0] || right_hole[1]) cango_set.right = canGo::NO;
+
+		// 探索用マップに記録 後ろには書き込まない(落とし穴の確認ができないから)
 		mapperS.markAroundStatus({ (int)cango_set.front < 3,
 															 (int)cango_set.left < 3,
 															 (int)cango_set.right < 3,
@@ -62,35 +85,59 @@ void DFS() {
 		canGo canGoFrontRight = judgeCanGo(front_right_tile, (int)cango_set.front_right < 3);
 
 		bool hasStack = addToStackDFS(stack, angle, canGoFront, canGoLeft, canGoRight, canGoBack, canGoFrontLeft, canGoFrontRight);
+		if (stack.size() == 0) {
+			break;
+		}
 		MapAddress nextTile = pickSatckDFS(stack);
+		cout << "nextTile: " << nextTile.x << " " << nextTile.z << endl;
+		if (nextTile.x == 123456789) { // スタックが空になったら終了
+			break;
+		}
 
 		// 進む
 		vector<MapAddress> route = mapperS.getRoute(nextTile, footprints);
+		bool isHole = false;
 		for (auto& tile : route) {
 			if (tile == *route.begin()) continue;
-
+			int dx, dz;
+			dx = tile.x - mapper.currentTile_R.x;
+			dz = tile.z - mapper.currentTile_R.z;
+			isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST);
+			angle = gyro.getGyro();
+			if (isHole) {
+				mapper.updatePostion(angle);
+				footprints.push_back(mapper.currentTile_R);
+			}
 		}
-
-		//// 被災者
-		//mapper.printMap();
-		//cout << "stack size. " << stack.size() << " ========================================" << endl;
-		//bool isHole = false;
-		//if (direction_of_travel == NEWS::NORTH) {
-		//	isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4.5);
-		//}
-		//else  if (direction_of_travel == NEWS::EAST) {
-		//	isHole = tank.gpsTrace(gps.moveTiles(1, 0), 4.5);
-		//}
-		//else if (direction_of_travel == NEWS::SOUTH) {
-		//	isHole = tank.gpsTrace(gps.moveTiles(0, 1), 4.5);
-		//}
-		//else if (direction_of_travel == NEWS::WEST) {
-		//	isHole = tank.gpsTrace(gps.moveTiles(-1, 0), 4.5);
-		//}
-		//else if (direction_of_travel == NEWS::NO) {
-		//	cout << "No way to go" << endl;
-		//	break;
-		//}
+		if (!isHole) {
+			HoleIsThere(angle);
+		}
+		cout << "======================" << endl;
+		// 斜めにやってきた場合は修正
+		if (!(abs(angle - 90) < 5 ||
+			abs(angle - 180) < 5 ||
+			abs(angle - 270) < 5 ||
+			(angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) {
+			// 修正
+			cout << "fixing angle" << endl;
+			vector<float> tmp = { 0,90,180,270,360 };
+			auto min = min_element(tmp.begin(), tmp.end(), [&angle](float a, float b) { return abs(a - angle) < abs(b - angle); });
+			tank.setDireciton(*min, 4);
+			angle = gyro.getGyro();
+		}
+		colorsensor.update();
+		TileState left_col = colorsensor.getLeftColor();
+		colorsensor.getRightColor();
+		obstacle = colorsensor.obstacle();
+		TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
+		if (recordedTile != TileState::START){
+			mapper.markTileAs(mapper.currentTile_R, left_col, angle);
+			// 被ったスタックの排除
+			removeFromStackDFS(stack, mapper.currentTile_R);
+		}
+		if (left_col == TileState::AREA1to4 || left_col == TileState::AREA3to4) {
+			//Area4IsThere(angle, tail, stack,dontStack);
+		}
 
 		//angle = gyro.getGyro();
 		//if (!isHole) {
@@ -115,15 +162,38 @@ void DFS() {
 		//	}
 		//}
 	}
+	vector<MapAddress> route = mapperS.getRoute(mapper.startTile_R, footprints);
+	bool isHole = false;
+	for (auto& tile : route) {
+		if (tile == *route.begin()) continue;
+		int dx, dz;
+		dx = tile.x - mapper.currentTile_R.x;
+		dz = tile.z - mapper.currentTile_R.z;
+		isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST);
+		double angle = gyro.getGyro();
+		if (isHole) {
+			break;
+		}
+	}
+
 	mapper.replaceLineTo0();
 	mapper.printMap();
 	sendMap(mapper.map_A);
+
+	char msg = 'M'; // Send map evaluate request
+	emitter->send(&msg, sizeof(msg));
+
+	while (robot->step(timeStep) != -1) {
+		msg = 'E'; // Send an Exit message to get Map Bonus
+		emitter->send(&msg, sizeof(msg));
+		tank.setVelocity(-1, 1);
+	}
 }
 
 MapAddress pickSatckDFS(vector<stackDFS>& stack)
 {
 	stackDFS top = stack.back();
-	MapAddress next;
+	MapAddress next = {123456789,123456789 };
 	// 斜め
 	if (top.diagonal.size() != 0) {
 		next = top.diagonal[0];
@@ -139,6 +209,10 @@ MapAddress pickSatckDFS(vector<stackDFS>& stack)
 	}
 	else {
 		stack.pop_back();
+		if (stack.size() == 0) {
+			cout << "stack is empty" << endl;
+			return next;
+		}
 		return pickSatckDFS(stack); // なかったら再起
 	}
 	return next;
@@ -182,6 +256,8 @@ bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& fr
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 		north = back; east = left; south = front; west = right, south_east = front_left, south_west = front_right;
 	}
+	//cout << "front: " << (int)front << " left: " << (int)left << " right: " << (int)right << " back: " << (int)back << " front_left: " << (int)front_left << " front_right: " << (int)front_right << endl;
+	//cout << "north: " << (int)north << " east: " << (int)east << " south: " << (int)south << " west: " << (int)west << " north_east: " << (int)north_east << " north_west: " << (int)north_west << " south_east: " << (int)south_east << " south_west: " << (int)south_west << endl;
 
 	if (north == canGo::GO) {
 		stackElement.Go.push_back({ mapper.currentTile_R.x, mapper.currentTile_R.z - 1 });
@@ -229,81 +305,26 @@ bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& fr
 	}
 }
 
-NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dontStack) {
-	PotentialDirectionsOfTravel PDoT = { canGo::NO,canGo::NO,canGo::NO,canGo::NO };
-	pcLiDAR.update(gps.expectedPos);
+void removeFromStackDFS(vector<stackDFS>& stack, const MapAddress& address)
+{
+	for (auto& stackElement : stack) {
+		for (auto& go : stackElement.Go) {
+			if (go == address) {
+				stackElement.Go.erase(remove(stackElement.Go.begin(), stackElement.Go.end(), address), stackElement.Go.end());
+			}
+		}
+		for (auto& partlyVisited : stackElement.PartlyVisited) {
+			if (partlyVisited == address) {
+				stackElement.PartlyVisited.erase(remove(stackElement.PartlyVisited.begin(), stackElement.PartlyVisited.end(), address), stackElement.PartlyVisited.end());
+			}
+		}
+		for (auto& diagonal : stackElement.diagonal) {
+			if (diagonal == address) {
+				stackElement.diagonal.erase(remove(stackElement.diagonal.begin(), stackElement.diagonal.end(), address), stackElement.diagonal.end());
+			}
+		}
+	}
 
-	WallSet front_mp,back_mp,left_mp,right_mp;
-	TileState front_tile, back_tile, left_tile, right_tile;
-
-	mapper.getAroundTileState(mapper.currentTile_R, front_tile, back_tile, left_tile, right_tile, angle); // マップ上での周囲のタイルの有無を取得
-	cout << "front tile: " << (int)front_tile << ", back tile: " << (int)back_tile << ", left tile: " << (int)left_tile << ", right tile: " << (int)right_tile << endl;
-
-	//searchFront(PDoT, front_mp, front_tile); // 前
-	//searchBack(PDoT, back_mp, back_tile); // 後ろ
-	//searchLeft(PDoT, left_mp, left_tile); // 左
-	//searchRight(PDoT, right_mp, right_tile); // 右
-
-	NEWSset directionNEWS = { canGo::NO,canGo::NO,canGo::NO,canGo::NO };
-	// 壁をマップに登録
-	if (abs(angle - 90) < 5) {
-		mapper.markAroundWall(left_mp, right_mp, back_mp, front_mp);
-		directionNEWS = { PDoT.left, PDoT.front, PDoT.right, PDoT.back };
-	}
-	else if (abs(angle - 180) < 5) {
-		mapper.markAroundWall(front_mp, back_mp, left_mp, right_mp);
-		directionNEWS = { PDoT.front, PDoT.right, PDoT.back, PDoT.left };
-	}
-	else if (abs(angle - 270) < 5) {
-		mapper.markAroundWall(right_mp, left_mp, front_mp, back_mp);
-		directionNEWS = { PDoT.right, PDoT.back, PDoT.left, PDoT.front };
-	}
-	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
-		directionNEWS = { PDoT.back, PDoT.left, PDoT.front, PDoT.right };
-	}
-	std::cout << "front: " << (int)PDoT.front << " back: " << (int)PDoT.back << " left: " << (int)PDoT.left << " right: " << (int)PDoT.right << endl;
-
-	// 進行方向の選択
-	// 北 -> 東 -> 南 -> 西 の順に優先する
-	if (directionNEWS.north == canGo::GO) {
-		return NEWS::NORTH;
-	}
-	else if (directionNEWS.east == canGo::GO) {
-		return NEWS::EAST;
-	}
-	else if (directionNEWS.south == canGo::GO) {
-		return NEWS::SOUTH;
-	}
-	else if (directionNEWS.west == canGo::GO) {
-		return NEWS::WEST;
-	}
-	else { // スタックを拾っていく
-		int tmp = (int)stack.size() - 2;
-		if (tmp < 0) {
-			cout << "reach 0" << endl;
-			return NEWS::NO;
-		}
-		MapAddress nextTile = stack[tmp];
-		cout << "tail; " << tail << endl;
-		dontStack = true;
-		stack.pop_back();
-		if (nextTile.x > mapper.currentTile_R.x) {
-			return NEWS::EAST;
-		}
-		else if (nextTile.x < mapper.currentTile_R.x) {
-			return NEWS::WEST;
-		}
-		else if (nextTile.z > mapper.currentTile_R.z) {
-			return NEWS::SOUTH;
-		}
-		else if (nextTile.z < mapper.currentTile_R.z) {
-			return NEWS::NORTH;
-		}
-		else {
-			return NEWS::NO;
-		}
-	}
 }
 
 /* 手前に半マス進めるか否か
@@ -342,25 +363,25 @@ void HoleIsThere(const double& angle)
 void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack) // チェックポイントタイルだけ踏んでやるHAHAHA
 {
 	if (abs(angle - 90) < 5) {
-		searchAround(angle, tail, stack, dontStack);
+		//searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
-		searchAround(angle, tail, stack, dontStack);
+		//searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(0, 1), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
-		searchAround(angle, tail, stack, dontStack);
+		//searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(1, 0), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		searchAround(angle, tail, stack, dontStack);
+		//searchAround(angle, tail, stack, dontStack);
 		tank.gpsTrace(gps.moveTiles(0, -1), 5);
 		double angleN = gyro.getGyro();
 		mapper.updatePostion(angleN);
@@ -388,12 +409,4 @@ void sendMap(vector<vector<string>>& map) { // mallocを使ってるのが良くないね
 	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
 
 	emitter->send(message, 8+(int)flattened.size()); // Send map data
-
-	char msg = 'M'; // Send map evaluate request
-	emitter->send(&msg, sizeof(msg));
-
-	while (robot->step(timeStep) != -1) {
-		msg = 'E'; // Send an Exit message to get Map Bonus
-		emitter->send(&msg, sizeof(msg));
-	}
 }

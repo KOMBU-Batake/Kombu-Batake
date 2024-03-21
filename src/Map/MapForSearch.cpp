@@ -58,24 +58,31 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 	MapAddress start_L = convertAtoListPoint(start_A);
 	MapAddress goal_A = convertRtoA(Goal_R);
 	MapAddress goal_L = convertAtoListPoint(goal_A);
+	cout << "goal_L: " << goal_L.x << " " << goal_L.z << endl;
 
 	// まずはスタックベースで経路を探す
   auto goal_it = find(stack_of_DFS.rbegin(), stack_of_DFS.rend(), Goal_R); // 直近で通ったGoalを探す
+	vector<MapAddress> stack_based_route_R;
+	int stack_based_route_R_size = 1000000000;
 	if (goal_it != stack_of_DFS.rend()) {
 		++goal_it; // イテレータをインクリメント
-	}
-	vector<MapAddress> route_stack(distance(stack_of_DFS.rbegin(),goal_it));
-	copy(stack_of_DFS.rbegin(), goal_it, route_stack.begin());
+		vector<MapAddress> route_stack(distance(stack_of_DFS.rbegin(), goal_it));
+		copy(stack_of_DFS.rbegin(), goal_it, route_stack.begin());
 
-	vector<MapAddress> stack_based_route_R = { route_stack[0]};
-	for (auto it = route_stack.begin() + 1; it != route_stack.end() - 1; ++it) {
-		auto it_second_tile = find(it+1, route_stack.end(), *it);
-		stack_based_route_R.push_back(*it);
-		if (it_second_tile != route_stack.end()) { // 見つかった
-			it = it_second_tile;
+		stack_based_route_R = { route_stack[0] };
+		int counta = 0;
+		for (auto it = route_stack.begin() + 1; it != route_stack.end() - 1; ++it) {
+			auto it_second_tile = find(it + 1, route_stack.end(), *it);
+			stack_based_route_R.push_back(*it);
+			if (it_second_tile != route_stack.end()) { // 見つかった
+				it = it_second_tile;
+			}
+			counta++;
+			cout << counta << endl;
 		}
+		stack_based_route_R.push_back(route_stack.back());
+		stack_based_route_R_size = (int)stack_based_route_R.size();
 	}
-	stack_based_route_R.push_back(route_stack.back());
 
 	// 幅優先探索
 	resetSearchPoint();
@@ -104,15 +111,16 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 						// 逆からたどる
 						count--;
 						deque<MapAddress> canGo = canGoNEWS(next, -1, count, false);
-						cout << "size: " << canGo.size() << ", count: " << count << ", center: " << next.x << " " << next.z << ", " << map_S[next.z][next.x] << endl;
+						//cout << "size: " << canGo.size() << ", count: " << count << ", center: " << next.x << " " << next.z << ", " << map_S[next.z][next.x] << endl;
 						next = canGo[0];
 						route_BFS_R.push_back(convertListPointtoR(next));
 					}
 					reverse(route_BFS_R.begin(), route_BFS_R.end());
 					for (auto& k : route_BFS_R) {
-						cout << k.x << " " << k.z << endl;
+						cout << k.x << "," << k.z << " / ";
 					}
-					if (stack_based_route_R.size() < route_BFS_R.size()) {
+					cout << endl;
+					if (stack_based_route_R_size < route_BFS_R.size()) {
 						return stack_based_route_R;
 					} else return route_BFS_R;
 				}
@@ -128,8 +136,9 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 
 void MapperS::markAroundStatus(const aroundStatus& status, const double& angle)
 {
-	MapAddress currentTile_L = convertAtoListPoint(startTile_A);
+	MapAddress currentTile_L = convertAtoListPoint(currentTile_R);
 	vector<bool> around4 = { status.front, status.left, status.back, status.right };
+	cout << around4[0] << around4[1] << around4[2] << around4[3] << endl;
 	if (abs(angle - 90) < 5) {
 		rotate(around4.begin(), around4.begin() + 1, around4.end());
 		map_S[currentTile_L.z - 1][currentTile_L.x + 1] = status.front_left;
@@ -150,10 +159,12 @@ void MapperS::markAroundStatus(const aroundStatus& status, const double& angle)
 		map_S[currentTile_L.z + 1][currentTile_L.x + 1] = status.front_left;
 		map_S[currentTile_L.z + 1][currentTile_L.x - 1] = status.front_right;
 	}
-	map_S[currentTile_L.z - 1][currentTile_L.x] = around4[0];
-	map_S[currentTile_L.z][currentTile_L.x + 1] = around4[3];
-	map_S[currentTile_L.z + 1][currentTile_L.x] = around4[2];
-	map_S[currentTile_L.z][currentTile_L.x - 1] = around4[1];
+	else cout << "unreliable angle at markAroundStatus" << endl;
+	// 後ろには書き込まない
+	if (! ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) map_S[currentTile_L.z - 1][currentTile_L.x] = around4[0]; // 上
+	if (! (abs(angle - 270) < 5)) map_S[currentTile_L.z][currentTile_L.x + 1] = around4[3]; // 右
+	if (! (abs(angle - 180) < 5)) map_S[currentTile_L.z + 1][currentTile_L.x] = around4[2]; // 下
+	if (! (abs(angle - 90 ) < 5)) map_S[currentTile_L.z][currentTile_L.x - 1] = around4[1]; // 左
 }
 
 /* 探索候補探しと、数字の書き込み
