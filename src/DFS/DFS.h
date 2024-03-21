@@ -34,18 +34,16 @@ extern MyCam myCam;
 
 extern int timeStep;
 
-enum class canGo {
-	GO,
-	NO,
-	VISITED,
-};
-
 // 情報を知らせるニュースじゃなくてN(orth), E(ast), W(est), S(outh)の略だよ。まぁニュースも一緒だけど
 enum class NEWS {
 	NORTH,
+	NORTH_EAST,
 	EAST,
+	SOUTH_EAST,
 	SOUTH,
+	SOUTH_WEST,
 	WEST,
+	NORTH_WEST,
 
 	NO,
 };
@@ -64,20 +62,22 @@ struct NEWSset {
 	canGo west;
 };
 
-struct DESelement {
-	MapAddress target;
-	NEWSset direction;
+struct stackDFS {
+	MapAddress center;
+	vector<MapAddress> Go;
+	vector<MapAddress> PartlyVisited;
+	vector<MapAddress> diagonal;
 };
 
 void DFS();
 
+canGo judgeCanGo(const vector<TileState>& tileState, const bool canGo);
+bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& front, const canGo& left, const canGo& right, const canGo& back, const canGo& front_left, const canGo& front_right);
+MapAddress pickSatckDFS(vector<stackDFS>& stack);
+
 // マップデータとLiDARを基に進行方向を決定する エリア1飲みに対応
 NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dontStack);
 
-static void searchFront(PotentialDirectionsOfTravel& PDoT, WallSet& front_mp, const TileState& front_tile);
-static void searchBack(PotentialDirectionsOfTravel& PDoT, WallSet& back_mp, const TileState& back_tile);
-static void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, const TileState& left_tile);
-static void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const TileState& right_tile);
 static void HoleIsThere(const double& angle);
 static void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack);
 static bool condirtion_canGo(const WallSet& wallset);

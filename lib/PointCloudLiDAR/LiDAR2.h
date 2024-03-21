@@ -2,6 +2,15 @@
 #include "PointCloudLiDAR.h"
 #include <corecrt_math_defines.h>
 
+enum class canGo {
+  GO,
+  GO_leftO,
+  GO_rightO,
+  NO,
+  VISITED,
+  PARTLY_VISITED,
+};
+
 // 真ん中はleftの末尾にある
 struct NcmPoints {
   vector<XZcoordinate> model_left;
@@ -64,11 +73,13 @@ struct StraightLine {
   StraightLine() = default;
 };
 
-struct cornerSet {
-  bool front_left = false;
-  bool back_left = false;
-  bool front_right = false;
-  bool back_right = false;
+struct canGoSet {
+	canGo front = canGo::NO;
+  canGo front_left = canGo::NO;
+  canGo left = canGo::NO;
+  canGo front_right = canGo::NO;
+  canGo right = canGo::NO;
+  canGo back = canGo::NO;
 };
 
 struct ImageXZcoordinate {
@@ -109,9 +120,16 @@ public:
     return pointCloud[num % 512];
   }
 
-  void test() {
+  canGoSet identifyCanGo() {
+    canGoSet returnSet;
+    returnSet.front = isClear(LiDAR_degree::FRONT);
+    returnSet.front_left = isClear(LiDAR_degree::FRONT_LEFT);
+    returnSet.left = isClear(LiDAR_degree::LEFT);
+    returnSet.front_right = isClear(LiDAR_degree::FRONT_RIGHT);
+    returnSet.right = isClear(LiDAR_degree::RIGHT);
+    returnSet.back = isClear(LiDAR_degree::BACK);
+    return returnSet;
   }
-
 private:
   struct XZrange {
     XZrange(const float xmax, const float xmin, const float zmax, const float zmin) {
@@ -154,10 +172,9 @@ private:
   WallType identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyRight(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints);
-  cornerSet identifyCorner();
 
-  // getWallTypeを全方向呼び出してから使用する
-  bool isClear(const LiDAR_degree& direction);
+  // getWallTypeを全方向呼び出してから使用する 直径は8cmで勘定
+  canGo isClear(const LiDAR_degree& direction);
 
   void printLeftRight(const NcmPoints& pointsSet);
 

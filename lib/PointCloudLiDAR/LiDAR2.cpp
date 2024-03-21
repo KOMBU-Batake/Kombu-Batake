@@ -154,16 +154,16 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     vector<int> featurePoints;
     if (wallSet.left != WallType::type16 && wallSet.right != WallType::type17) featurePoints = VectorTracer(pointsSet, true); featurePoints = VectorTracer(pointsSet, true);
 
-    std::cout << "-------------------" << endl;
-    printLeftRight(pointsSet);
-    std::cout << "-------------------" << endl;
+    //std::cout << "-------------------" << endl;
+    //printLeftRight(pointsSet);
+    //std::cout << "-------------------" << endl;
 
     if (! (isLeftEmpty || wallSet.left == WallType::type16)) wallSet.left = identifyLeft(pointsSet, featurePoints);
-    std::cout << "* left: " << (int)wallSet.left << endl;
+    //std::cout << "* left: " << (int)wallSet.left << endl;
     if (! (isRightEmpty || wallSet.right == WallType::type17)) wallSet.right = identifyRight(pointsSet, featurePoints);
-    std::cout << "* right: " << (int)wallSet.right << endl;
+    //std::cout << "* right: " << (int)wallSet.right << endl;
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
-    cout << "* center: " << (int)wallSet.center << endl;
+    //cout << "* center: " << (int)wallSet.center << endl;
 
     return wallSet;
 }
@@ -558,20 +558,30 @@ vector<ImageXZcoordinate> LiDAR2::getPositionOfImage(vector<int>& numbers) {
   return optimizedPoints;
 }
 
-cornerSet LiDAR2::identifyCorner()
-{
-  return {
-    isClear(LiDAR_degree::FRONT_LEFT),
-    isClear(LiDAR_degree::BACK_LEFT),
-    isClear(LiDAR_degree::FRONT_RIGHT),
-    isClear(LiDAR_degree::BACK_RIGHT)
-  };
-}
-
-bool LiDAR2::isClear(const LiDAR_degree& direction) {
+canGo LiDAR2::isClear(const LiDAR_degree& direction) {
   XZcoordinate center = {0,0};
   int start = 0, end = 0;
   switch (direction) {
+    case LiDAR_degree::FRONT:
+      center = { 0, 6 };
+      start = frontCenterNum-128;
+      end = frontCenterNum+ 128;
+      break;
+    case LiDAR_degree::LEFT:
+      center = { -6, 0 };
+      start = leftCenterNum - 128;
+      end = leftCenterNum + 128;
+      break;
+    case LiDAR_degree::BACK:
+      center = { 0, -6 };
+      start = backCenterNum - 128;
+      end = backCenterNum + 128;
+      break;
+    case LiDAR_degree::RIGHT:
+      center = { 6, 0 };
+      start = rightCenterNum - 128;
+      end = rightCenterNum + 128;
+      break;
     case LiDAR_degree::FRONT_LEFT:
 			center = { -6, 6 };
       start = leftCenterNum;
@@ -584,22 +594,61 @@ bool LiDAR2::isClear(const LiDAR_degree& direction) {
 			end = rightCenterNum;
       if (start > end) start -= 512;
       break;
-    case LiDAR_degree::BACK_LEFT:
-      center = { -6, -6 };
-      start = backCenterNum;
-      end = leftCenterNum;
-      break;
-    case LiDAR_degree::BACK_RIGHT:
-      center = { 6, -6 };
-      start = rightCenterNum;
-			end = backCenterNum;
-			break;
   }
+  bool ok = true;
   for (int i = start; i <= end; i++) {
     XZcoordinate p = readPoint(i);
-    if (pow(p.x - center.x, 2) + pow(p.z - center.z, 2) < 49) return false;
+    if (pow(p.x - center.x, 2) + pow(p.z - center.z, 2) < 16) {
+      ok = false;
+			break;
+    }
   }
-  return true;
+  if (ok) return canGo::GO;
+
+  switch (direction) {
+  case LiDAR_degree::FRONT:
+    center = { -3, 6 };
+    break;
+  case LiDAR_degree::LEFT:
+    center = { -6, -3 };;
+    break;
+  case LiDAR_degree::BACK:
+    center = { 3, -6 };
+    break;
+  case LiDAR_degree::RIGHT:
+    center = { 6, 3 };
+    break;
+  }
+  ok = true;
+  for (int i = start; i <= end; i++) {
+    XZcoordinate p = readPoint(i);
+    if (pow(p.x - center.x, 2) + pow(p.z - center.z, 2) < 16) {
+      ok = false;
+      break;
+    }
+  }
+  if (ok) return canGo::GO_leftO;
+
+  switch (direction) {
+  case LiDAR_degree::FRONT:
+    center = { 3, 6 };
+    break;
+  case LiDAR_degree::LEFT:
+    center = { -6, 3 };;
+    break;
+  case LiDAR_degree::BACK:
+    center = { -3, -6 };
+    break;
+  case LiDAR_degree::RIGHT:
+    center = { 6, -3 };
+    break;
+  }
+
+  for (int i = start; i <= end; i++) {
+    XZcoordinate p = readPoint(i);
+    if (pow(p.x - center.x, 2) + pow(p.z - center.z, 2) < 16) return canGo::NO;
+  }
+  canGo::GO_rightO;
 }
 
 void LiDAR2::printLeftRight(const NcmPoints& pointsSet) {
