@@ -188,23 +188,23 @@ public:
 	vector<TileState> getTileStateLR(MapAddress addr_R, const double& angle, const LiDAR_degree& direction) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (direction == LiDAR_degree::FRONT_LEFT || direction == LiDAR_degree::FRONT_RIGHT) {
-			if (direction == LiDAR_degree::FRONT_LEFT && abs(angle - 90) ||
-					direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 180)) {
+			if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 90)) ||
+					(direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 180))) {
 				if (!existTile_R({ addr_R.x + 2,addr_R.z - 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 				return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x + 3]] }; // –k“Œ
 			}
-			else if (direction == LiDAR_degree::FRONT_LEFT && abs(angle - 180) ||
-							 direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 270)) {
+			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 180)) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 270))) {
 				if (!existTile_R({ addr_R.x - 2,addr_R.z - 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 				return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x - 3]] }; // –k¼
 			}
-			else if (direction == LiDAR_degree::FRONT_LEFT && abs(angle - 270) ||
-				direction == LiDAR_degree::FRONT_RIGHT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 270)) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ) {
 				if (!existTile_R({ addr_R.x - 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 3]] }; // “ì¼
 			}
-			else if (direction == LiDAR_degree::FRONT_LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
-							 direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 90)) {
+			else if ((direction == LiDAR_degree::FRONT_LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 90))) {
 				if (!existTile_R({ addr_R.x + 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 3]] }; // “ì“Œ
 			}
@@ -221,31 +221,33 @@ public:
 			if (!existTile_R({ addr_R.x,addr_R.z-2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 			return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x - 1]],TileStateMap2[map_A[addr_L.z - 3][addr_L.x + 1]] }; // –k
 		}
-		else if (direction == LiDAR_degree::FRONT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
-				direction == LiDAR_degree::LEFT && abs(angle - 270) < 5 ||
-				direction == LiDAR_degree::BACK && abs(angle - 180) < 5 ||
-				direction == LiDAR_degree::RIGHT && abs(angle - 90) < 5) {
+		
+		if ((direction == LiDAR_degree::FRONT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(direction == LiDAR_degree::LEFT && abs(angle - 270) < 5) ||
+				(direction == LiDAR_degree::BACK && abs(angle - 180) < 5) ||
+				(direction == LiDAR_degree::RIGHT && abs(angle - 90) < 5)) {
 			if (!existTile_R({ addr_R.x,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };	
 			return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 1]],TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 1]] }; // “ì
 		}
-		else if (direction == LiDAR_degree::FRONT && abs(angle - 90) ||
-				direction == LiDAR_degree::LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
-				direction == LiDAR_degree::BACK && abs(angle - 270) < 5 ||
-				direction == LiDAR_degree::RIGHT && abs(angle - 180) < 5) {
+
+		if ((direction == LiDAR_degree::FRONT && abs(angle - 90) < 5) ||
+				(direction == LiDAR_degree::LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(direction == LiDAR_degree::BACK && abs(angle - 270) < 5) ||
+				(direction == LiDAR_degree::RIGHT && abs(angle - 180) < 5)) {
 			if (!existTile_R({ addr_R.x + 2,addr_R.z })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 			return { TileStateMap2[map_A[addr_L.z - 1][addr_L.x + 3]],TileStateMap2[map_A[addr_L.z + 1][addr_L.x + 3]] }; // “Œ
 		}
-		else if (direction == LiDAR_degree::FRONT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) ||
-				direction == LiDAR_degree::LEFT && abs(angle - 180) < 5 ||
-				direction == LiDAR_degree::BACK && abs(angle - 90) ||
-				direction == LiDAR_degree::RIGHT && (angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+
+		if ((direction == LiDAR_degree::FRONT && abs(angle - 270) < 5) ||
+				(direction == LiDAR_degree::LEFT && abs(angle - 180) < 5) ||
+				(direction == LiDAR_degree::BACK && abs(angle - 90) < 5) ||
+				(direction == LiDAR_degree::RIGHT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)))) {
 			if (!existTile_R({ addr_R.x - 2,addr_R.z })) return { TileState::UNKNOWN,TileState::UNKNOWN };
 			return { TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 3]],TileStateMap2[map_A[addr_L.z + 1][addr_L.x - 3]] }; // ¼
 		}
-		else {
-			cout << "unrelireble angle at getTileStateLR" << endl;
-			return { TileState::UNKNOWN,TileState::UNKNOWN };
-		}
+
+		cout << "unrelireble angle at getTileStateLR" << endl;
+		return { TileState::UNKNOWN,TileState::UNKNOWN };
 	}
 
 	// ’†‚Ì•Ç‚Ü‚Å‚Í’²‚×‚È‚¢
@@ -275,22 +277,43 @@ public:
 	bool existTile_R2(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (addr_L.x - 2 < 0) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		else if (addr_L.z - 2 < 0) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		else if (addr_L.x + 3 > map_A[0].size()) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		else if (addr_L.z + 3 > map_A.size()) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		return true;
+	}
+
+	bool isAllVisited(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (map_A[addr_L.z - 1][addr_L.x - 1] != "-" &&
+				map_A[addr_L.z - 1][addr_L.x + 1] != "-" &&
+				map_A[addr_L.z + 1][addr_L.x - 1] != "-" &&
+				map_A[addr_L.z + 1][addr_L.x + 1] != "-") {
+			return true;
+		}
+		return false;
+	}
+
+	TileState getCurrentTile(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (map_A[addr_L.z - 1][addr_L.x - 1] == map_A[addr_L.z - 1][addr_L.x + 1] &&
+			map_A[addr_L.z - 1][addr_L.x + 1] == map_A[addr_L.z + 1][addr_L.x - 1] &&
+			map_A[addr_L.z + 1][addr_L.x - 1] == map_A[addr_L.z + 1][addr_L.x + 1]) {
+			return TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 1]];
+		}
+		return TileState::WALL;
 	}
 
 	// ƒ}ƒbƒv‘S‘Ì‚ð•\Ž¦‚·‚é

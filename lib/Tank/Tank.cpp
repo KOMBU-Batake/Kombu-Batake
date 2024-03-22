@@ -329,10 +329,10 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		if (goal.z > presentPos.z) directionPorM = Direction_of_Travel::z_plus;
 		
 		do {
-			if (!checkColor()) {
-				stop(StopMode::HOLD);
-				return false;
-			}
+			//if (!checkColor()) {
+			//	stop(StopMode::HOLD);
+			//	return false;
+			//}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			dx_d = presentPos.x - goal.x;

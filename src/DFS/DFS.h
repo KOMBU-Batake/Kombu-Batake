@@ -75,10 +75,12 @@ canGo judgeCanGo(const vector<TileState>& tileState, const bool canGo);
 bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& front, const canGo& left, const canGo& right, const canGo& back, const canGo& front_left, const canGo& front_right);
 MapAddress pickSatckDFS(vector<stackDFS>& stack);
 void removeFromStackDFS(vector<stackDFS>& stack, const MapAddress& address);
+void reallyAbleToGo(canGo& cango, const WallSet& wallset);
+void deleteVisited(vector<stackDFS>& stack);
 
 static void HoleIsThere(const double& angle);
-static void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack);
+static void Area4IsThere(const double& angle);
 static bool condirtion_canGo(const WallSet& wallset);
 
 // マップデータ提出できてエライ!!天才!!神!!
-static void sendMap(vector<vector<string>>& map);
+void sendMap(vector<vector<string>>& map);

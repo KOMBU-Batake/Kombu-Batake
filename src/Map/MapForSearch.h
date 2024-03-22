@@ -1,5 +1,6 @@
 #include <iostream>
 #include <webots/Robot.hpp>
+#include <iomanip>
 #include <math.h>
 #include <vector>
 #include <deque>
@@ -8,6 +9,9 @@
 #include <unordered_set>
 #include <webots/Receiver.hpp>
 #include <webots/Emitter.hpp>
+
+extern webots::Robot *robot;
+extern int timeStep;
 
 using namespace webots;
 using namespace std;
@@ -50,7 +54,7 @@ public:
 
 	vector<MapAddress> getRoute(MapAddress& Goal, const vector<MapAddress>& stack_of_DFS);
 
-	void markAroundStatus(const aroundStatus& status, const double& angle);
+	void markAroundStatus(const aroundStatus& status, const double& angle, const bool& isFirst = false);
 
 	void printMap() {
 		MapAddress addr_List = convertRtoListPoint(currentTile_R);
@@ -58,15 +62,15 @@ public:
 		for (int i = 0; i < map_S.size(); i++) {
 			for (int j = 0; j < map_S[0].size(); j++) {
 				if (j == addr_List.x && i == addr_List.z) {
-					cout << "R ";
+					cout << std::setw(2) << "R  ";
 				}
 				else {
-					cout << map_S[i][j] << " ";
+					std::cout << std::setw(2) << map_S[i][j] << " ";
 				}
 			}
-			cout << endl;
+			cout << "\n";
 		}
-	
+		cout << endl;
 	}
 private:
 	vector<vector<int>> map_S = vector<vector<int>>(5, vector<int>(5, 0));

@@ -23,9 +23,9 @@ int main(int argc, char **argv) {
   {
     cout << "catch exception" << endl;
     tank.stop(StopMode::HOLD);
-    //mapper.replaceLineTo0();
-    //mapper.printMap();
-    //sendMap(mapper.map_A);
+    mapper.replaceLineTo0();
+    mapper.printMap();
+    sendMap(mapper.map_A);
   }
 
   return 0; // ‚Î‚¢‚Î‚¢`

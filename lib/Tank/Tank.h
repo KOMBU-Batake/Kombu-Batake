@@ -123,11 +123,11 @@ public:
 	}
 
 	bool checkColor() {
-		colorsensor.update();
-		TileState tileColor = colorsensor.getTileColor();
-		if (tileColor == TileState::HOLE) {
-			return false;
-		}
+		//colorsensor.update();
+		//TileState tileColor = colorsensor.getTileColor();
+		//if (tileColor == TileState::HOLE) {
+		//	return false;
+		//}
 		return true;
 	}
 private:

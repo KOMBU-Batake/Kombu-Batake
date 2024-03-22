@@ -31,12 +31,14 @@ struct NcmPoints {
 
   bool isLeftEmpty() {
     auto closest = min_element(model_left.begin(), model_left.end(), [](XZcoordinate s1, XZcoordinate s2) { return (abs(s1.x + 3) < abs(s2.x + 3)); });
+    if (abs(closest->x + 3) > 1) return true;
     leftClosest = closest->z;
     return closest->z > 18;
 	}
 
   bool isRightEmpty() {
     auto closest = min_element(model_right.begin(), model_right.end(), [](XZcoordinate s1, XZcoordinate s2) { return (abs(s1.x - 3) < abs(s2.x - 3)); });
+    if (abs(closest->x - 3) > 1) return true;
     rightClosest = closest->z;
     return closest->z > 18;
 	}
@@ -212,7 +214,7 @@ private:
     for (auto it = startIt; it != endIt + 1; ++it) sumZpow2 += (float)pow(it->z,2);
     // •ªŽU
     float variance = (float)(sumZpow2 / (end - start + 1) - pow(sumZ / (end - start + 1), 2));
-    std::cout << "variance: " << variance << endl;
+    //std::cout << "variance: " << variance << endl;
     return variance;
   }
 

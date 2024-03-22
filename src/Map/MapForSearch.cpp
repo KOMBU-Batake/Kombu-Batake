@@ -16,6 +16,7 @@ void MapperS::addNorth(const int& i) { // ã‚É’Ç‰Á
 	rotate(map_S.rbegin(), map_S.rbegin() + 4 * i, map_S.rend());
 	startTile_A.z += 2;
 	currentTile_A.z += 2;
+	cout << "*plus: " << currentTile_A.x << "," << currentTile_A.z << endl;
 }
 
 void MapperS::addSouth(const int& i) { // ‰º‚É’Ç‰Á
@@ -59,6 +60,7 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 	MapAddress goal_A = convertRtoA(Goal_R);
 	MapAddress goal_L = convertAtoListPoint(goal_A);
 	cout << "goal_L: " << goal_L.x << " " << goal_L.z << endl;
+	robot->step(timeStep);
 
 	// ‚Ü‚¸‚ÍƒXƒ^ƒbƒNƒx[ƒX‚ÅŒo˜H‚ğ’T‚·
   auto goal_it = find(stack_of_DFS.rbegin(), stack_of_DFS.rend(), Goal_R); // ’¼‹ß‚Å’Ê‚Á‚½Goal‚ğ’T‚·
@@ -78,8 +80,9 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 				it = it_second_tile;
 			}
 			counta++;
-			cout << counta << endl;
+			cout << counta << ", ";
 		}
+		cout << endl;
 		stack_based_route_R.push_back(route_stack.back());
 		stack_based_route_R_size = (int)stack_based_route_R.size();
 	}
@@ -101,12 +104,6 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 					// Œo˜H‚ğŒ©‚Â‚¯‚½
 					vector<MapAddress> route_BFS_R;
 					route_BFS_R.push_back(Goal_R);
-					for (auto& k : map_S) {
-						for (auto& l : k) {
-							cout << l << " ";
-						}
-						cout << endl;
-					}
 					while (next != start_L) {
 						// ‹t‚©‚ç‚½‚Ç‚é
 						count--;
@@ -134,9 +131,9 @@ vector<MapAddress> MapperS::getRoute(MapAddress& Goal_R, const vector<MapAddress
 	return vector<MapAddress>();
 }
 
-void MapperS::markAroundStatus(const aroundStatus& status, const double& angle)
+void MapperS::markAroundStatus(const aroundStatus& status, const double& angle, const bool& isFirst)
 {
-	MapAddress currentTile_L = convertAtoListPoint(currentTile_R);
+	MapAddress currentTile_L = convertRtoListPoint(currentTile_R);
 	vector<bool> around4 = { status.front, status.left, status.back, status.right };
 	cout << around4[0] << around4[1] << around4[2] << around4[3] << endl;
 	if (abs(angle - 90) < 5) {
@@ -148,6 +145,7 @@ void MapperS::markAroundStatus(const aroundStatus& status, const double& angle)
 		// ‚»‚Ì‚Ü‚Ü
 		map_S[currentTile_L.z - 1][currentTile_L.x - 1] = status.front_left;
 		map_S[currentTile_L.z - 1][currentTile_L.x + 1] = status.front_right;
+		cout << "a" << endl;
 	}
 	else if (abs(angle - 270) < 5) {
 		rotate(around4.rbegin(), around4.rbegin() + 1, around4.rend());
@@ -161,10 +159,12 @@ void MapperS::markAroundStatus(const aroundStatus& status, const double& angle)
 	}
 	else cout << "unreliable angle at markAroundStatus" << endl;
 	// Œã‚ë‚É‚Í‘‚«‚Ü‚È‚¢
-	if (! ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) map_S[currentTile_L.z - 1][currentTile_L.x] = around4[0]; // ã
-	if (! (abs(angle - 270) < 5)) map_S[currentTile_L.z][currentTile_L.x + 1] = around4[3]; // ‰E
-	if (! (abs(angle - 180) < 5)) map_S[currentTile_L.z + 1][currentTile_L.x] = around4[2]; // ‰º
-	if (! (abs(angle - 90 ) < 5)) map_S[currentTile_L.z][currentTile_L.x - 1] = around4[1]; // ¶
+	cout << "currentTile_A: " << currentTile_A.x << " " << currentTile_A.z << endl;
+	cout << "currentTile_L: " << currentTile_L.x << " " << currentTile_L.z << endl;
+	if ((!((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) || isFirst) map_S[currentTile_L.z - 1][currentTile_L.x] = around4[0]; // ã
+	if ((abs(angle - 270) >= 5) || isFirst) map_S[currentTile_L.z][currentTile_L.x + 1] = around4[3]; // ‰E
+	if ((abs(angle - 180) >= 5) || isFirst) map_S[currentTile_L.z + 1][currentTile_L.x] = around4[2]; // ‰º
+	if ((abs(angle - 90 ) >= 5) || isFirst) map_S[currentTile_L.z][currentTile_L.x - 1] = around4[1]; // ¶
 }
 
 /* ’TõŒó•â’T‚µ‚ÆA”š‚Ì‘‚«‚İ
