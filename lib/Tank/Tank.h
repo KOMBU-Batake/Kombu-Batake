@@ -104,7 +104,7 @@ public:
 	void setDireciton(double direction, double maxspeed /*最大速度*/, const unit unit = unit::degrees);
 
 	/* Ｘ軸方向、Y軸方向にGPSトレースする 位置はあらかたあっている前提で過度な修正はできない。 */
-	bool gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 1000, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
+	bool gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 5500, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
 
 	static double pd_cm_to_rad(double cm) { // cmをラジアンに変換
 		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)

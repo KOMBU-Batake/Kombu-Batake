@@ -44,7 +44,7 @@ void DFS() {
 		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 			mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
 		}
-		//mapper.printMap();
+		mapper.printMap();
 		
 		// 側面カメラで落とし穴の確認
 		myCam.update();
@@ -81,7 +81,7 @@ void DFS() {
 															 (int)cango_set.front_left < 3,
 															 (int)cango_set.front_right < 3 }, 
 															 angle, count_DFS == 1);
-		//mapperS.printMap();
+		mapperS.printMap();
 
 		// タイルの情報を取得
 		vector<TileState> front_tile(2), back_tile(2), left_tile(2), right_tile(2), front_left_tile(2), front_right_tile(2);
@@ -132,7 +132,7 @@ void DFS() {
 			int dx, dz;
 			dx = tile.x - mapper.currentTile_R.x;
 			dz = tile.z - mapper.currentTile_R.z;
-			isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST);
+			isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST); // タイムアウト込み
 			angle = gyro.getGyro();
 			std::cout << "angle: " << angle << endl;
 			if (isHole) {

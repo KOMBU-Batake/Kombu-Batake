@@ -52,36 +52,7 @@ public:
 			for (int j = 3; j <= 35; j++) {
 				ColorHSV hsv = convertRGBtoHSV(leftInputImage.at<cv::Vec4b>(j, i));
 				//cout << "Hue: " << hsv.hue << " Saturation: " << hsv.saturation << " Value: " << hsv.value << endl;
-				if (hsv.hue > 340 && hsv.hue < 360 && hsv.value > 150) {
-					cout << "Red found" << endl;
-					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
-					redCount++;
-				}
-				if (hsv.hue > 50 && hsv.hue < 60) {
-					cout << "Yellow found" << endl;
-					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
-					yellowCount++;
-				}
-				else if (foundRed) cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
-			}
-			if (redCount >= 3) {
-				if (yellowCount >= 1) return "O";
-				else return "F";
-			}
-		}
-		return "n";
-	}
-
-	string rightFindYellow(const float& distance) {
-		if (distance > 9) return "n";
-		bool foundRed = false;
-		for (int i = 31; i <= 32; i++) {
-			int redCount = 0;
-			int yellowCount = 0;
-			for (int j = 3; j <= 35; j++) {
-				ColorHSV hsv = convertRGBtoHSV(rightInputImage.at<cv::Vec4b>(j, i));
-				//cout << "Hue: " << hsv.hue << " Saturation: " << hsv.saturation << " Value: " << hsv.value << endl;
-				if (hsv.hue > 340 && hsv.hue < 360 && hsv.value > 150) {
+				if (hsv.hue > 340 && hsv.hue < 360 && hsv.value > 170) {
 					cout << "Red found" << endl;
 					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
 					redCount++;
@@ -96,10 +67,49 @@ public:
 			if (redCount >= 2) {
 				if (yellowCount >= 1) {
 					cout << "O" << endl;
+					imwrite("leftO.png", leftInputImage);
 					return "O";
 				}
 				else {
 					cout << "F" << endl;
+					imwrite("leftF.png", leftInputImage);
+					return "F";
+				}
+			}
+		}
+		return "n";
+	}
+
+	string rightFindYellow(const float& distance) {
+		if (distance > 9) return "n";
+		bool foundRed = false;
+		for (int i = 31; i <= 32; i++) {
+			int redCount = 0;
+			int yellowCount = 0;
+			for (int j = 3; j <= 35; j++) {
+				ColorHSV hsv = convertRGBtoHSV(rightInputImage.at<cv::Vec4b>(j, i));
+				//cout << "Hue: " << hsv.hue << " Saturation: " << hsv.saturation << " Value: " << hsv.value << endl;
+				if (hsv.hue > 340 && hsv.hue < 360 && hsv.value > 170) {
+					cout << "Red found" << endl;
+					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
+					redCount++;
+				}
+				if (hsv.hue > 50 && hsv.hue < 60) {
+					cout << "Yellow found" << endl;
+					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
+					yellowCount++;
+				}
+				else if (foundRed) cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
+			}
+			if (redCount >= 2) {
+				if (yellowCount >= 1) {
+					cout << "O" << endl;
+					imwrite("rightO.png", rightInputImage);
+					return "O";
+				}
+				else {
+					cout << "F" << endl;
+					imwrite("rightF.png", rightInputImage);
 					return "F";
 				}
 			}
