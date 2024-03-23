@@ -43,6 +43,66 @@ public:
 		updateRight();
 	}
 
+	void leftFindYellow(const float& distance) {
+		if (distance > 9) return;
+		bool fin = false;
+		for (int i = 31; i <= 32; i++) {
+			for (int j = 3; j <= 35; j++) {
+				ColorHSV hsv = convertRGBtoHSV(leftInputImage.at<cv::Vec4b>(j, i));
+				//cout << "Hue: " << hsv.hue << " Saturation: " << hsv.saturation << " Value: " << hsv.value << endl;
+				if (hsv.hue > 50 && hsv.hue < 60 &&
+					hsv.saturation > 50 &&
+					hsv.value > 150) { 
+					cout << "Yellow found" << endl;
+					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
+					robot->step(timeStep*100);
+					char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+					GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+					int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+					cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+					memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+					message[8] = 'O'; // The victim type is harmed
+					emitter->send(message, sizeof(message));
+					robot->step(timeStep);
+					fin = true;
+					//imwrite("left.png", leftInputImage);
+					break;
+				}
+			}
+			if (fin) break;
+		}
+	}
+
+	void rightFindYellow(const float& distance) {
+		if (distance > 9) return;
+		bool fin = false;
+		for (int i = 31; i <= 32; i++) {
+			for (int j = 3; j <= 35; j++) {
+				ColorHSV hsv = convertRGBtoHSV(rightInputImage.at<cv::Vec4b>(j, i));
+				//cout << "Hue: " << hsv.hue << " Saturation: " << hsv.saturation << " Value: " << hsv.value << endl;
+				if (hsv.hue > 50 && hsv.hue < 60 &&
+					hsv.saturation > 50 &&
+					hsv.value > 150) {
+					cout << "Yellow found" << endl;
+					cout << "hue:" << hsv.hue << " saturation: " << hsv.saturation << " value: " << hsv.value << endl;
+					robot->step(timeStep * 100);
+					char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+					GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+					int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+					cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+					memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+					message[8] = 'O'; // The victim type is harmed
+					emitter->send(message, sizeof(message));
+					robot->step(timeStep);
+					fin = true;
+					//imwrite("left.png", leftInputImage);
+					break;
+				}
+			}
+			if (fin) break;
+		}
+	}
+
 	vector<bool> leftHole() {
 		vector<bool> result(2, false);
 		float leftFloorBrightness = 0, leftFloorSaturation = 0;

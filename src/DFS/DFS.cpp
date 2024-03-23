@@ -30,6 +30,9 @@ void DFS() {
 		std::cout << "left: " << (int)left_mp.left << " " << (int)left_mp.center << " " << (int)left_mp.right << " / ";
 		std::cout << "right: " << (int)right_mp.left << " " << (int)right_mp.center << " " << (int)right_mp.right << endl;
 
+		//myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+		//myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+
 		// 壁を提出用マップに登録
 		if (abs(angle - 90) < 5) {
 			mapper.markAroundWall(left_mp, right_mp, back_mp, front_mp);
@@ -43,7 +46,7 @@ void DFS() {
 		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 			mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
 		}
-		//mapper.printMap();
+		mapper.printMap();
 		
 		// 側面カメラで落とし穴の確認
 		myCam.update();
@@ -76,7 +79,7 @@ void DFS() {
 															 (int)cango_set.front_left < 3,
 															 (int)cango_set.front_right < 3 }, 
 															 angle, count_DFS == 1);
-		//mapperS.printMap();
+		mapperS.printMap();
 
 		// タイルの情報を取得
 		vector<TileState> front_tile(2), back_tile(2), left_tile(2), right_tile(2), front_left_tile(2), front_right_tile(2);
