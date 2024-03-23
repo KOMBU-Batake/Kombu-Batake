@@ -142,7 +142,7 @@ public:
 		}
 		leftFloorBrightness2 /= 9;
 		leftFloorSaturation2 /= 9;
-		if (leftFloorSaturation2 < 0.1f && leftFloorBrightness2 < 35) {
+		if (leftFloorSaturation2 < 0.1f && leftFloorBrightness2 < 30) {
 			result[0] = true;
 		}
 		return result;
@@ -160,7 +160,7 @@ public:
 		}
 		leftFloorBrightness /= 9;
 		leftFloorSaturation /= 9;
-		if (leftFloorSaturation < 0.1f && leftFloorBrightness < 35) {
+		if (leftFloorSaturation < 0.1f && leftFloorBrightness < 30) {
 			result[0] = true;
 		}
 		float leftFloorBrightness2 = 0, leftFloorSaturation2 = 0;

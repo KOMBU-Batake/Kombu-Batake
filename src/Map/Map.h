@@ -90,6 +90,7 @@ public:
 	}
 
 	void markTileAs(MapAddress add_R, TileState tilestate, const double& angle) {
+		// 配列のマスがない分は勝手に追加する
 		if (add_R.x < left_top_R.x) {
 			addWest(left_top_R.x - add_R.x);
 		} else if (add_R.x > right_bottom_R.x) {
@@ -342,6 +343,11 @@ public:
 	MapAddress currentTile_A = { 1, 1 }, currentTile_R = { 1, 1 };
 	unordered_set<TileState> ColoredTiles = { TileState::CHECKPOINT, TileState::AREA1to2, TileState::AREA2to3, TileState::AREA3to4, TileState::AREA1to4, TileState::SWAMP };
 
+	/* 相対座標からリストのタイル中心の座標に変換 */
+	MapAddress convertRtoListPoint(const MapAddress& addr_R) {
+		return convertAtoListPoint(convertRtoA(addr_R));
+	}
+
 private: // ************************************************************************************
 	/* なんだコレ */
 	int convertTiletoList(int tile) {
@@ -366,11 +372,6 @@ private: // ********************************************************************
 	/* リストのタイル中心の座標からタイル座標に変換 */
 	MapAddress convertListPointtoA(const MapAddress& addr_list) {
 		return { (addr_list.x) / 2, (addr_list.z) / 2 };
-	}
-
-	/* 相対座標からリストのタイル中心の座標に変換 */
-	MapAddress convertRtoListPoint(const MapAddress& addr_R) {
-		return convertAtoListPoint(convertRtoA(addr_R));
 	}
 
 	/* リストのタイル中心の座標から相対座標に変換 */

@@ -34,6 +34,7 @@ void MapperS::addWest(const int& j) { // ç∂Ç…í«â¡
 	for (int i = 0; i < map_S.size(); ++i) {
 		rotate(map_S[i].rbegin(), map_S[i].rbegin() + 4 * j, map_S[i].rend());
 	}
+	cout << "add west" << endl;
 	startTile_A.x += 2;
 	currentTile_A.x += 2;
 }
@@ -145,7 +146,6 @@ void MapperS::markAroundStatus(const aroundStatus& status, const double& angle, 
 		// ÇªÇÃÇ‹Ç‹
 		map_S[currentTile_L.z - 1][currentTile_L.x - 1] = status.front_left;
 		map_S[currentTile_L.z - 1][currentTile_L.x + 1] = status.front_right;
-		cout << "a" << endl;
 	}
 	else if (abs(angle - 270) < 5) {
 		rotate(around4.rbegin(), around4.rbegin() + 1, around4.rend());

@@ -161,11 +161,11 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     if (wallSet.left != WallType::type16 && wallSet.right != WallType::type17) featurePoints = VectorTracer(pointsSet);
 
     if (! (isLeftEmpty || wallSet.left == WallType::type16)) wallSet.left = identifyLeft(pointsSet, featurePoints);
-    std::cout << "* left: " << (int)wallSet.left << endl;
+    //std::cout << "* left: " << (int)wallSet.left << endl;
     if (! (isRightEmpty || wallSet.right == WallType::type17)) wallSet.right = identifyRight(pointsSet, featurePoints);
-    std::cout << "* right: " << (int)wallSet.right << endl;
+    //std::cout << "* right: " << (int)wallSet.right << endl;
     wallSet.center = identifyCenter(pointsSet, wallSet, featurePoints);
-    cout << "* center: " << (int)wallSet.center << endl;
+    //cout << "* center: " << (int)wallSet.center << endl;
 
     return wallSet;
 }
@@ -226,9 +226,6 @@ WallType LiDAR2::identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints)
 
 WallType LiDAR2::identifyRight(NcmPoints& pointSet, vector<int>& featurePoints)
 {
-  for (auto& p : pointSet.model_right) {
-		cout << p.x << " " << p.z << endl;
-	}
   // 範囲外をカット
   int end_tmp = pointSet.count_left;
   for (size_t i = 0; i < pointSet.model_right.size(); i++) {

@@ -78,6 +78,8 @@ void removeFromStackDFS(vector<stackDFS>& stack, const MapAddress& address);
 void reallyAbleToGo(canGo& cango, const WallSet& wallset);
 void deleteVisited(vector<stackDFS>& stack);
 
+void markHole(const MapAddress& addr_R, float angle, const bool& left, const bool& right);
+
 static void HoleIsThere(const double& angle);
 static void Area4IsThere(const double& angle);
 static bool condirtion_canGo(const WallSet& wallset);
