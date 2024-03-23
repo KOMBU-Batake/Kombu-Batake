@@ -235,8 +235,10 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		while (1) {
 			lidar2.update(presentPos);
 			myCam.update();
-			if (myCam.leftFindYellow(abs(lidar2.readPoint(384).x))) houkoku();
-			if (myCam.rightFindYellow(abs(lidar2.readPoint(128).x))) houkoku();
+			string leftCamColor = myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+			string rightCamColor = myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+			if (leftCamColor != "n") houkoku(leftCamColor);
+			if (rightCamColor != "n") houkoku(rightCamColor);
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ‚wŽ²•ûŒü‚Ì‚¸‚ê
@@ -282,8 +284,10 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		while (1) {
 			lidar2.update(presentPos);
 			myCam.update();
-			if (myCam.leftFindYellow(abs(lidar2.readPoint(384).x))) houkoku();
-			if (myCam.rightFindYellow(abs(lidar2.readPoint(128).x))) houkoku();
+			string leftCamColor = myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+			string rightCamColor = myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+			if (leftCamColor != "n") houkoku(leftCamColor);
+			if (rightCamColor != "n") houkoku(rightCamColor);
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ZŽ²•ûŒü‚Ì‚¸‚ê
