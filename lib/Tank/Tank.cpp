@@ -230,11 +230,13 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		// PID
 		double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
 		double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
+		presentPosRAW = gps.getPositionRAW();
+		presentPos = gps.filter(presentPosRAW);
 		while (1) {
-			//if (!checkColor()) {
-			//	stop(StopMode::HOLD);
-			//	return false;
-			//}
+			lidar2.update(presentPos);
+			myCam.update();
+			if (myCam.leftFindYellow(abs(lidar2.readPoint(384).x))) houkoku();
+			if (myCam.rightFindYellow(abs(lidar2.readPoint(128).x))) houkoku();
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ‚wŽ²•ûŒü‚Ì‚¸‚ê
@@ -275,11 +277,13 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		// PID
 		double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
 		double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
+		presentPosRAW = gps.getPositionRAW();
+		presentPos = gps.filter(presentPosRAW);
 		while (1) {
-			//if (!checkColor()) {
-			//	stop(StopMode::HOLD);
-			//	return false;
-			//}
+			lidar2.update(presentPos);
+			myCam.update();
+			if (myCam.leftFindYellow(abs(lidar2.readPoint(384).x))) houkoku();
+			if (myCam.rightFindYellow(abs(lidar2.readPoint(128).x))) houkoku();
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// ZŽ²•ûŒü‚Ì‚¸‚ê

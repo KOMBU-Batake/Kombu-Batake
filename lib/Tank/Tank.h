@@ -150,4 +150,17 @@ private:
 		plus, // ”½ŽžŒv‰ñ‚è
 		minus, // ŽžŒv‰ñ‚è
 	};
+
+	void houkoku() {
+		stop(StopMode::BRAKE);
+		robot->step(timeStep * 100);
+		char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+		GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+		int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+		cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+		message[8] = 'O'; // The victim type is harmed
+		emitter->send(message, sizeof(message));
+		robot->step(timeStep);
+	}
 };
