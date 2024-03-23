@@ -176,7 +176,6 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 		last_error = error;
 	}
 	stop(StopMode::HOLD);
-	robot->step(160);
 }
 
 // 出でよ!!サイクロマティック複雑度53の力!!
