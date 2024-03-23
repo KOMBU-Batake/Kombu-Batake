@@ -138,6 +138,11 @@ void Map::markNorthWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z - 4][add_L.x + 1] = "0";
 		map_A[add_L.z - 4][add_L.x - 1] = "0";
 	}
+	else if ((wallset.left == WallType::type16 && wallset.right == WallType::type17) ||
+		(wallset.left == WallType::type16 && wallset.right == WallType::type10) ||
+		(wallset.left == WallType::type10 && wallset.right == WallType::type17)) {
+		return;
+	}
 	else
 	{
 		if (!existTile_R({ addr_R.x,addr_R.z - 2 })) addNorth(1);
@@ -192,6 +197,11 @@ void Map::markSouthWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z + 4][add_L.x + 1] = "0";
 		map_A[add_L.z + 4][add_L.x - 1] = "0";
 	}
+	else if ((wallset.left == WallType::type16 && wallset.right == WallType::type17) ||
+		(wallset.left == WallType::type16 && wallset.right == WallType::type10) ||
+		(wallset.left == WallType::type10 && wallset.right == WallType::type17)) {
+		return;
+	}
 	else 
 	{
 		if (!existTile_R({ addr_R.x,addr_R.z + 2 })) addSouth(1);
@@ -245,6 +255,11 @@ void Map::markWestWall(MapAddress addr_R, WallSet wallset) {
 		map_A[add_L.z		 ][add_L.x - 5] = "0";
 		map_A[add_L.z - 1][add_L.x - 4] = "0";
 		map_A[add_L.z + 1][add_L.x - 4] = "0";
+	}
+	else if ((wallset.left == WallType::type16 && wallset.right == WallType::type17) ||
+		(wallset.left == WallType::type16 && wallset.right == WallType::type10) ||
+		(wallset.left == WallType::type10 && wallset.right == WallType::type17)) {
+		return;
 	}
 	else 
 	{
@@ -301,6 +316,11 @@ if (wallset.left == WallType::type10 && wallset.center == WallType::center_n && 
 		map_A[add_L.z - 1][add_L.x + 4] = "0";
 		map_A[add_L.z + 1][add_L.x + 4] = "0";
 	}
+	else if ((wallset.left == WallType::type16 && wallset.right == WallType::type17) ||
+		(wallset.left == WallType::type16 && wallset.right == WallType::type10) ||
+		(wallset.left == WallType::type10 && wallset.right == WallType::type17)) {
+	return;
+}
 	else {
 		if (!existTile_R({ addr_R.x + 2,addr_R.z })) addEast(1);
 		vector<vector<string>> wall = {
@@ -487,7 +507,7 @@ void Map::paintTile(vector<vector<string>>& tile, const WallSet& wallset) {
 		break;
 	}
 	if (tile[4][1] == "-" && wallset.left != WallType::type16) tile[4][1] = "0";
-	if (tile[4][2] == "-" && wallset.left != WallType::type16 && wallset.right != WallType::type16) tile[4][2] = "0";
+	if (tile[4][2] == "-" && wallset.left != WallType::type16 && wallset.right != WallType::type17) tile[4][2] = "0";
 	if (tile[4][3] == "-" && wallset.right != WallType::type16) tile[4][3] = "0";
 
 	// ‹ó”’‚¤‚ß‚¤‚ß

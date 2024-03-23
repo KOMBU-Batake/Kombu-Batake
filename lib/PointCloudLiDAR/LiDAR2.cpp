@@ -149,12 +149,12 @@ WallSet LiDAR2::getWallType(const LiDAR_degree& direction)
     if (pointsSet.leftClosest < 6) {
       float var = Variance2(pointsSet.model_left, (int)pointsSet.model_left.size());
       if (var < 1) wallSet.left = WallType::type16;
-      cout << "variance L : " << var << endl;
+      //cout << "variance L : " << var << endl;
     }
     if (pointsSet.rightClosest < 6) {
 			float var = Variance2(pointsSet.model_right, (int)pointsSet.model_right.size());
       if (var < 1) wallSet.right = WallType::type17;
-      cout << "variance R : " << var << endl;
+      //cout << "variance R : " << var << endl;
 		}
     vector<int> featurePoints;
     if (wallSet.left != WallType::type16 && wallSet.right != WallType::type17) featurePoints = VectorTracer(pointsSet);

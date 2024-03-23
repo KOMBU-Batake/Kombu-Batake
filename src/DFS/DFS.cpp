@@ -8,11 +8,11 @@ void DFS() {
 	obstacleState obstacle = colorsensor.obstacle();
 
 	//mapper.printMap();
-	cout << "DFS" << endl;
+	std::cout << "DFS" << endl;
 	int count_DFS = 0;
 	while (robot->step(timeStep) != -1) {
 		count_DFS++;
-		cout << "count DFS: " << count_DFS << endl;
+		std::cout << "count DFS: " << count_DFS << endl;
 		// 角度(方位)を取得
 		double angle = gyro.getGyro();
 
@@ -25,10 +25,10 @@ void DFS() {
 		WallSet back_mp = lidar2.getWallType(LiDAR_degree::BACK);
 		WallSet left_mp = lidar2.getWallType(LiDAR_degree::LEFT);
 		WallSet right_mp = lidar2.getWallType(LiDAR_degree::RIGHT);
-		cout << "front: " << (int)front_mp.left << " " << (int)front_mp.center << " " << (int)front_mp.right << " / ";
-		cout << "back: " << (int)back_mp.left << " " << (int)back_mp.center << " " << (int)back_mp.right << " / ";
-		cout << "left: " << (int)left_mp.left << " " << (int)left_mp.center << " " << (int)left_mp.right << " / ";
-		cout << "right: " << (int)right_mp.left << " " << (int)right_mp.center << " " << (int)right_mp.right << endl;
+		std::cout << "front: " << (int)front_mp.left << " " << (int)front_mp.center << " " << (int)front_mp.right << " / ";
+		std::cout << "back: " << (int)back_mp.left << " " << (int)back_mp.center << " " << (int)back_mp.right << " / ";
+		std::cout << "left: " << (int)left_mp.left << " " << (int)left_mp.center << " " << (int)left_mp.right << " / ";
+		std::cout << "right: " << (int)right_mp.left << " " << (int)right_mp.center << " " << (int)right_mp.right << endl;
 
 		// 壁を提出用マップに登録
 		if (abs(angle - 90) < 5) {
@@ -43,7 +43,7 @@ void DFS() {
 		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 			mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
 		}
-		mapper.printMap();
+		//mapper.printMap();
 		
 		// 側面カメラで落とし穴の確認
 		myCam.update();
@@ -52,20 +52,21 @@ void DFS() {
 
 		// 進める方向を探す
 		canGoSet cango_set = lidar2.identifyCanGo();
-		// 斜めの選択肢を吟味
-		if ((int)cango_set.front < 3 || (int)cango_set.left < 3) cango_set.front_left = canGo::NO;
-		if ((int)cango_set.front < 3 || (int)cango_set.right < 3) cango_set.front_right = canGo::NO;
-
-		// 落とし穴の考慮
-		if (obstacle.leftHoleState || obstacle.rightHoleState) cango_set.front = canGo::NO;
-		if (left_hole[0] || left_hole[1]) cango_set.left = canGo::NO;
-		if (right_hole[0] || right_hole[1]) cango_set.right = canGo::NO;
-
+		cout << "front: " << (int)cango_set.front << " left: " << (int)cango_set.left << " right: " << (int)cango_set.right << " back: " << (int)cango_set.back << " front_left: " << (int)cango_set.front_left << " front_right: " << (int)cango_set.front_right << endl;
 		// 無理やり行ってもいいのか
 		reallyAbleToGo(cango_set.front, front_mp);
 		reallyAbleToGo(cango_set.left, left_mp);
 		reallyAbleToGo(cango_set.right, right_mp);
 		reallyAbleToGo(cango_set.back, back_mp);
+		// 斜めの選択肢を吟味
+		if ((int)cango_set.front < 3 || (int)cango_set.left < 3) cango_set.front_left = canGo::NO;
+		if ((int)cango_set.front < 3 || (int)cango_set.right < 3) cango_set.front_right = canGo::NO;
+		cout << "front: " << (int)cango_set.front << " left: " << (int)cango_set.left << " right: " << (int)cango_set.right << " back: " << (int)cango_set.back << " front_left: " << (int)cango_set.front_left << " front_right: " << (int)cango_set.front_right << endl;
+
+		// 落とし穴の考慮
+		if (obstacle.leftHoleState || obstacle.rightHoleState) cango_set.front = canGo::NO;
+		if (left_hole[0] || left_hole[1]) cango_set.left = canGo::NO;
+		if (right_hole[0] || right_hole[1]) cango_set.right = canGo::NO;
 
 		// 探索用マップに記録 後ろには書き込まない(落とし穴の確認ができないから)
 		mapperS.markAroundStatus({ (int)cango_set.front < 3,
@@ -75,7 +76,7 @@ void DFS() {
 															 (int)cango_set.front_left < 3,
 															 (int)cango_set.front_right < 3 }, 
 															 angle, count_DFS == 1);
-		mapperS.printMap();
+		//mapperS.printMap();
 
 		// タイルの情報を取得
 		vector<TileState> front_tile(2), back_tile(2), left_tile(2), right_tile(2), front_left_tile(2), front_right_tile(2);
@@ -85,24 +86,34 @@ void DFS() {
 		right_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::RIGHT);
 		front_left_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::FRONT_LEFT);
 		front_right_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::FRONT_RIGHT);
+		cout << "front left:" << (int)front_left_tile[0] << " front right:" << (int)front_right_tile[0] << endl;
 
 		// 進行方向の選択
 		canGo canGoFront = judgeCanGo(front_tile, (int)cango_set.front < 3);
-		cout << "front tile:" << (int)front_tile[0] << " " << (int)front_tile[1] << endl;
+		std::cout << "front tile:" << (int)front_tile[0] << " " << (int)front_tile[1] << endl;
 		canGo canGoBack = judgeCanGo(back_tile, (int)cango_set.back < 3);
 		canGo canGoLeft = judgeCanGo(left_tile, (int)cango_set.left < 3);
 		canGo canGoRight = judgeCanGo(right_tile, (int)cango_set.right < 3);
 		canGo canGoFrontLeft = judgeCanGo(front_left_tile, (int)cango_set.front_left < 3);
 		canGo canGoFrontRight = judgeCanGo(front_right_tile, (int)cango_set.front_right < 3);
 
-		cout << "front: " << (int)canGoFront << " left: " << (int)canGoLeft << " right: " << (int)canGoRight << " back: " << (int)canGoBack << " front_left: " << (int)canGoFrontLeft << " front_right: " << (int)canGoFrontRight << endl;
+		std::cout << "front: " << (int)canGoFront << " left: " << (int)canGoLeft << " right: " << (int)canGoRight << " back: " << (int)canGoBack << " front_left: " << (int)canGoFrontLeft << " front_right: " << (int)canGoFrontRight << endl;
 		
+		// スタックを追加
 		bool hasStack = addToStackDFS(stack, angle, canGoFront, canGoLeft, canGoRight, canGoBack, canGoFrontLeft, canGoFrontRight);
 		if (stack.size() == 0) {
 			break;
 		}
+		cout << stack.back().diagonal.size() << endl;
+		// 重複したスタックを削除
+		deleteVisited(stack);
+		if (stack.size() == 0) {
+			cout << "stack is empty last" << endl;
+			break;
+		}
+
 		MapAddress nextTile = pickSatckDFS(stack);
-		cout << "nextTile: " << nextTile.x << " " << nextTile.z << endl;
+		std::cout << "nextTile: " << nextTile.x << " " << nextTile.z << endl;
 		if (nextTile.x == 123456789) { // スタックが空になったら終了
 			break;
 		}
@@ -118,23 +129,25 @@ void DFS() {
 			dz = tile.z - mapper.currentTile_R.z;
 			isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST);
 			angle = gyro.getGyro();
-			cout << "angle: " << angle << endl;
+			std::cout << "angle: " << angle << endl;
 			if (isHole) {
 				mapper.updatePostion(angle);
 				footprints.push_back(mapper.currentTile_R);
+				std::cout << "update Pos: " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << endl;
 			}
 		}
 		if (!isHole) {
+			std::cout << "Hole is there" << endl;
 			HoleIsThere(angle);
 		}
-		cout << "======================" << endl;
+		std::cout << "======================" << endl;
 		// 斜めにやってきた場合は修正
 		if (!(abs(angle - 90) < 5 ||
 			abs(angle - 180) < 5 ||
 			abs(angle - 270) < 5 ||
 			(angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) {
 			// 修正
-			cout << "fixing angle" << endl;
+			std::cout << "fixing angle" << endl;
 			vector<float> tmp = { 0,90,180,270,360 };
 			auto min = min_element(tmp.begin(), tmp.end(), [&angle](float a, float b) { return abs(a - angle) < abs(b - angle); });
 			tank.setDireciton(*min, 4);
@@ -143,6 +156,7 @@ void DFS() {
 		colorsensor.update();
 		TileState left_col = colorsensor.getLeftColor();
 		colorsensor.getRightColor();
+		cout << "color: " << (int)left_col << endl;
 		obstacle = colorsensor.obstacle();
 		TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
 		if (recordedTile != TileState::START){
@@ -158,12 +172,8 @@ void DFS() {
 				}
 				Area4IsThere(angle);
 				angle = gyro.getGyro();
+				colorsensor.update();
 			}
-		}
-
-		deleteVisited(stack);
-		if (stack.size() == 0) {
-			break;
 		}
 
 		//angle = gyro.getGyro();
@@ -189,6 +199,8 @@ void DFS() {
 		//	}
 		//}
 	}
+
+	cout << "fin" << endl;
 	vector<MapAddress> route = mapperS.getRoute(mapper.startTile_R, footprints);
 	bool isHole = false;
 	for (auto& tile : route) {
@@ -203,8 +215,8 @@ void DFS() {
 		}
 	}
 
-	cout << "final submit " << endl;
-	cout << "current tile: " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << endl;
+	std::cout << "final submit " << endl;
+	std::cout << "current tile: " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << endl;
 	double angle = gyro.getGyro();
 	mapper.updatePostion(angle);
 	route = mapperS.getRoute(mapper.startTile_R, footprints);
@@ -254,7 +266,7 @@ MapAddress pickSatckDFS(vector<stackDFS>& stack)
 	else {
 		stack.pop_back();
 		if (stack.size() == 0) {
-			cout << "stack is empty" << endl;
+			std::cout << "stack is empty" << endl;
 			return next;
 		}
 		return pickSatckDFS(stack); // なかったら再起
@@ -404,7 +416,7 @@ void deleteVisited(vector<stackDFS>& stacks)
 				}
 			}
 		}
-		if (stack->Go.size() == 0 && stack->PartlyVisited.size() == 0) {
+		if (stack->Go.size() == 0 && stack->PartlyVisited.size() == 0 && stack->diagonal.size() == 0) {
 			// delete
 			stack = stacks.erase(stack);
 			--stack;

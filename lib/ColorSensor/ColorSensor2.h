@@ -47,7 +47,7 @@ public:
 			}
 		}
 		double variance = calculateVariance(leftFloorBrightness);
-		if (variance > 10) return TileState::CHECKPOINT;
+		if (variance > 5) return TileState::CHECKPOINT;
 		if (hsv.value < 35 || centerPixel == Vec4b{ 106,106,106 }) return TileState::HOLE;
 		return TileState::OTHER;
 	}
@@ -67,7 +67,7 @@ public:
 			}
 		}
 		double variance = calculateVariance(rightFloorBrightness);
-		if (variance > 10) return TileState::CHECKPOINT;
+		if (variance > 5) return TileState::CHECKPOINT;
 		if (hsv.value < 35 || centerPixel == Vec4b{106,106,106}) return TileState::HOLE;
 		return TileState::OTHER;
 	}

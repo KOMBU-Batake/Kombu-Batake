@@ -74,6 +74,18 @@ public:
 		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 			updatePostion(0, 1);
 		}
+		else if (abs(angle - 45) < 5) {
+			updatePostion(1, 1);
+		}
+		else if (abs(angle - 135) < 5) {
+			updatePostion(1, -1);
+		}
+		else if (abs(angle - 225) < 5) {
+			updatePostion(-1, -1);
+		}
+		else if (abs(angle - 315) < 5) {
+			updatePostion(-1, 1);
+		}
 		//cout << "upedPos: " << currentTile_R.x << " " << currentTile_R.z << " " << angle << endl;
 	}
 
@@ -188,24 +200,28 @@ public:
 	vector<TileState> getTileStateLR(MapAddress addr_R, const double& angle, const LiDAR_degree& direction) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (direction == LiDAR_degree::FRONT_LEFT || direction == LiDAR_degree::FRONT_RIGHT) {
-			if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 90)) ||
-					(direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 180))) {
+			if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 90) < 5) ||
+					(direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 180) < 5)) {
 				if (!existTile_R({ addr_R.x + 2,addr_R.z - 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "1" << endl;
 				return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x + 3]] }; // –k“Œ
 			}
-			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 180)) ||
-							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 270))) {
+			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 180) < 5) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 270) < 5)) {
 				if (!existTile_R({ addr_R.x - 2,addr_R.z - 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "2" << endl;
 				return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x - 3]] }; // –k¼
 			}
-			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 270)) ||
+			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 270) < 5) ||
 							 (direction == LiDAR_degree::FRONT_RIGHT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ) {
 				if (!existTile_R({ addr_R.x - 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "3" << endl;
 				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 3]] }; // “ì¼
 			}
 			else if ((direction == LiDAR_degree::FRONT_LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
-							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 90))) {
+							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 90) < 5)) {
 				if (!existTile_R({ addr_R.x + 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "4" << endl;
 				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 3]] }; // “ì“Œ
 			}
 			else {
