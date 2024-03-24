@@ -16,4 +16,4 @@ Visual Studio 2022で開いたらキレイに?なるから。
 ![alt text](めっちゃおいしいパスタ.png)
 
 # 機体
-MyAwesomeRobot (48).json
+[MyAwesomeRobot (48).json](https://github.com/KOMBU-Batake/Kombu-Batake/blob/master/MyAwesomeRobot%20(48).json)
