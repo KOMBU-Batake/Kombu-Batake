@@ -8,4 +8,12 @@
 * Python 3.12.1
 * Visual Studio 2022
 
-# ファイルが乱雑で汚いとか言わないで
+# ファイルが乱雑で汚いとか言わないで🥺
+Visual Studio 2022で開いたらキレイに?なるから。
+
+# ポスター
+優秀ポスター賞受賞!!  
+![alt text](めっちゃおいしいパスタ.png)
+
+# 機体
+MyAwesomeRobot (48).json
