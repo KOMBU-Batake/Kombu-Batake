@@ -132,6 +132,12 @@ public:
     returnSet.back = isClear(LiDAR_degree::BACK);
     return returnSet;
   }
+
+  // getWallTypeを全方向呼び出してから使用する 直径は8cmで勘定
+  canGo isClear(const LiDAR_degree& direction);
+
+  // 指定した方向にある点
+  int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
 private:
   struct XZrange {
     XZrange(const float xmax, const float xmin, const float zmax, const float zmin) {
@@ -161,8 +167,6 @@ private:
     XZrange() = default;
   };
 
-  // 指定した方向にある点
-  int getCenterNum(LiDAR_degree direction, XZcoordinate centralPos = { 0,0 });
   // 都合よく座標を回転させる
   void rotateToFront(vector<XZcoordinate>& points, LiDAR_degree direction);
   // ベクトルトレーサー法で特徴点を探す
@@ -174,9 +178,6 @@ private:
   WallType identifyLeft(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyRight(NcmPoints& pointSet, vector<int>& featurePoints);
   WallType identifyCenter(NcmPoints& pointSet, const WallSet& wallset, vector<int>& featurePoints);
-
-  // getWallTypeを全方向呼び出してから使用する 直径は8cmで勘定
-  canGo isClear(const LiDAR_degree& direction);
 
   void printLeftRight(const NcmPoints& pointsSet);
 

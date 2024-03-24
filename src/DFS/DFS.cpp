@@ -1,6 +1,6 @@
 #include "DFS.h"
 
-void DFS() {
+void DFS(const double& startTime) {
 	vector<stackDFS> stack;
 	vector<MapAddress> footprints = {mapper.currentTile_R};
 	int tail = -1;

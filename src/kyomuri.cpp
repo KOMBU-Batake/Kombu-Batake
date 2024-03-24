@@ -9,12 +9,12 @@ int main(int argc, char **argv) {
   try
   {
     // ƒfƒoƒCƒX‚Ì—LŒø‰»
+    double startTime = robot->getTime();
+    cout << "start: " << startTime << endl;
     enableDevices();
 
-    cout << "start: " << robot->getTime() << endl;
-
     // [‚³—Dæ’Tõ
-    DFS();
+    DFS(startTime);
 
     cout << "end: " << robot->getTime() << endl;
     delete robot;

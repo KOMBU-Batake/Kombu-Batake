@@ -100,6 +100,16 @@ public:
 
 	void stop(const StopMode mode);
 
+	bool shouldStop() {
+		for (int i = -64; i < 64; i++) {
+			XZcoordinate p = lidar2.readPoint(i);
+			if (p.x * p.x + p.z * p.z < 4.1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/* ‚»‚Ìê‚Å‰ñ“]‚µ‚ÄŒü‚«‚ð‡‚í‚¹‚é */
 	void setDireciton(double direction, double maxspeed /*Å‘å‘¬“x*/, const unit unit = unit::degrees);
 
@@ -160,7 +170,12 @@ private:
 		cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
 		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
 		if (victim == "O") message[8] = 'O'; // The victim type is harmed
-		else  message[8] = 'F';
+		else  if (victim == "F") {
+			message[8] = 'F';
+		}
+		else if (victim == "H") {
+			message[8] = 'H';
+		}
 		emitter->send(message, sizeof(message));
 		robot->step(timeStep);
 	}

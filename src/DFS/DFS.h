@@ -69,7 +69,7 @@ struct stackDFS {
 	vector<MapAddress> diagonal;
 };
 
-void DFS();
+void DFS(const double& startTime);
 
 canGo judgeCanGo(const vector<TileState>& tileState, const bool canGo);
 bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& front, const canGo& left, const canGo& right, const canGo& back, const canGo& front_left, const canGo& front_right);

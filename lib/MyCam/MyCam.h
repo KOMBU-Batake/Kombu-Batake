@@ -1,5 +1,9 @@
 #pragma once
 #include <opencv2/opencv.hpp>
+#include "opencv2/core.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
 #include <iostream>
 #include <webots/Camera.hpp>
 #include <webots/Robot.hpp>
@@ -43,6 +47,16 @@ public:
 		updateRight();
 	}
 
+	void test() {
+		int count = 0;
+		for (int i = 10; i <= 57; i++) {
+			ColorHSV hsv = convertRGBtoHSV(leftInputImage.at<cv::Vec4b>(30, i));
+			if (hsv.value > 150) count++;
+			cout << hsv.value << endl;
+		}
+		cout << count << endl;
+	}
+
 	string leftFindYellow(const float& distance) {
 		if (distance > 9) return "n";
 		bool foundRed = false;
@@ -77,6 +91,29 @@ public:
 				}
 			}
 		}
+
+		//int count = 0;
+		//for (int i = 10; i <= 57; i++) {
+		//	ColorHSV hsv = convertRGBtoHSV(leftInputImage.at<cv::Vec4b>(9, i));
+		//	if (hsv.value > 150) count++;
+		//}
+		//if (count > 15) {
+		//	GPSPosition pos = gps.getPosition();
+		//	if (victimStack.size() == 0) {
+		//		victimStack.push_back(pos);
+		//		cout << "left H " << distance << endl;
+		//		return "H";
+		//	}
+		//	for (auto& past : victimStack) {
+		//		if ((pow(pos.z - past.z, 2) + pow(pos.x - past.x, 2)) < 36) {
+		//			return "n";
+		//		}
+		//	}
+		//	victimStack.push_back(pos);
+		//	cout << "left H " << distance << endl;
+		//	return "H";
+		//}
+
 		return "n";
 	}
 
@@ -114,6 +151,29 @@ public:
 				}
 			}
 		}
+
+		//int count = 0;
+		//for (int i = 10; i <= 57; i++) {
+		//	ColorHSV hsv = convertRGBtoHSV(rightInputImage.at<cv::Vec4b>(9, i));
+		//	if (hsv.value > 150) count++;
+		//}
+		//if (count > 15) {
+		//	GPSPosition pos = gps.getPosition();
+		//	if (victimStack.size() == 0) {
+		//		victimStack.push_back(pos);
+		//		cout << "right H " << distance << endl;
+		//		return "H";
+		//	}
+		//	for (auto& past : victimStack) {
+		//		if ((pow(pos.z - past.z, 2) + pow(pos.x - past.x, 2)) < 36) {
+		//			return "n";
+		//		}
+		//	}
+		//	victimStack.push_back(pos);
+		//	cout << "right H " << distance << endl;
+		//	return "H";
+		//}
+
 		return "n";
 	}
 
@@ -292,6 +352,8 @@ public:
 
 	Mat Leftframe,Rightframe;
 	Mat leftInputImage, rightInputImage;
+
+	void findSquares(const Mat& image, vector<vector<Point> >& squares);
 private:
 	void delay(int ms) {
 		float initTime = (uint8_t)robot->getTime();	// Store starting time (in seconds)
@@ -327,4 +389,17 @@ private:
 		hsv.value = max;
 		return hsv;
 	}
+
+	double angle(Point pt1, Point pt2, Point pt0)
+	{
+		double dx1 = pt1.x - pt0.x;
+		double dy1 = pt1.y - pt0.y;
+		double dx2 = pt2.x - pt0.x;
+		double dy2 = pt2.y - pt0.y;
+		return (dx1 * dx2 + dy1 * dy2) / sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
+	}
+
+	int thresh = 50, N = 11;
+	const char* wndname = "Square Detection Demo";
+	vector<GPSPosition> victimStack;
 };

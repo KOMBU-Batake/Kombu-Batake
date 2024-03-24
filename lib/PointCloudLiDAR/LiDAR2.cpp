@@ -612,18 +612,20 @@ canGo LiDAR2::isClear(const LiDAR_degree& direction) {
   }
   if (ok) return canGo::GO;
 
+  float range = 1;
+
   switch (direction) {
   case LiDAR_degree::FRONT:
-    center = { -3, 6 };
+    center = { -1*range, 6 };
     break;
   case LiDAR_degree::LEFT:
-    center = { -6, -3 };;
+    center = { -6, -1*range };;
     break;
   case LiDAR_degree::BACK:
-    center = { 3, -6 };
+    center = { range, -6 };
     break;
   case LiDAR_degree::RIGHT:
-    center = { 6, 3 };
+    center = { 6, range };
     break;
   }
   ok = true;
@@ -638,16 +640,16 @@ canGo LiDAR2::isClear(const LiDAR_degree& direction) {
 
   switch (direction) {
   case LiDAR_degree::FRONT:
-    center = { 3, 6 };
+    center = { range, 6 };
     break;
   case LiDAR_degree::LEFT:
-    center = { -6, 3 };;
+    center = { -6, range };;
     break;
   case LiDAR_degree::BACK:
-    center = { -3, -6 };
+    center = { -1*range, -6 };
     break;
   case LiDAR_degree::RIGHT:
-    center = { 6, -3 };
+    center = { 6, -1* range };
     break;
   }
 

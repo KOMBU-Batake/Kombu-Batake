@@ -276,7 +276,7 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_x = error_x;
 			last_error_z = error_z;
-			if ((robot->getTime() - startTime_S) > 5.5) break;
+			if ((robot->getTime() - startTime_S) > (timeout_ms / 1000)) break;
 			if (abs(error_z) < 0.05 || robot->step(timeStep) == -1) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
@@ -327,7 +327,7 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_x = error_x;
 			last_error_z = error_z;
-			if ((robot->getTime() - startTime_S) > 5.5) break;
+			if ((robot->getTime() - startTime_S) > (timeout_ms / 1000)) break;
 			if (abs(error_x) < 0.05 || robot->step(timeStep) == -1) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
@@ -377,7 +377,7 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_d = error_d;
 			last_error_vertialdir = error_vertialdir;
-			if ((robot->getTime() - startTime_S) > 6.5) break;
+			if ((robot->getTime() - startTime_S) > (timeout_ms / 1000)) break;
 		} while (abs(dz_d) > 0.05 && abs(dx_d) > 0.05 && robot->step(timeStep) != -1);
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}
