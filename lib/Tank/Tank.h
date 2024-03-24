@@ -8,7 +8,7 @@
 
 #include "../GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../IMU/IMU.h"
-#include "../ColorSensor/ColorSensor.h"
+#include "../ColorSensor/ColorSensor2.h"
 #include "../MyCam/MyCam.h"
 
 using namespace webots;
@@ -44,7 +44,7 @@ extern Robot* robot;
 extern int timeStep;
 extern GlobalPositioningSystem gps;
 extern GyroZ gyro;
-extern ColorSensor colorsensor;
+extern ColorSensor2 colorsensor;
 extern MyCam myCam;
 
 class Tank {
@@ -100,11 +100,21 @@ public:
 
 	void stop(const StopMode mode);
 
+	bool shouldStop() {
+		for (int i = -64; i < 64; i++) {
+			XZcoordinate p = lidar2.readPoint(i);
+			if (p.x * p.x + p.z * p.z < 4.1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/* その場で回転して向きを合わせる */
 	void setDireciton(double direction, double maxspeed /*最大速度*/, const unit unit = unit::degrees);
 
 	/* Ｘ軸方向、Y軸方向にGPSトレースする 位置はあらかたあっている前提で過度な修正はできない。 */
-	bool gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 1000, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
+	bool gpsTrace(const GPSPosition& goal, double speed /*rad/s固定*/, const StopMode stopmode = StopMode::HOLD, int timeout_ms = 5500, Direction_of_Travel direction = Direction_of_Travel::diagonal); // ロボットはすでに進行方向を向いていることを前提とする
 
 	static double pd_cm_to_rad(double cm) { // cmをラジアンに変換
 		return cm / 2.05; // rθ(cm)/r(cm) =θ(rad)
@@ -123,11 +133,11 @@ public:
 	}
 
 	bool checkColor() {
-		colorsensor.update();
-		TileState tileColor = colorsensor.getTileColor();
-		if (tileColor == TileState::HOLE) {
-			return false;
-		}
+		//colorsensor.update();
+		//TileState tileColor = colorsensor.getTileColor();
+		//if (tileColor == TileState::HOLE) {
+		//	return false;
+		//}
 		return true;
 	}
 private:
@@ -150,4 +160,23 @@ private:
 		plus, // 反時計回り
 		minus, // 時計回り
 	};
+
+	void houkoku(const string& victim) {
+		stop(StopMode::BRAKE);
+		robot->step(timeStep * 100);
+		char message[9]; // Here we use a 9 byte array, since sizeof(int + int + char) = 9
+		GPSPosition pos = gps.getPosition(); // Get the current gps position of the robot
+		int victim_pos[2] = { (int)round(pos.x), (int)round(pos.z) };
+		cout << "Victim position: " << victim_pos[0] << " " << victim_pos[1] << endl;
+		memcpy(message, victim_pos, sizeof(victim_pos)); // Copy the victim position into the message array
+		if (victim == "O") message[8] = 'O'; // The victim type is harmed
+		else  if (victim == "F") {
+			message[8] = 'F';
+		}
+		else if (victim == "H") {
+			message[8] = 'H';
+		}
+		emitter->send(message, sizeof(message));
+		robot->step(timeStep);
+	}
 };

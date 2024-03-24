@@ -111,6 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\OpenCV4.8.0\build\include;$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)/include/controller/cpp</AdditionalIncludeDirectories>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -154,36 +155,41 @@
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\src\controller\cpp\TouchSensor.cpp" />
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp" />
-    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp" />
+    <ClCompile Include="lib\ColorSensor\ColorSensor2.cpp" />
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp" />
     <ClCompile Include="lib\IMU\IMU.cpp" />
     <ClCompile Include="lib\MyCam\MyCam.cpp" />
     <ClCompile Include="lib\myMath\myMath.cpp" />
+    <ClCompile Include="lib\PointCloudLiDAR\LiDAR2.cpp" />
     <ClCompile Include="lib\PointCloudLiDAR\PointCloudLiDAR.cpp" />
     <ClCompile Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.cpp" />
     <ClCompile Include="lib\Tank\Tank.cpp" />
-    <ClCompile Include="lib\ToF\ToF.cpp" />
     <ClCompile Include="src\DFS\DFS.cpp" />
     <ClCompile Include="src\kyomuri.cpp" />
     <ClCompile Include="src\Map\Map.cpp" />
+    <ClCompile Include="src\Map\MapForSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\ColorSensor\ColorSensor.h" />
+    <ClInclude Include="lib\ColorSensor\ColorSensor2.h" />
     <ClInclude Include="lib\devices.h" />
-    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h" />
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h" />
     <ClInclude Include="lib\IMU\IMU.h" />
     <ClInclude Include="lib\MyCam\MyCam.h" />
     <ClInclude Include="lib\myMath\myMath.h" />
+    <ClInclude Include="lib\PointCloudLiDAR\LiDAR2.h" />
     <ClInclude Include="lib\PointCloudLiDAR\PointCloudLiDAR.h" />
     <ClInclude Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.h" />
     <ClInclude Include="lib\Tank\Tank.h" />
-    <ClInclude Include="lib\ToF\ToF.h" />
     <ClInclude Include="src\DFS\DFS.h" />
     <ClInclude Include="src\Map\Map.h" />
+    <ClInclude Include="src\Map\MapForSearch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Docs\map.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Docs\壁マップ.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

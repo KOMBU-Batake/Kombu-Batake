@@ -9,12 +9,12 @@
 #include <unordered_set>
 
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
-#include "../../lib/ColorSensor/ColorSensor.h"
+#include "../../lib/ColorSensor/ColorSensor2.h"
+#include "MapForSearch.h"
 
-/* 提出用のマップを作りつつ、DFSにも利用するよ
+/* 提出用のマップを作るよ
  * 
  * 座標の変数名の末尾に_AがついているものはABSOLUTEつまり絶対座標を
  * _RがついているものはRELATIVEつまり相対座標を表すよ
@@ -23,6 +23,7 @@
  * なので絶対座標は負の値を取りえないが、相対座標は負の値を取ることがある
  * 
  * リスト内でのx,zは基本的に絶対的な値だけを使う
+ * MapForSearch.hで探索用のマップ?を作る
  */
 
 using namespace webots;
@@ -30,19 +31,11 @@ using namespace std;
 
 extern Robot* robot;
 extern GlobalPositioningSystem gps;
+extern MapperS mapperS;
 
 extern int timeStep;
 
 typedef struct MapAddress MapAddress;
-
-struct MapAddress {
-	int x;
-	int z;
-
-	bool operator==(const MapAddress& other) const {
-		return x == other.x && z == other.z;
-	}
-};
 
 enum class VictimState {
 	H, // 重度の被災者
@@ -81,10 +74,23 @@ public:
 		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
 			updatePostion(0, 1);
 		}
+		else if (abs(angle - 45) < 5) {
+			updatePostion(1, 1);
+		}
+		else if (abs(angle - 135) < 5) {
+			updatePostion(1, -1);
+		}
+		else if (abs(angle - 225) < 5) {
+			updatePostion(-1, -1);
+		}
+		else if (abs(angle - 315) < 5) {
+			updatePostion(-1, 1);
+		}
 		//cout << "upedPos: " << currentTile_R.x << " " << currentTile_R.z << " " << angle << endl;
 	}
 
 	void markTileAs(MapAddress add_R, TileState tilestate, const double& angle) {
+		// 配列のマスがない分は勝手に追加する
 		if (add_R.x < left_top_R.x) {
 			addWest(left_top_R.x - add_R.x);
 		} else if (add_R.x > right_bottom_R.x) {
@@ -100,10 +106,10 @@ public:
 		
 		// 穴の場合は無条件に2を入れる
 		if (tilestate == TileState::HOLE) {
-			if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = "2";
-			if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = "2";
-			if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = "2";
-			if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = "2";
+			ifBarOR0Write(add_L.x - 1, add_L.z - 1, "2");
+			ifBarOR0Write(add_L.x + 1, add_L.z - 1, "2");
+			ifBarOR0Write(add_L.x - 1, add_L.z + 1, "2");
+			ifBarOR0Write(add_L.x + 1, add_L.z + 1, "2");
 
 			// 壁の情報が入るマス
 			ifBarWrite(add_L.x, add_L.z - 1, "0");
@@ -121,36 +127,36 @@ public:
 			){
 			if (!(add_R.x % 2 == 0 && add_R.z % 2 == 0)) tile = TileStateMap[tilestate];
 			if (abs(angle - 90) < 5) {
-				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile; // 下3行要らんかも
-				if (map_A[add_L.z    ][add_L.x + 1] == "-") map_A[add_L.z    ][add_L.x + 1] = "0";
-				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x + 2] == "-") map_A[add_L.z - 1][add_L.x + 2] = "0";
-				if (map_A[add_L.z    ][add_L.x + 2] == "-") map_A[add_L.z    ][add_L.x + 2] = "0";
-				if (map_A[add_L.z + 1][add_L.x + 2] == "-") map_A[add_L.z + 1][add_L.x + 2] = "0";
+				ifBarWrite(add_L.x + 1, add_L.z - 1, tile); // 下3行要らんかも
+				ifBarWrite(add_L.x + 1, add_L.z    , "0");
+				ifBarWrite(add_L.x + 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x + 2, add_L.z - 1, "0");
+				ifBarWrite(add_L.x + 2, add_L.z    , "0");
+				ifBarWrite(add_L.x + 2, add_L.z + 1, "0");
 			}
 			else if (abs(angle - 180) < 5) {
-				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x    ] == "-") map_A[add_L.z - 1][add_L.x    ] = "0";
-				if (map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z - 2][add_L.x - 1] == "-") map_A[add_L.z - 2][add_L.x - 1] = "0";
-				if (map_A[add_L.z - 2][add_L.x    ] == "-") map_A[add_L.z - 2][add_L.x    ] = "0";
-				if (map_A[add_L.z - 2][add_L.x + 1] == "-") map_A[add_L.z - 2][add_L.x + 1] = "0";
+				ifBarWrite(add_L.x - 1, add_L.z - 1, tile);
+				ifBarWrite(add_L.x    , add_L.z - 1, "0");
+				ifBarWrite(add_L.x + 1, add_L.z - 1, tile);
+				ifBarWrite(add_L.x - 1, add_L.z - 2, "0");
+				ifBarWrite(add_L.x    , add_L.z - 2, "0");
+				ifBarWrite(add_L.x + 1, add_L.z - 2, "0");
 			}
 			else if (abs(angle - 270) < 5) {
-				if (map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z    ][add_L.x - 1] == "-") map_A[add_L.z    ][add_L.x - 1] = "0";
-				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z - 1][add_L.x - 2] == "-") map_A[add_L.z - 1][add_L.x - 2] = "0";
-				if (map_A[add_L.z    ][add_L.x - 2] == "-") map_A[add_L.z    ][add_L.x - 2] = "0";
-				if (map_A[add_L.z + 1][add_L.x - 2] == "-") map_A[add_L.z + 1][add_L.x - 2] = "0";
+				ifBarWrite(add_L.x - 1, add_L.z - 1, tile);
+				ifBarWrite(add_L.x - 1, add_L.z    , "0");
+				ifBarWrite(add_L.x - 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x - 2, add_L.z - 1, "0");
+				ifBarWrite(add_L.x - 2, add_L.z    , "0");
+				ifBarWrite(add_L.x - 2, add_L.z + 1, "0");
 			}
 			else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-				if (map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-				if (map_A[add_L.z + 1][add_L.x    ] == "-") map_A[add_L.z + 1][add_L.x    ] = "0";
-				if (map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
-				if (map_A[add_L.z + 2][add_L.x - 1] == "-") map_A[add_L.z + 2][add_L.x - 1] = "0";
-				if (map_A[add_L.z + 2][add_L.x    ] == "-") map_A[add_L.z + 2][add_L.x    ] = "0";
-				if (map_A[add_L.z + 2][add_L.x + 1] == "-") map_A[add_L.z + 2][add_L.x + 1] = "0";
+				ifBarWrite(add_L.x - 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x    , add_L.z + 1, "0");
+				ifBarWrite(add_L.x + 1, add_L.z + 1, tile);
+				ifBarWrite(add_L.x - 1, add_L.z + 2, "0");
+				ifBarWrite(add_L.x    , add_L.z + 2, "0");
+				ifBarWrite(add_L.x + 1, add_L.z + 2, "0");
 			}
 			return;
 		}
@@ -174,10 +180,10 @@ public:
 		tile = TileStateMap[tilestate];
 
 		// タイルの情報が入るマス
-		if (map_A[add_L.z - 1][add_L.x - 1] == "0" || map_A[add_L.z - 1][add_L.x - 1] == "-") map_A[add_L.z - 1][add_L.x - 1] = tile;
-		if (map_A[add_L.z - 1][add_L.x + 1] == "0" || map_A[add_L.z - 1][add_L.x + 1] == "-") map_A[add_L.z - 1][add_L.x + 1] = tile;
-		if (map_A[add_L.z + 1][add_L.x - 1] == "0" || map_A[add_L.z + 1][add_L.x - 1] == "-") map_A[add_L.z + 1][add_L.x - 1] = tile;
-		if (map_A[add_L.z + 1][add_L.x + 1] == "0" || map_A[add_L.z + 1][add_L.x + 1] == "-") map_A[add_L.z + 1][add_L.x + 1] = tile;
+		ifBarOR0Write(add_L.x - 1, add_L.z - 1, tile);
+		ifBarOR0Write(add_L.x + 1, add_L.z - 1, tile);
+		ifBarOR0Write(add_L.x - 1, add_L.z + 1, tile);
+		ifBarOR0Write(add_L.x + 1, add_L.z + 1, tile);
 
 		// 壁の情報が入るマス
 		ifBarWrite(add_L.x, add_L.z -1, "0");
@@ -191,6 +197,75 @@ public:
 	void markAroundTile(TileState front, TileState back, TileState left, TileState right, float angle = -1);
 
 	TileState getTileState(MapAddress addr_R, int16_t relative_angle = 1);
+
+	vector<TileState> getTileStateLR(MapAddress addr_R, const double& angle, const LiDAR_degree& direction) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (direction == LiDAR_degree::FRONT_LEFT || direction == LiDAR_degree::FRONT_RIGHT) {
+			if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 90) < 5) ||
+					(direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 180) < 5)) {
+				if (!existTile_R({ addr_R.x + 2,addr_R.z - 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "1" << endl;
+				return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x + 3]] }; // 北東
+			}
+			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 180) < 5) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 270) < 5)) {
+				if (!existTile_R({ addr_R.x - 2,addr_R.z - 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "2" << endl;
+				return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x - 3]] }; // 北西
+			}
+			else if ((direction == LiDAR_degree::FRONT_LEFT && abs(angle - 270) < 5) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ) {
+				if (!existTile_R({ addr_R.x - 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "3" << endl;
+				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 3]] }; // 南西
+			}
+			else if ((direction == LiDAR_degree::FRONT_LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+							 (direction == LiDAR_degree::FRONT_RIGHT && abs(angle - 90) < 5)) {
+				if (!existTile_R({ addr_R.x + 2,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+				cout << "4" << endl;
+				return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 3]] }; // 南東
+			}
+			else {
+				cout << "unrelireble angle at getTileStateLR" << endl;
+				return { TileState::UNKNOWN,TileState::UNKNOWN };
+			}
+		}
+
+		if ((direction == LiDAR_degree::FRONT && abs(angle - 180) < 5) ||
+				(direction == LiDAR_degree::LEFT && abs(angle - 90) < 5) ||
+				(direction == LiDAR_degree::BACK && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(direction == LiDAR_degree::RIGHT && abs(angle - 270) < 5)) {
+			if (!existTile_R({ addr_R.x,addr_R.z-2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+			return { TileStateMap2[map_A[addr_L.z - 3][addr_L.x - 1]],TileStateMap2[map_A[addr_L.z - 3][addr_L.x + 1]] }; // 北
+		}
+		
+		if ((direction == LiDAR_degree::FRONT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(direction == LiDAR_degree::LEFT && abs(angle - 270) < 5) ||
+				(direction == LiDAR_degree::BACK && abs(angle - 180) < 5) ||
+				(direction == LiDAR_degree::RIGHT && abs(angle - 90) < 5)) {
+			if (!existTile_R({ addr_R.x,addr_R.z + 2 })) return { TileState::UNKNOWN,TileState::UNKNOWN };	
+			return { TileStateMap2[map_A[addr_L.z + 3][addr_L.x - 1]],TileStateMap2[map_A[addr_L.z + 3][addr_L.x + 1]] }; // 南
+		}
+
+		if ((direction == LiDAR_degree::FRONT && abs(angle - 90) < 5) ||
+				(direction == LiDAR_degree::LEFT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) ||
+				(direction == LiDAR_degree::BACK && abs(angle - 270) < 5) ||
+				(direction == LiDAR_degree::RIGHT && abs(angle - 180) < 5)) {
+			if (!existTile_R({ addr_R.x + 2,addr_R.z })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+			return { TileStateMap2[map_A[addr_L.z - 1][addr_L.x + 3]],TileStateMap2[map_A[addr_L.z + 1][addr_L.x + 3]] }; // 東
+		}
+
+		if ((direction == LiDAR_degree::FRONT && abs(angle - 270) < 5) ||
+				(direction == LiDAR_degree::LEFT && abs(angle - 180) < 5) ||
+				(direction == LiDAR_degree::BACK && abs(angle - 90) < 5) ||
+				(direction == LiDAR_degree::RIGHT && ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)))) {
+			if (!existTile_R({ addr_R.x - 2,addr_R.z })) return { TileState::UNKNOWN,TileState::UNKNOWN };
+			return { TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 3]],TileStateMap2[map_A[addr_L.z + 1][addr_L.x - 3]] }; // 西
+		}
+
+		cout << "unrelireble angle at getTileStateLR" << endl;
+		return { TileState::UNKNOWN,TileState::UNKNOWN };
+	}
 
 	// 中の壁までは調べない
 	void getAroundTileState(MapAddress addr_R, TileState& front, TileState& back, TileState& left, TileState& right, double angle = -1);
@@ -219,22 +294,43 @@ public:
 	bool existTile_R2(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (addr_L.x - 2 < 0) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		else if (addr_L.z - 2 < 0) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		else if (addr_L.x + 3 > map_A[0].size()) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		else if (addr_L.z + 3 > map_A.size()) {
-			cout << "existTile_R2" << endl;
+			//cout << "existTile_R2" << endl;
 			return false;
 		}
 		return true;
+	}
+
+	bool isAllVisited(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (map_A[addr_L.z - 1][addr_L.x - 1] != "-" &&
+				map_A[addr_L.z - 1][addr_L.x + 1] != "-" &&
+				map_A[addr_L.z + 1][addr_L.x - 1] != "-" &&
+				map_A[addr_L.z + 1][addr_L.x + 1] != "-") {
+			return true;
+		}
+		return false;
+	}
+
+	TileState getCurrentTile(const MapAddress& addr_R) {
+		MapAddress addr_L = convertRtoListPoint(addr_R);
+		if (map_A[addr_L.z - 1][addr_L.x - 1] == map_A[addr_L.z - 1][addr_L.x + 1] &&
+			map_A[addr_L.z - 1][addr_L.x + 1] == map_A[addr_L.z + 1][addr_L.x - 1] &&
+			map_A[addr_L.z + 1][addr_L.x - 1] == map_A[addr_L.z + 1][addr_L.x + 1]) {
+			return TileStateMap2[map_A[addr_L.z - 1][addr_L.x - 1]];
+		}
+		return TileState::WALL;
 	}
 
 	// マップ全体を表示する
@@ -246,6 +342,11 @@ public:
 	MapAddress startTile_A = { 1, 1 }, startTile_R = { 1, 1 };
 	MapAddress currentTile_A = { 1, 1 }, currentTile_R = { 1, 1 };
 	unordered_set<TileState> ColoredTiles = { TileState::CHECKPOINT, TileState::AREA1to2, TileState::AREA2to3, TileState::AREA3to4, TileState::AREA1to4, TileState::SWAMP };
+
+	/* 相対座標からリストのタイル中心の座標に変換 */
+	MapAddress convertRtoListPoint(const MapAddress& addr_R) {
+		return convertAtoListPoint(convertRtoA(addr_R));
+	}
 
 private: // ************************************************************************************
 	/* なんだコレ */
@@ -273,17 +374,12 @@ private: // ********************************************************************
 		return { (addr_list.x) / 2, (addr_list.z) / 2 };
 	}
 
-	/* 相対座標からリストのタイル中心の座標に変換 */
-	MapAddress convertRtoListPoint(const MapAddress& addr_R) {
-		return convertAtoListPoint(convertRtoA(addr_R));
-	}
-
 	/* リストのタイル中心の座標から相対座標に変換 */
 	MapAddress convertListPointtoR(const MapAddress& addr_list) {
 		return convertAtoR(convertListPointtoA(addr_list));
 	}
 
-	// 中心が存在するか
+	// 中心が存在するか つまり手前までしか判定できない
 	bool existTile_R(const MapAddress& addr_R) {
 		MapAddress addr_L = convertRtoListPoint(addr_R);
 		if (addr_L.x < 0) {
@@ -320,6 +416,12 @@ private: // ********************************************************************
 
 	void ifBarWrite(int x, int z, string part) {
 		if (map_A[z][x] == "-") {
+			map_A[z][x] = part;
+		}
+	}
+
+	void ifBarOR0Write(int x, int z, string part) {
+		if (map_A[z][x] == "-" || map_A[z][x] == "0") {
 			map_A[z][x] = part;
 		}
 	}

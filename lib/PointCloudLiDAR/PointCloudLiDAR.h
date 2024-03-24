@@ -12,7 +12,6 @@
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
 #include "../../lib/myMath/myMath.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "./RecognizingSpace/RecognizingSpace.h"
 
 extern GyroZ gyro;
@@ -46,6 +45,9 @@ enum class WallType :uint8_t{
 	center_n, // 14
 
 	gomi, // 15
+
+	type16, // 16
+	type17, // 17
 };
 
 typedef struct WallSet WallSet;
@@ -81,6 +83,40 @@ enum class estimatedWalls :uint8_t{
 	gomi,
 };
 
+enum class LiDAR_degree {
+	RELATIVE, // 機体から見た相対的な角度
+	ABSOLUTE, // フィールドから見た絶対的な角度(方位とも言える)
+
+	LEFT, // 機体の左側
+	RIGHT,
+	FRONT,
+	BACK,
+
+	FRONT_RIGHT,
+	FRONT_LEFT,
+	BACK_RIGHT,
+	BACK_LEFT,
+};
+
+enum class WallState { // これから尋常じゃないレベルで増える予定は未定
+	noWALL,     // 0
+	WALL,       // 1
+	leftWALL,   // 2
+	rightWALL,  // 3
+	cneterWALL, // 4
+	maybeWALL,  // 5
+	maybeNOWALL,// 6
+	unknown,    // 7 
+	visited, // LiDARのクラスでは使わない
+};
+
+enum class relativeDirection {
+	FRONT,
+	RIGHT,
+	BACK,
+	LEFT,
+};
+
 /* 壁のモデルを格納するクラス
  * 中心から見た左右のデータの個数、モデルの値を格納する
  * 測定範囲は左右5cmずつの計10cmである
@@ -96,12 +132,6 @@ public:
 	WallSet wallSet = { WallType::typeNo, WallType::center_n, WallType::typeNo };
 private:
 	static int16_t counter;
-	//map<TagMinDistance, float> minDistanceMap = {
-	//	{TagMinDistance::Nine, (float)8},
-	//	{TagMinDistance::Fifteen, (float)14},
-	//	{TagMinDistance::TwentyOne, (float)20},
-	//	{TagMinDistance::Nine_and_Fifteen, (float)9}
-	//};
 };
 
 class PointCloudLiDAR {
@@ -248,7 +278,7 @@ public:
 	void move_update_display(GPSPosition goalPos, int j, recoedingMode mode);
 
 	void printNum();
-private:
+protected:
 	const float* rangeImage = 0;
 	MyMath myMath;
 

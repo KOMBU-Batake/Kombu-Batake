@@ -1,11 +1,20 @@
 #pragma once
 
+/* 1ピクセルカラーセンサ用のクラス */
+
+#include <opencv2/opencv.hpp>
 #include <webots/Robot.hpp>
 #include <webots/Camera.hpp>
 #include <iostream>
 #include <algorithm>
 #include <map>
 
+#include "../PointCloudLiDAR/LiDAR2.h"
+
+extern LiDAR2 lidar2;
+extern int timeStep;
+extern Camera* colorCam;
+extern webots::Robot* robot;
 using namespace webots;
 using namespace std;
 
@@ -20,32 +29,39 @@ enum class TileState {
 	AREA2to3 = 7,
 	AREA3to4 = 8,
 	AREA1to4 = 9,
-	UNKNOWN, // = "-
+	UNKNOWN, // = "-"
 	visited, // LiDARのクラスでは使わない
+	partly_visited,
 };
 
-typedef struct
-{
+struct ColorRGB {
 	int red;
 	int green;
 	int blue;
-} ColorRGB;
 
-typedef struct
-{
+	bool operator==(const ColorRGB& other) const {
+		return red == other.red && green == other.green && blue == other.blue;
+	}
+};
+
+ struct ColorHSV {
 	float hue;
 	float saturation;
 	float value;
-} ColorHSV;
 
-typedef struct {
+	bool operator==(const ColorHSV& other) const {
+		return hue == other.hue && saturation == other.saturation && value == other.value;
+	}
+};
+
+struct ColorRange {
 	int hue; // hueの理想的な値
 	int hue_diff; // hueの許容誤差
 	int saturation; // 以下同文
 	int saturation_diff;
 	int value;
 	int value_diff;
-} ColorRange;
+};
 
 enum class Colors {
 	WHITE,
@@ -62,20 +78,18 @@ enum class Colors {
 class ColorSensor
 {
 public:
-	ColorSensor(webots::Camera* camera){ this->colorsen = camera; } // colorCamをexternすればいちいちこんなことしなくてもよくね？
-
 	/* これを実行しないとクラス内のどの関数でも値が更新されないままなので注意 */
 	void update() {
-		const unsigned char* rgb = colorsen->getImage();
+		const unsigned char* rgb = colorCam->getImage();
 		RGB.red = rgb[2];
 		RGB.green = rgb[1];
 		RGB.blue = rgb[0];
 	}
-	uint8_t getRed() { return RGB.red; }
-	uint8_t getGreen() { return RGB.green; }
-	uint8_t getBlue() { return RGB.blue; }
+	uint8_t getRed() const { return RGB.red; }
+	uint8_t getGreen() const { return RGB.green; }
+	uint8_t getBlue() const { return RGB.blue; }
 
-	ColorHSV getHSV() {
+	ColorHSV getHSV() const {
 		ColorHSV hsv = {512.0,0,0};
 		uint8_t max = std::max(RGB.red, std::max(RGB.green, RGB.blue));
 		uint8_t min = std::min(RGB.red, std::min(RGB.green, RGB.blue));
@@ -144,22 +158,13 @@ public:
 	}
 
 	ColorRGB RGB = { 0,0,0 };
-private:
-	webots::Camera* colorsen;
-	// 落とし穴と普通の床、チェックポイントタイルの定義は別で特別に行ふ
-	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // 許容誤差はとりま5 実験では2未満
-	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };
-	ColorRange swampRange= { 40, 5, 53, 5, 197, 5 };
-	ColorRange greenRange = { 120, 5, 87, 5, 244, 5 };
-	ColorRange redRange = { 0, 5, 77, 5, 248, 5 };
+protected:
 
 	bool isTheColor(const ColorRange& range, const ColorHSV& hsv) {
 		if (abs(hsv.hue - range.hue) <= range.hue_diff && abs(hsv.saturation - range.saturation) <= range.saturation_diff && abs(hsv.value - range.value) <= range.value_diff) {
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	std::map<Colors, TileState> tileColorMap = {
@@ -172,4 +177,12 @@ private:
 		{Colors::RED, TileState::AREA3to4},
 		{Colors::SWAMP, TileState::SWAMP},
 	};
+
+private:
+	// 落とし穴と普通の床、チェックポイントタイルの定義は別で特別に行ふ
+	ColorRange blueRange = { 240, 5, 77, 5, 248, 5 }; // 許容誤差はとりま5 実験では2未満
+	ColorRange purpleRange = { 268, 5, 74, 5, 214, 5 };
+	ColorRange swampRange = { 40, 5, 53, 5, 197, 5 };
+	ColorRange greenRange = { 120, 5, 87, 5, 244, 5 };
+	ColorRange redRange = { 0, 5, 77, 5, 248, 5 };
 };

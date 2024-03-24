@@ -104,6 +104,7 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 	if (unit == unit::rad) direction = pd_rad_to_degrees(direction);
 	//cout << "direction: " << direction << endl;
 	double startAngle = gyro.getGyro();
+	if (abs(startAngle - direction) <= 1 || abs(startAngle - direction) >= 355) return;
 	maxspeed = abs(maxspeed);
 	if (maxspeed > maxVelocity) maxspeed = maxVelocity;
 	
@@ -173,9 +174,18 @@ void Tank::setDireciton(double direction, double maxspeed, const unit unit)
 		leftMotor->setVelocity(-1 * maxspeed * u);
 		rightMotor->setVelocity(maxspeed * u);
 		last_error = error;
+
+		if (abs(error) > 5) {
+			GPSPosition presentPos = gps.getPosition();
+			lidar2.update(presentPos);
+			myCam.update();
+			string leftCamColor = myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+			string rightCamColor = myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+			if (leftCamColor != "n") houkoku(leftCamColor);
+			if (rightCamColor != "n") houkoku(rightCamColor);
+		}
 	}
 	stop(StopMode::HOLD);
-	robot->step(160);
 }
 
 // 出でよ!!サイクロマティック複雑度53の力!!
@@ -230,11 +240,16 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		// PID
 		double Kp_x = 0.5, Ki_x = 0.01, Kd_x = 15;
 		double Kp_z = 0.6, Ki_z = 0, Kd_z = 0;
+		presentPosRAW = gps.getPositionRAW();
+		presentPos = gps.filter(presentPosRAW);
+		double startTime_S = robot->getTime();
 		while (1) {
-			if (!checkColor()) {
-				stop(StopMode::HOLD);
-				return false;
-			}
+			lidar2.update(presentPos);
+			myCam.update();
+			string leftCamColor = myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+			string rightCamColor = myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+			if (leftCamColor != "n") houkoku(leftCamColor);
+			if (rightCamColor != "n") houkoku(rightCamColor);
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// Ｘ軸方向のずれ
@@ -261,6 +276,7 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_x = error_x;
 			last_error_z = error_z;
+			if ((robot->getTime() - startTime_S) > (timeout_ms / 1000)) break;
 			if (abs(error_z) < 0.05 || robot->step(timeStep) == -1) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
@@ -275,11 +291,16 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		// PID
 		double Kp_x = 0.6, Ki_x = 0, Kd_x = 0;
 		double Kp_z = 0.5, Ki_z = 0.01, Kd_z = 15;
+		presentPosRAW = gps.getPositionRAW();
+		presentPos = gps.filter(presentPosRAW);
+		double startTime_S = robot->getTime();
 		while (1) {
-			if (!checkColor()) {
-				stop(StopMode::HOLD);
-				return false;
-			}
+			lidar2.update(presentPos);
+			myCam.update();
+			string leftCamColor = myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+			string rightCamColor = myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+			if (leftCamColor != "n") houkoku(leftCamColor);
+			if (rightCamColor != "n") houkoku(rightCamColor);
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			// Z軸方向のずれ
@@ -306,6 +327,7 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_x = error_x;
 			last_error_z = error_z;
+			if ((robot->getTime() - startTime_S) > (timeout_ms / 1000)) break;
 			if (abs(error_x) < 0.05 || robot->step(timeStep) == -1) break;
 		}
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
@@ -326,12 +348,12 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 		// 進む方向はZ軸正か負か
 		Direction_of_Travel directionPorM = Direction_of_Travel::z_minus;
 		if (goal.z > presentPos.z) directionPorM = Direction_of_Travel::z_plus;
-		
+		double startTime_S = robot->getTime();
 		do {
-			if (!checkColor()) {
-				stop(StopMode::HOLD);
-				return false;
-			}
+			//if (!checkColor()) {
+			//	stop(StopMode::HOLD);
+			//	return false;
+			//}
 			presentPosRAW = gps.getPositionRAW();
 			presentPos = gps.filter(presentPosRAW);
 			dx_d = presentPos.x - goal.x;
@@ -355,6 +377,7 @@ bool Tank::gpsTrace(const GPSPosition& goal, double speed, const StopMode stopmo
 
 			last_error_d = error_d;
 			last_error_vertialdir = error_vertialdir;
+			if ((robot->getTime() - startTime_S) > (timeout_ms / 1000)) break;
 		} while (abs(dz_d) > 0.05 && abs(dx_d) > 0.05 && robot->step(timeStep) != -1);
 		if (stopmode == StopMode::BRAKE || stopmode == StopMode::HOLD) stop(stopmode);
 	}

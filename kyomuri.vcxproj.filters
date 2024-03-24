@@ -109,9 +109,6 @@
     <ClCompile Include="lib\ColorSensor\ColorSensor.cpp">
       <Filter>lib\ColorSensor</Filter>
     </ClCompile>
-    <ClCompile Include="lib\easyLiDAR\easyLiDAR.cpp">
-      <Filter>lib\easyLiDAR</Filter>
-    </ClCompile>
     <ClCompile Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.cpp">
       <Filter>lib\GlobalPositioningSystem</Filter>
     </ClCompile>
@@ -120,9 +117,6 @@
     </ClCompile>
     <ClCompile Include="lib\myMath\myMath.cpp">
       <Filter>lib\MyMath</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\ToF\ToF.cpp">
-      <Filter>lib\ToF</Filter>
     </ClCompile>
     <ClCompile Include="lib\Tank\Tank.cpp">
       <Filter>lib\Tank</Filter>
@@ -138,6 +132,15 @@
     </ClCompile>
     <ClCompile Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.cpp">
       <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\PointCloudLiDAR\LiDAR2.cpp">
+      <Filter>lib\PointCloudLiDAR</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\ColorSensor\ColorSensor2.cpp">
+      <Filter>lib\ColorSensor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Map\MapForSearch.cpp">
+      <Filter>src\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -159,9 +162,6 @@
     <Filter Include="lib\ColorSensor">
       <UniqueIdentifier>{f3be9f98-2434-4fde-b08b-bbef1cbc6c83}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\easyLiDAR">
-      <UniqueIdentifier>{93076581-ffa9-415e-9fb3-d5158cb244ab}</UniqueIdentifier>
-    </Filter>
     <Filter Include="lib\GlobalPositioningSystem">
       <UniqueIdentifier>{8c734cff-a168-401e-9959-d7352caf77ff}</UniqueIdentifier>
     </Filter>
@@ -176,9 +176,6 @@
     </Filter>
     <Filter Include="lib\Tank">
       <UniqueIdentifier>{3dfa1bf3-38bc-46df-88e7-6428877f9bce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\ToF">
-      <UniqueIdentifier>{56c2886d-3969-4c51-8777-77bdc20f15af}</UniqueIdentifier>
     </Filter>
     <Filter Include="lib\MyCam">
       <UniqueIdentifier>{f5f24d18-46e6-48c2-b900-0fd5f646f936}</UniqueIdentifier>
@@ -203,9 +200,6 @@
     <ClInclude Include="lib\ColorSensor\ColorSensor.h">
       <Filter>lib\ColorSensor</Filter>
     </ClInclude>
-    <ClInclude Include="lib\easyLiDAR\easyLiDAR.h">
-      <Filter>lib\easyLiDAR</Filter>
-    </ClInclude>
     <ClInclude Include="lib\GlobalPositioningSystem\GlobalPositioningSystem.h">
       <Filter>lib\GlobalPositioningSystem</Filter>
     </ClInclude>
@@ -214,9 +208,6 @@
     </ClInclude>
     <ClInclude Include="lib\myMath\myMath.h">
       <Filter>lib\MyMath</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\ToF\ToF.h">
-      <Filter>lib\ToF</Filter>
     </ClInclude>
     <ClInclude Include="lib\Tank\Tank.h">
       <Filter>lib\Tank</Filter>
@@ -230,10 +221,24 @@
     <ClInclude Include="lib\PointCloudLiDAR\RecognizingSpace\RecognizingSpace.h">
       <Filter>lib\PointCloudLiDAR\RecognizingSpace</Filter>
     </ClInclude>
+    <ClInclude Include="lib\PointCloudLiDAR\LiDAR2.h">
+      <Filter>lib\PointCloudLiDAR</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ColorSensor\ColorSensor2.h">
+      <Filter>lib\ColorSensor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Map\MapForSearch.h">
+      <Filter>src\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Docs\map.md">
       <Filter>Docs</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Docs\壁マップ.png">
+      <Filter>Docs</Filter>
+    </Image>
   </ItemGroup>
 </Project>

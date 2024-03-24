@@ -22,18 +22,42 @@ using namespace std;
 extern Robot* robot;
 extern int timeStep;
 
-typedef struct {
+struct XZcoordinate {
 	float x;
 	float z;
-}XZcoordinate;
 
-typedef struct {
+	XZcoordinate operator+(const XZcoordinate& other) const {
+		return {x + other.x, z + other.z};
+	}
+
+	XZcoordinate operator/(const float& other) const {
+		return {x / other, z / other};
+	}
+};
+
+struct RoadAccess {
 	int8_t front;
 	int8_t left;
 	int8_t right;
 	int8_t back;
-}RoadAccess;
+};
+
+struct LeftRightAccess {
+	int8_t left;
+	int8_t right;
+};
+
+struct moveableArea {
+	RoadAccess access;
+	moveableArea(vector<LeftRightAccess> front, vector<LeftRightAccess> back, RoadAccess access): access(access){	
+		
+	}
+};
 
 // 前後左右方向に進むことができる距離
 // この値を基にマップを拡張してマッピングボーナスを少しでも確実にこそげ取るぱわー
-RoadAccess RecognizingSpace(vector<XZcoordinate>& poitns);
+RoadAccess RecognizingSpaceSimple(vector<XZcoordinate>& poitns);
+
+moveableArea RecognizingSpace(vector<XZcoordinate>& poitns);
+
+static LeftRightAccess LeftRightAccessSimple(vector<XZcoordinate>& poitns, float z);

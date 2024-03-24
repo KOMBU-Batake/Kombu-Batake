@@ -10,12 +10,10 @@
 #include <webots/Receiver.hpp>
 #include <webots/Emitter.hpp>
 
-#include "../../lib/ColorSensor/ColorSensor.h"
+#include "../../lib/ColorSensor/ColorSensor2.h"
 #include "../../lib/IMU/IMU.h"
 #include "../../lib/GlobalPositioningSystem/GlobalPositioningSystem.h"
-#include "../../lib/ToF/ToF.h"
 #include "../../lib/Tank/Tank.h"
-#include "../../lib/easyLiDAR/easyLiDAR.h"
 #include "../../lib/PointCloudLiDAR/PointCloudLiDAR.h"
 #include "../Map/Map.h"
 #include "../../lib/MyCam/MyCam.h"
@@ -24,12 +22,10 @@ using namespace webots;
 using namespace std;
 
 extern Robot* robot;
-extern ColorSensor colorsensor;
+extern ColorSensor2 colorsensor;
 extern GyroZ gyro;
 extern GlobalPositioningSystem gps;
-extern ToFSensor leftToF, rightToF;
 extern Tank tank;
-extern LiDAR lidar;
 extern Map mapper;
 extern PointCloudLiDAR pcLiDAR;
 extern Receiver* receiver;
@@ -38,52 +34,55 @@ extern MyCam myCam;
 
 extern int timeStep;
 
-enum class canGo {
-	GO,
-	NO,
-	VISITED,
-};
-
+// 情報を知らせるニュースじゃなくてN(orth), E(ast), W(est), S(outh)の略だよ。まぁニュースも一緒だけど
 enum class NEWS {
 	NORTH,
+	NORTH_EAST,
 	EAST,
+	SOUTH_EAST,
 	SOUTH,
+	SOUTH_WEST,
 	WEST,
+	NORTH_WEST,
 
 	NO,
 };
 
-typedef struct{
+struct PotentialDirectionsOfTravel {
 	canGo front;
 	canGo back;
 	canGo left;
 	canGo right;
-} PotentialDirectionsOfTravel;
+};
 
-typedef struct {
+struct NEWSset {
 	canGo north;
 	canGo east;
 	canGo south;
 	canGo west;
-} NEWSset;
+};
 
-typedef struct {
-	MapAddress target;
-	NEWSset direction;
-} DESelement;
+struct stackDFS {
+	MapAddress center = {0,0};
+	vector<MapAddress> Go;
+	vector<MapAddress> PartlyVisited;
+	vector<MapAddress> diagonal;
+};
 
-void DFS();
+void DFS(const double& startTime);
 
-// マップデータとLiDARを基に進行方向を決定する エリア1飲みに対応
-NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dontStack);
+canGo judgeCanGo(const vector<TileState>& tileState, const bool canGo);
+bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& front, const canGo& left, const canGo& right, const canGo& back, const canGo& front_left, const canGo& front_right);
+MapAddress pickSatckDFS(vector<stackDFS>& stack);
+void removeFromStackDFS(vector<stackDFS>& stack, const MapAddress& address);
+void reallyAbleToGo(canGo& cango, const WallSet& wallset);
+void deleteVisited(vector<stackDFS>& stack);
 
-static void searchFront(PotentialDirectionsOfTravel& PDoT, WallSet& front_mp, const TileState& front_tile);
-static void searchBack(PotentialDirectionsOfTravel& PDoT, WallSet& back_mp, const TileState& back_tile);
-static void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, const TileState& left_tile);
-static void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const TileState& right_tile);
+void markHole(const MapAddress& addr_R, float angle, const bool& left, const bool& right);
+
 static void HoleIsThere(const double& angle);
-static void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack);
+static void Area4IsThere(const double& angle);
 static bool condirtion_canGo(const WallSet& wallset);
 
 // マップデータ提出できてエライ!!天才!!神!!
-static void sendMap(vector<vector<string>>& map);
+void sendMap(vector<vector<string>>& map);

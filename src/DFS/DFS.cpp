@@ -1,234 +1,503 @@
 #include "DFS.h"
 
-void DFS() {
-	vector<MapAddress> stack = {mapper.currentTile_R};
+void DFS(const double& startTime) {
+	vector<stackDFS> stack;
+	vector<MapAddress> footprints = {mapper.currentTile_R};
 	int tail = -1;
-	
-	mapper.printMap();
+	colorsensor.update();
+	myCam.update();
+	obstacleState obstacle = colorsensor.obstacle();
+
+	//mapper.printMap();
+	std::cout << "DFS" << endl;
+	int count_DFS = 0;
+	float diff_goal_real = 0.0f;
+	bool canWriteMap = true;
 	while (robot->step(timeStep) != -1) {
-		// 進行方向の選択
-		bool dontStack = false;
+		count_DFS++;
+		std::cout << "count DFS: " << count_DFS << endl;
+		// 角度(方位)を取得
 		double angle = gyro.getGyro();
-		NEWS direction_of_travel = searchAround(angle,tail,stack,dontStack);
-		// 被災者
+
+		// 壁の情報を取得
+		lidar2.update(gps.expectedPos);
+		WallSet front_mp, back_mp, left_mp, right_mp;
+		try {
+			front_mp = lidar2.getWallType(LiDAR_degree::FRONT);
+		}
+		catch (...){
+			front_mp = { WallType::typeNo, WallType::center_n, WallType::typeNo };
+		}
+		try {
+			back_mp = lidar2.getWallType(LiDAR_degree::BACK);
+		}
+		catch (...) {
+			back_mp = { WallType::typeNo, WallType::center_n, WallType::typeNo };
+		}
+		try {
+			left_mp = lidar2.getWallType(LiDAR_degree::LEFT);
+		}
+		catch (...) {
+			left_mp = { WallType::typeNo, WallType::center_n, WallType::typeNo };
+		}
+		try {
+			right_mp = lidar2.getWallType(LiDAR_degree::RIGHT);
+		}
+		catch (...) {
+			right_mp = { WallType::typeNo, WallType::center_n, WallType::typeNo };
+		}
+		std::cout << "front: " << (int)front_mp.left << " " << (int)front_mp.center << " " << (int)front_mp.right << " / ";
+		std::cout << "back: " << (int)back_mp.left << " " << (int)back_mp.center << " " << (int)back_mp.right << " / ";
+		std::cout << "left: " << (int)left_mp.left << " " << (int)left_mp.center << " " << (int)left_mp.right << " / ";
+		std::cout << "right: " << (int)right_mp.left << " " << (int)right_mp.center << " " << (int)right_mp.right << endl;
+
+		// 壁を提出用マップに登録
+		if (abs(angle - 90) < 5) {
+			mapper.markAroundWall(left_mp, right_mp, back_mp, front_mp);
+		}
+		else if (abs(angle - 180) < 5) {
+			mapper.markAroundWall(front_mp, back_mp, left_mp, right_mp);
+		}
+		else if (abs(angle - 270) < 5) {
+			mapper.markAroundWall(right_mp, left_mp, front_mp, back_mp);
+		}
+		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+			mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
+		}
 		mapper.printMap();
-		cout << "stack size. " << stack.size() << " ========================================" << endl;
-		bool isHole = false;
-		if (direction_of_travel == NEWS::NORTH) {
-			isHole = tank.gpsTrace(gps.moveTiles(0, -1), 4.5);
+		
+		// 側面カメラで落とし穴の確認
+		myCam.update();
+		vector<bool> left_hole = myCam.leftHole();
+		vector<bool> right_hole = myCam.rightHole();
+		// 登録
+		if (canWriteMap) {
+			cout << "angle." << angle << endl;
+ 			markHole(mapper.currentTile_R, (float)angle+90, left_hole[1], left_hole[0]); // left
+			markHole(mapper.currentTile_R, (float)angle-90, right_hole[0], right_hole[1]); // right
 		}
-		else  if (direction_of_travel == NEWS::EAST) {
-			isHole = tank.gpsTrace(gps.moveTiles(1, 0), 4.5);
+		// 被災者の類
+		myCam.leftFindYellow(abs(lidar2.readPoint(384).x));
+		myCam.rightFindYellow(abs(lidar2.readPoint(128).x));
+
+		// 進める方向を探す
+		canGoSet cango_set = lidar2.identifyCanGo();
+		std::cout << "front: " << (int)cango_set.front << " left: " << (int)cango_set.left << " right: " << (int)cango_set.right << " back: " << (int)cango_set.back << " front_left: " << (int)cango_set.front_left << " front_right: " << (int)cango_set.front_right << endl;
+		// 無理やり行ってもいいのか
+		reallyAbleToGo(cango_set.front, front_mp);
+		reallyAbleToGo(cango_set.left, left_mp);
+		reallyAbleToGo(cango_set.right, right_mp);
+		reallyAbleToGo(cango_set.back, back_mp);
+		// 斜めの選択肢を吟味
+		if ((int)cango_set.front < 3 || (int)cango_set.left < 3) cango_set.front_left = canGo::NO;
+		if ((int)cango_set.front < 3 || (int)cango_set.right < 3) cango_set.front_right = canGo::NO;
+		std::cout << "front: " << (int)cango_set.front << " left: " << (int)cango_set.left << " right: " << (int)cango_set.right << " back: " << (int)cango_set.back << " front_left: " << (int)cango_set.front_left << " front_right: " << (int)cango_set.front_right << endl;
+
+		// 落とし穴の考慮
+		if (obstacle.leftHoleState || obstacle.rightHoleState) cango_set.front = canGo::NO;
+		if (left_hole[0] || left_hole[1]) cango_set.left = canGo::NO;
+		if (right_hole[0] || right_hole[1]) cango_set.right = canGo::NO;
+
+		// 探索用マップに記録 後ろには書き込まない(落とし穴の確認ができないから)
+		mapperS.markAroundStatus({ (int)cango_set.front < 3,
+															 (int)cango_set.left < 3,
+															 (int)cango_set.right < 3,
+															 (int)cango_set.back < 3,
+															 (int)cango_set.front_left < 3,
+															 (int)cango_set.front_right < 3 }, 
+															 angle, count_DFS == 1);
+		mapperS.printMap();
+
+		// タイルの情報を取得
+		vector<TileState> front_tile(2), back_tile(2), left_tile(2), right_tile(2), front_left_tile(2), front_right_tile(2);
+		front_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::FRONT);
+		back_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::BACK);
+		left_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::LEFT);
+		right_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::RIGHT);
+		front_left_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::FRONT_LEFT);
+		front_right_tile = mapper.getTileStateLR(mapper.currentTile_R, angle, LiDAR_degree::FRONT_RIGHT);
+		std::cout << "front left:" << (int)front_left_tile[0] << " front right:" << (int)front_right_tile[0] << endl;
+
+		// 進行方向の選択
+		canGo canGoFront = judgeCanGo(front_tile, (int)cango_set.front < 3);
+		std::cout << "front tile:" << (int)front_tile[0] << " " << (int)front_tile[1] << endl;
+		canGo canGoBack = judgeCanGo(back_tile, (int)cango_set.back < 3);
+		canGo canGoLeft = judgeCanGo(left_tile, (int)cango_set.left < 3);
+		canGo canGoRight = judgeCanGo(right_tile, (int)cango_set.right < 3);
+		canGo canGoFrontLeft = judgeCanGo(front_left_tile, (int)cango_set.front_left < 3);
+		canGo canGoFrontRight = judgeCanGo(front_right_tile, (int)cango_set.front_right < 3);
+
+		std::cout << "front: " << (int)canGoFront << " left: " << (int)canGoLeft << " right: " << (int)canGoRight << " back: " << (int)canGoBack << " front_left: " << (int)canGoFrontLeft << " front_right: " << (int)canGoFrontRight << endl;
+		
+		// スタックを追加
+		bool hasStack = addToStackDFS(stack, angle, canGoFront, canGoLeft, canGoRight, canGoBack, canGoFrontLeft, canGoFrontRight);
+		if (stack.size() == 0) {
+			break;
 		}
-		else if (direction_of_travel == NEWS::SOUTH) {
-			isHole = tank.gpsTrace(gps.moveTiles(0, 1), 4.5);
-		}
-		else if (direction_of_travel == NEWS::WEST) {
-			isHole = tank.gpsTrace(gps.moveTiles(-1, 0), 4.5);
-		}
-		else if (direction_of_travel == NEWS::NO) {
-			cout << "No way to go" << endl;
+		std::cout << stack.back().diagonal.size() << endl;
+		// 重複したスタックを削除
+		deleteVisited(stack);
+		if (stack.size() == 0) {
+			std::cout << "stack is empty last" << endl;
 			break;
 		}
 
-		angle = gyro.getGyro();
+		MapAddress nextTile = pickSatckDFS(stack);
+		std::cout << "nextTile: " << nextTile.x << " " << nextTile.z << endl;
+		if (nextTile.x == 123456789) { // スタックが空になったら終了
+			break;
+		}
+
+		// 進む
+		vector<MapAddress> route = mapperS.getRoute(nextTile, footprints);
+		bool isHole = false;
+
+		for (auto& tile : route) {
+			if (tile == *route.begin()) continue;
+			int dx, dz;
+			dx = tile.x - mapper.currentTile_R.x;
+			dz = tile.z - mapper.currentTile_R.z;
+			isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST); // タイムアウト込み
+			angle = gyro.getGyro();
+			GPSPosition realPos = gps.getPosition();
+			diff_goal_real = (float)sqrt(pow(realPos.x - gps.expectedPos.x, 2) + pow(realPos.z - gps.expectedPos.z, 2));
+			canWriteMap = diff_goal_real < 1.0f;
+			if (isHole) {
+				mapper.updatePostion(angle);
+				footprints.push_back(mapper.currentTile_R);
+				std::cout << "update Pos: " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << ", angle: " << angle << endl;
+			}
+		}
 		if (!isHole) {
-			cout << "Hole is there" << endl;
+			std::cout << "Hole is there" << endl;
 			HoleIsThere(angle);
 		}
-		else {
+		std::cout << "======================" << endl;
+		// 斜めにやってきた場合は修正
+		if (!(abs(angle - 90) < 5 ||
+			abs(angle - 180) < 5 ||
+			abs(angle - 270) < 5 ||
+			(angle >= 0 && angle < 5) || (angle > 355 && angle <= 360))) {
+			// 修正
+			std::cout << "fixing angle" << endl;
+			vector<float> tmp = { 0,90,180,270,360 };
+			auto min = min_element(tmp.begin(), tmp.end(), [&angle](float a, float b) { return abs(a - angle) < abs(b - angle); });
+			tank.setDireciton(*min, 4);
+			angle = gyro.getGyro();
+		}
+
+		// 正面のカラーセンサ
+		colorsensor.update();
+		TileState left_col = colorsensor.getLeftColor();
+		colorsensor.getRightColor();
+		std::cout << "color: " << (int)left_col << endl;
+		obstacle = colorsensor.obstacle();
+		if (canWriteMap) {
+			markHole(mapper.currentTile_R, (float)angle, obstacle.leftHoleState, obstacle.rightHoleState);
+		}
+
+		// スタック周りの処理
+		TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
+		if (recordedTile != TileState::START){
+			mapper.markTileAs(mapper.currentTile_R, left_col, angle);
+			// 被ったスタックの排除
+			removeFromStackDFS(stack, mapper.currentTile_R);
+		}
+		TileState wholeTile = mapper.getCurrentTile(mapper.currentTile_R);
+		if (wholeTile != TileState::WALL) { // 全て同じではない
+			if (wholeTile == TileState::AREA1to4 || wholeTile == TileState::AREA3to4) {
+				if (hasStack) { // スタックを追加していたなら消す。
+					stack.pop_back();
+				}
+				Area4IsThere(angle);
+				angle = gyro.getGyro();
+				colorsensor.update();
+			}
+		}
+
+		//angle = gyro.getGyro();
+		//if (!isHole) {
+		//	cout << "Hole is there" << endl;
+		//	HoleIsThere(angle);
+		//}
+		//else {
+		//	mapper.updatePostion(angle);
+		//	// 現在のタイルの情報を取得、記録する
+		//	colorsensor.update();
+		//	TileState col = colorsensor.getTileColor();
+		//	TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
+		//	if (recordedTile != TileState::START){
+		//		mapper.markTileAs(mapper.currentTile_R, col, angle);
+		//	}
+		//	if (col == TileState::AREA1to4 || col == TileState::AREA3to4) {
+		//		Area4IsThere(angle, tail, stack,dontStack);
+		//	}
+		//	else {
+		//		// スタックに現在のタイルを追加
+		//		if (!dontStack) stack.push_back(mapper.currentTile_R);
+		//	}
+		//}
+	}
+
+	std::cout << "fin" << endl;
+	vector<MapAddress> route = mapperS.getRoute(mapper.startTile_R, footprints);
+	bool isHole = false;
+	for (auto& tile : route) {
+		if (tile == *route.begin()) continue;
+		int dx, dz;
+		dx = tile.x - mapper.currentTile_R.x;
+		dz = tile.z - mapper.currentTile_R.z;
+		isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST);
+		double angle = gyro.getGyro();
+		if (isHole) {
+			break;
+		}
+	}
+
+	std::cout << "final submit " << endl;
+	std::cout << "current tile: " << mapper.currentTile_R.x << " " << mapper.currentTile_R.z << endl;
+	double angle = gyro.getGyro();
+	mapper.updatePostion(angle);
+	route = mapperS.getRoute(mapper.startTile_R, footprints);
+	for (auto& tile : route) {
+		if (tile == *route.begin()) continue;
+		int dx, dz;
+		dx = tile.x - mapper.currentTile_R.x;
+		dz = tile.z - mapper.currentTile_R.z;
+		isHole = tank.gpsTrace(gps.moveTiles(dx, dz), 3, StopMode::COAST);
+		angle = gyro.getGyro();
+		if (isHole) {
 			mapper.updatePostion(angle);
-			// 現在のタイルの情報を取得、記録する
-			colorsensor.update();
-			TileState col = colorsensor.getTileColor();
-			TileState recordedTile = mapper.getTileState(mapper.currentTile_R);
-			if (recordedTile != TileState::START){
-				mapper.markTileAs(mapper.currentTile_R, col, angle);
-			}
-			if (col == TileState::AREA1to4 || col == TileState::AREA3to4) {
-				Area4IsThere(angle, tail, stack,dontStack);
-			}
-			else {
-				// スタックに現在のタイルを追加
-				if (!dontStack) stack.push_back(mapper.currentTile_R);
-			}
+			footprints.push_back(mapper.currentTile_R);
 		}
 	}
 	mapper.replaceLineTo0();
 	mapper.printMap();
 	sendMap(mapper.map_A);
+
+	char msg = 'M'; // Send map evaluate request
+	emitter->send(&msg, sizeof(msg));
+
+	while (robot->step(timeStep) != -1) {
+		msg = 'E'; // Send an Exit message to get Map Bonus
+		emitter->send(&msg, sizeof(msg));
+		tank.setVelocity(-1, 1);
+	}
 }
 
-NEWS searchAround(double angle, int& tail, vector<MapAddress>& stack, bool& dontStack) {
-	PotentialDirectionsOfTravel PDoT = { canGo::NO,canGo::NO,canGo::NO,canGo::NO };
-	pcLiDAR.update(gps.expectedPos);
+MapAddress pickSatckDFS(vector<stackDFS>& stack)
+{
+	stackDFS top = stack.back();
+	MapAddress next = {123456789,123456789 };
+	// 斜め
+	if (top.diagonal.size() != 0) {
+		next = top.diagonal[0];
+		stack.back().diagonal.pop_back();
+	}
+	else if (top.Go.size() != 0) {
+		next = top.Go.back();
+		stack.back().Go.pop_back();
+	}
+	else if (top.PartlyVisited.size() != 0) {
+		next = top.PartlyVisited.back();
+		stack.back().PartlyVisited.pop_back();
+	}
+	else {
+		stack.pop_back();
+		if (stack.size() == 0) {
+			std::cout << "stack is empty" << endl;
+			return next;
+		}
+		return pickSatckDFS(stack); // なかったら再起
+	}
+	return next;
+}
 
-	WallSet front_mp,back_mp,left_mp,right_mp;
-	TileState front_tile, back_tile, left_tile, right_tile;
+canGo judgeCanGo(const vector<TileState>& tileState, const bool canGo)
+{
+	if (canGo) {
+		if (find(tileState.begin(), tileState.end(), TileState::UNKNOWN) != tileState.end()) { // 未探索
+			if (all_of(tileState.begin(), tileState.end(), [](const TileState& state) { return state == TileState::UNKNOWN; })) {
+				return canGo::GO;
+			}
+			return canGo::PARTLY_VISITED;
+		}
+		else if (any_of(tileState.begin(), tileState.end(), [](const TileState& state) { return state == TileState::AREA3to4 || state == TileState::AREA1to4; })) { // 穴かエリア4がある {
+			return canGo::NO;
+		}
+		else { // 何かしらのタイルを探索済み
+			return canGo::VISITED;
+		}
+	}
+	else {
+		return canGo::NO;
+	}
+}
 
-	mapper.getAroundTileState(mapper.currentTile_R, front_tile, back_tile, left_tile, right_tile, angle); // マップ上での周囲のタイルの有無を取得
-	cout << "front tile: " << (int)front_tile << ", back tile: " << (int)back_tile << ", left tile: " << (int)left_tile << ", right tile: " << (int)right_tile << endl;
-
-	searchFront(PDoT, front_mp, front_tile); // 前
-	searchBack(PDoT, back_mp, back_tile); // 後ろ
-	searchLeft(PDoT, left_mp, left_tile); // 左
-	searchRight(PDoT, right_mp, right_tile); // 右
-
-	NEWSset directionNEWS = { canGo::NO,canGo::NO,canGo::NO,canGo::NO };
-	// 壁をマップに登録
+bool addToStackDFS(vector<stackDFS>& stack, const double& angle, const canGo& front, const canGo& left, const canGo& right, const canGo& back, const canGo& front_left, const canGo& front_right)
+{
+	stackDFS stackElement;
+	stackElement.center = mapper.currentTile_R;
+	canGo north = canGo::NO , east = canGo::NO, south = canGo::NO, west = canGo::NO, north_east = canGo::NO, south_east = canGo::NO, south_west = canGo::NO, north_west = canGo::NO;
 	if (abs(angle - 90) < 5) {
-		mapper.markAroundWall(left_mp, right_mp, back_mp, front_mp);
-		directionNEWS = { PDoT.left, PDoT.front, PDoT.right, PDoT.back };
+		north = left; east = front; south = right; west = back, north_east = front_left, south_east = front_right;
 	}
 	else if (abs(angle - 180) < 5) {
-		mapper.markAroundWall(front_mp, back_mp, left_mp, right_mp);
-		directionNEWS = { PDoT.front, PDoT.right, PDoT.back, PDoT.left };
+		north = front; east = right; south = back; west = left, north_west = front_left, north_east = front_right;
 	}
 	else if (abs(angle - 270) < 5) {
-		mapper.markAroundWall(right_mp, left_mp, front_mp, back_mp);
-		directionNEWS = { PDoT.right, PDoT.back, PDoT.left, PDoT.front };
+		north = right; east = back; south = left; west = front, south_west = front_left, north_west = front_right;
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		mapper.markAroundWall(back_mp, front_mp, right_mp, left_mp);
-		directionNEWS = { PDoT.back, PDoT.left, PDoT.front, PDoT.right };
+		north = back; east = left; south = front; west = right, south_east = front_left, south_west = front_right;
 	}
-	std::cout << "front: " << (int)PDoT.front << " back: " << (int)PDoT.back << " left: " << (int)PDoT.left << " right: " << (int)PDoT.right << endl;
+	//cout << "front: " << (int)front << " left: " << (int)left << " right: " << (int)right << " back: " << (int)back << " front_left: " << (int)front_left << " front_right: " << (int)front_right << endl;
+	//cout << "north: " << (int)north << " east: " << (int)east << " south: " << (int)south << " west: " << (int)west << " north_east: " << (int)north_east << " north_west: " << (int)north_west << " south_east: " << (int)south_east << " south_west: " << (int)south_west << endl;
 
-	// 進行方向の選択
-	// 北 -> 東 -> 南 -> 西 の順に優先する
-	if (directionNEWS.north == canGo::GO) {
-		return NEWS::NORTH;
+	if (north == canGo::GO) {
+		stackElement.Go.push_back({ mapper.currentTile_R.x, mapper.currentTile_R.z - 1 });
+	} else if (north == canGo::PARTLY_VISITED) {
+		stackElement.PartlyVisited.push_back({ mapper.currentTile_R.x, mapper.currentTile_R.z - 1 });
 	}
-	else if (directionNEWS.east == canGo::GO) {
-		return NEWS::EAST;
+
+	if (west == canGo::GO) {
+		stackElement.Go.push_back({ mapper.currentTile_R.x - 1, mapper.currentTile_R.z });
+	} else 	if (west == canGo::PARTLY_VISITED) {
+		stackElement.PartlyVisited.push_back({ mapper.currentTile_R.x - 1, mapper.currentTile_R.z });
 	}
-	else if (directionNEWS.south == canGo::GO) {
-		return NEWS::SOUTH;
+
+	if (east == canGo::GO) {
+		stackElement.Go.push_back({ mapper.currentTile_R.x + 1, mapper.currentTile_R.z });
+	} else if (east == canGo::PARTLY_VISITED) {
+		stackElement.PartlyVisited.push_back({ mapper.currentTile_R.x + 1, mapper.currentTile_R.z });
 	}
-	else if (directionNEWS.west == canGo::GO) {
-		return NEWS::WEST;
+
+	if (south == canGo::GO) {
+		stackElement.Go.push_back({ mapper.currentTile_R.x, mapper.currentTile_R.z + 1 });
+	} else if (south == canGo::PARTLY_VISITED) {
+		stackElement.PartlyVisited.push_back({ mapper.currentTile_R.x, mapper.currentTile_R.z + 1 });
 	}
-	else { // スタックを拾っていく
-		int tmp = (int)stack.size() - 2;
-		if (tmp < 0) {
-			cout << "reach 0" << endl;
-			return NEWS::NO;
+
+	if (north_east == canGo::GO) {
+		stackElement.diagonal.push_back({ mapper.currentTile_R.x + 1, mapper.currentTile_R.z - 1 });
+	}
+	else if (north_west == canGo::GO) {
+		stackElement.diagonal.push_back({ mapper.currentTile_R.x - 1, mapper.currentTile_R.z - 1 });
+	}
+	else if (south_east == canGo::GO) {
+		stackElement.diagonal.push_back({ mapper.currentTile_R.x + 1, mapper.currentTile_R.z + 1 });
+	}
+	else if (south_west == canGo::GO) {
+		stackElement.diagonal.push_back({ mapper.currentTile_R.x - 1, mapper.currentTile_R.z + 1 });
+	}
+
+	if (stackElement.Go.size() == 0 && stackElement.PartlyVisited.size() == 0 && stackElement.diagonal.size() == 0) {
+		return false;
+	}
+	else {
+		stack.push_back(stackElement);
+		return true;
+	}
+}
+
+void removeFromStackDFS(vector<stackDFS>& stack, const MapAddress& address)
+{
+	for (auto& stackElement : stack) {
+		for (auto& go : stackElement.Go) {
+			if (go == address) {
+				stackElement.Go.erase(remove(stackElement.Go.begin(), stackElement.Go.end(), address), stackElement.Go.end());
+			}
 		}
-		MapAddress nextTile = stack[tmp];
-		cout << "tail; " << tail << endl;
-		dontStack = true;
-		stack.pop_back();
-		if (nextTile.x > mapper.currentTile_R.x) {
-			return NEWS::EAST;
+		for (auto& partlyVisited : stackElement.PartlyVisited) {
+			if (partlyVisited == address) {
+				stackElement.PartlyVisited.erase(remove(stackElement.PartlyVisited.begin(), stackElement.PartlyVisited.end(), address), stackElement.PartlyVisited.end());
+			}
 		}
-		else if (nextTile.x < mapper.currentTile_R.x) {
-			return NEWS::WEST;
+		for (auto& diagonal : stackElement.diagonal) {
+			if (diagonal == address) {
+				stackElement.diagonal.erase(remove(stackElement.diagonal.begin(), stackElement.diagonal.end(), address), stackElement.diagonal.end());
+			}
 		}
-		else if (nextTile.z > mapper.currentTile_R.z) {
-			return NEWS::SOUTH;
+	}
+
+}
+
+void reallyAbleToGo(canGo& cango, const WallSet& wallset)
+{
+	if (cango == canGo::GO_leftO) {
+		if (wallset.right == WallType::type8) {
+			cango = canGo::NO;
 		}
-		else if (nextTile.z < mapper.currentTile_R.z) {
-			return NEWS::NORTH;
-		}
-		else {
-			return NEWS::NO;
+	} else if (cango == canGo::GO_rightO) {
+		if (wallset.left == WallType::type7) {
+			cango = canGo::NO;
 		}
 	}
 }
 
-bool condirtion_canGo(const WallSet& wallset)
+void deleteVisited(vector<stackDFS>& stacks)
+{
+	if (stacks.size() == 0) return;
+	for (auto stack = stacks.begin(); stack != stacks.end(); ++stack) {
+		if (stack->Go.size() != 0) {
+			for (auto addr = stack->Go.begin(); addr != stack->Go.end(); ++addr) {
+				if (mapper.isAllVisited(*addr)) {
+					stack->Go.erase(addr);
+					--addr;
+				}
+			}
+		}
+		if (stack->PartlyVisited.size() != 0) {
+			for (auto addr = stack->PartlyVisited.begin(); addr != stack->PartlyVisited.end(); ++addr) {
+				if (mapper.isAllVisited(*addr)) {
+					stack->PartlyVisited.erase(addr);
+					--addr;
+				}
+			}
+		}
+		if (stack->Go.size() == 0 && stack->PartlyVisited.size() == 0 && stack->diagonal.size() == 0) {
+			// delete
+			stack = stacks.erase(stack);
+			--stack;
+		}
+	}
+}
+
+void markHole(const MapAddress& addr_R, float angle, const bool& left, const bool& right)
+{
+	MapAddress addr_L = mapper.convertRtoListPoint(addr_R);
+	if (angle < 0) angle += 360;
+	angle = (float)((int)angle % 360);
+	if (left && right) {
+		cout << "both angle. " << angle << endl;
+		if (abs(angle - 90) < 5) {
+			mapper.markTileAs({ mapper.currentTile_R.x + 2,mapper.currentTile_R.z }, TileState::HOLE, angle);
+		}
+		else if (abs(angle - 180) < 5) {
+			mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z - 2 }, TileState::HOLE, angle);
+		}
+		else if (abs(angle - 270) < 5) {
+			mapper.markTileAs({ mapper.currentTile_R.x - 2,mapper.currentTile_R.z }, TileState::HOLE, angle);
+		}
+		else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
+			mapper.markTileAs({ mapper.currentTile_R.x,mapper.currentTile_R.z + 2 }, TileState::HOLE, angle);
+		}
+	}
+}
+
+/* 手前に半マス進めるか否か
+   直径は余裕を持って8cmで勘定する */
+bool condirtion_canGo(const WallSet& wallset) 
 {
 	uint8_t left = static_cast<uint8_t>(wallset.left);
 	uint8_t right = static_cast<uint8_t>(wallset.right);
 	uint8_t center = static_cast<uint8_t>(wallset.center);
-	if ((left <= 5U || left == 11U) && (right <= 5U || right == 11U) && center >= 13U) {
+	if ((left <= 5U || left == 9U || left == 11U) &&
+			(right <= 5U || right == 6U || right == 11U) &&
+			 center >= 13U) {
 		return true;
 	}
 	return false;
-}
-
-void searchFront(PotentialDirectionsOfTravel& PDoT, WallSet& front_mp, const TileState& front_tile)
-{
-	WallSet front = pcLiDAR.identifyWall(LiDAR_degree::FRONT);
-	std::cout << "front: " << (int)front.left << " " << (int)front.center << " " << (int)front.right;
-	if (condirtion_canGo(front)) {
-		if (front_tile == TileState::UNKNOWN) { // 未探索
-			PDoT.front = canGo::GO;
-		}
-		else if (front_tile == TileState::HOLE || front_tile == TileState::AREA3to4 || front_tile == TileState::AREA1to4) {
-			PDoT.front = canGo::NO;
-		}
-		else { // 何かしらのタイルを探索済み
-			PDoT.front = canGo::VISITED;
-		}
-	}
-	else {
-		PDoT.front = canGo::NO;
-	}
-	front_mp = front;
-}
-
-void searchBack(PotentialDirectionsOfTravel& PDoT, WallSet& back_mp, const TileState& back_tile) // ToDo: 基本的にWallState::visited;だから、余裕があればそこの実装もする
-{
-	WallSet back = pcLiDAR.identifyWall(LiDAR_degree::BACK);
-	std::cout << ", back: " << (int)back.left << " " << (int)back.center << " " << (int)back.right;
-	if (condirtion_canGo(back)) {
-		if (back_tile == TileState::UNKNOWN) { // 未探索
-			PDoT.back = canGo::GO;
-		}
-		else if (back_tile == TileState::HOLE || back_tile == TileState::AREA3to4 || back_tile == TileState::AREA1to4) {
-			PDoT.back = canGo::NO;
-		}
-		else { // 何かしらのタイルを探索済み
-			PDoT.back = canGo::VISITED;
-		}
-	}
-	else {
-		PDoT.back = canGo::NO;
-	}
-	back_mp = back;
-}
-
-void searchLeft(PotentialDirectionsOfTravel& PDoT, WallSet& left_mp, const TileState& left_tile)
-{
-	WallSet left = pcLiDAR.identifyWall(LiDAR_degree::LEFT);
-	std::cout << ", left: " << (int)left.left << " " << (int)left.center << " " << (int)left.right;
-	if (condirtion_canGo(left)) {
-		if (left_tile == TileState::UNKNOWN) { // 未探索
-			PDoT.left = canGo::GO;
-		}
-		else if (left_tile == TileState::HOLE || left_tile == TileState::AREA3to4 || left_tile == TileState::AREA1to4) {
-			PDoT.left = canGo::NO;
-		}
-		else { // 何かしらのタイルを探索済み
-			PDoT.left = canGo::VISITED;
-		}
-	}
-	else {
-		PDoT.left = canGo::NO;
-	}
-	left_mp = left;
-}
-
-void searchRight(PotentialDirectionsOfTravel& PDoT, WallSet& right_mp, const TileState& right_tile)
-{
-	WallSet right = pcLiDAR.identifyWall(LiDAR_degree::RIGHT);
-	std::cout << ", right: " << (int)right.left << " " << (int)right.center << " " << (int)right.right << endl;
-	if (condirtion_canGo(right)) {
-		if (right_tile == TileState::UNKNOWN) { // 未探索
-			PDoT.right = canGo::GO;
-		}
-		else if (right_tile == TileState::HOLE || right_tile == TileState::AREA3to4 || right_tile == TileState::AREA1to4) {
-			PDoT.right = canGo::NO;
-		}
-		else { // 何かしらのタイルを探索済み
-			PDoT.right = canGo::VISITED;
-		}
-	}
-	else {
-		PDoT.right = canGo::NO;
-	}
-	right_mp = right;
 }
 
 void HoleIsThere(const double& angle)
@@ -249,36 +518,35 @@ void HoleIsThere(const double& angle)
 	gps.returnTolastPos();
 }
 
-void Area4IsThere(const double& angle, int tail, vector<MapAddress>& stack, bool& dontStack) // チェックポイントタイルだけ踏んでやるHAHAHA
+void Area4IsThere(const double& angle) // チェックポイントタイルだけ踏んでやるHAHAHA
 {
 	if (abs(angle - 90) < 5) {
-		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(-1, 0), 5);
+		tank.gpsTrace(gps.moveTiles(-2, 0), 5);
 		double angleN = gyro.getGyro();
+		mapper.updatePostion(angleN);
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 180) < 5) {
-		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, 1), 5);
+		tank.gpsTrace(gps.moveTiles(0, 2), 5);
 		double angleN = gyro.getGyro();
+		mapper.updatePostion(angleN);
 		mapper.updatePostion(angleN);
 	}
 	else if (abs(angle - 270) < 5) {
-		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(1, 0), 5);
+		tank.gpsTrace(gps.moveTiles(2, 0), 5);
 		double angleN = gyro.getGyro();
+		mapper.updatePostion(angleN);
 		mapper.updatePostion(angleN);
 	}
 	else if ((angle >= 0 && angle < 5) || (angle > 355 && angle <= 360)) {
-		searchAround(angle, tail, stack, dontStack);
-		tank.gpsTrace(gps.moveTiles(0, -1), 5);
+		tank.gpsTrace(gps.moveTiles(0, -2), 5);
 		double angleN = gyro.getGyro();
+		mapper.updatePostion(angleN);
 		mapper.updatePostion(angleN);
 	}
 }
 
-void sendMap(vector<vector<string>>& map)
-{
+void sendMap(vector<vector<string>>& map) { // mallocを使ってるのが良くないね
 	int width = (int)map.size();
 	int height = (int)map[0].size();
 	string flattened = "";
@@ -299,12 +567,4 @@ void sendMap(vector<vector<string>>& map)
 	memcpy(&message[8], flattened.c_str(), flattened.size()); // Copy in the flattened map afterwards
 
 	emitter->send(message, 8+(int)flattened.size()); // Send map data
-
-	char msg = 'M'; // Send map evaluate request
-	emitter->send(&msg, sizeof(msg));
-
-	while (robot->step(timeStep) != -1) {
-		msg = 'E'; // Send an Exit message to get Map Bonus
-		emitter->send(&msg, sizeof(msg));
-	}
 }

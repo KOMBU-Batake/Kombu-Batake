@@ -45,13 +45,6 @@ enum class WallState { // これから尋常じゃないレベルで増える予定は未定
 	visited, // LiDARのクラスでは使わない
 };
 
-enum class relativeDirection{
-	FRONT,
-	RIGHT,
-	BACK,
-	LEFT,
-};
-
 class directionInfo {
 public:
 	float degree; // 目標の角度
